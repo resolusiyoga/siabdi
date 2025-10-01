@@ -4,7 +4,7 @@
     <div class="container-fluid">
         <!-- REKAP JUMLAH DATA -->
         <div class="row">
-            <div class="col-lg-3 col-md-6 col-sm-6">
+            <div class="col-lg-6 col-md-6 col-sm-6">
                 <div class="card card-stats">
                     <div class="card-header card-header-primary card-header-icon">
                         <div class="card-icon">
@@ -42,7 +42,7 @@
                     </div>
                 </div>
             </div> -->
-            <div class="col-lg-3 col-md-6 col-sm-6">
+            <div class="col-lg-6 col-md-6 col-sm-6">
                 <div class="card card-stats">
                     <div class="card-header card-header-info card-header-icon">
                         <div class="card-icon">
@@ -82,7 +82,7 @@
             </div> -->
         </div>
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-12">
                 <div class="card">
                     <div class="card-header card-header-primary">
                         <h4 class="card-title"><b>Absensi Siswa Hari Ini</b></h4>
@@ -141,7 +141,7 @@
         </div>
         <!-- GRAFIK CHART -->
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-12">
                 <div class="card card-chart">
                     <div class="card-header card-header-primary">
                         <div class="ct-chart" id="kehadiranSiswa"></div>
