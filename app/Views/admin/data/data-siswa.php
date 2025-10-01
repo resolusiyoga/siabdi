@@ -68,7 +68,7 @@
                                  <?php foreach ($jurusan as $value) : ?>
                                     <li class="nav-item">
                                        <a class="nav-link" onclick="jurusan = '<?= $value['jurusan']; ?>'; trig();" href="#" data-toggle="tab">
-                                          <i class="material-icons">work</i> <?= $value['jurusan']; ?>
+                                          <i class="material-icons">bookmark</i> <?= $value['jurusan']; ?>
                                           <div class="ripple-container"></div>
                                        </a>
                                     </li>

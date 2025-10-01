@@ -3,7 +3,7 @@
     <thead class="text-primary">
       <th><b>No</b></th>
       <th><b>Kelas / Tingkat</b></th>
-      <th><b>Jurusan</b></th>
+      <th><b>Lokal</b></th>
       <th><b>Aksi</b></th>
     </thead>
     <tbody>

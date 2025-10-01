@@ -44,13 +44,13 @@
                 <div class="nav-tabs-navigation">
                   <div class="row">
                     <div class="col-md-4 col-lg-5">
-                      <h4 class="card-title"><b>Daftar Jurusan</b></h4>
+                      <h4 class="card-title"><b>Daftar Lokal</b></h4>
                       <p class="card-category">Angkatan <?= $generalSettings->school_year; ?></p>
                     </div>
                     <div class="col-auto row">
                       <div class="col-12 col-sm-auto nav nav-tabs">
                         <a class="btn-custom-tools" id="tabBtn" href="<?= base_url('admin/jurusan/tambah'); ?>">
-                          <i class="material-icons">add</i> Tambah data jurusan
+                          <i class="material-icons">add</i> Tambah data lokal
                         </a>
 
                       </div>

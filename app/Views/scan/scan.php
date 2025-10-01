@@ -16,19 +16,8 @@
  <div class="main-panel">
     <div class="content">
        <div class="container-fluid">
-          <div class="row mx-auto">
-             <div class="col-lg-3 col-xl-4">
-                <div class="card">
-                   <div class="card-body">
-                      <h3 class="mt-2"><b>Tips</b></h3>
-                      <ul class="pl-3">
-                         <li>Tunjukkan qr code sampai terlihat jelas di kamera</li>
-                         <li>Posisikan qr code tidak terlalu jauh maupun terlalu dekat</li>
-                      </ul>
-                   </div>
-                </div>
-             </div>
-             <div class="col-lg-6 col-xl-4">
+          <div class="row">
+             <div class="col-lg-6 col-xl-12">
                 <div class="card">
                    <div class="col-10 mx-auto card-header card-header-primary">
                       <div class="row">
@@ -45,12 +34,12 @@
                    </div>
                    <div class="card-body my-auto px-5">
                       <h4 class="d-inline">Pilih kamera</h4>
-
-                      <select id="pilihKamera" class="custom-select w-50 ml-2" aria-label="Default select example" style="height: 35px;">
-                         <option selected>Select camera devices</option>
+                      <br>
+                      <select id="pilihKamera" class="custom-select w-100" aria-label="Default select example" style="height: 35px;">
+                         <option selected>Pilih Kamera</option>
                       </select>
 
-                      <br>
+                      <br><br>
 
                       <div class="row">
                          <div class="col-sm-12 mx-auto">
@@ -67,7 +56,18 @@
                    </div>
                 </div>
              </div>
-             <div class="col-lg-3 col-xl-4">
+             <div class="col-lg-3 col-xl-12">
+                <div class="card">
+                   <div class="card-body">
+                      <h3 class="mt-2"><b>Tips</b></h3>
+                      <ul class="pl-3">
+                         <li>Tunjukkan qr code sampai terlihat jelas di kamera</li>
+                         <li>Posisikan qr code tidak terlalu jauh maupun terlalu dekat</li>
+                      </ul>
+                   </div>
+                </div>
+             </div>
+             <div class="col-lg-3 col-xl-12">
                 <div class="card">
                    <div class="card-body">
                       <h3 class="mt-2"><b>Penggunaan</b></h3>

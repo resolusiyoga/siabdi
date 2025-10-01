@@ -7,7 +7,7 @@
         <?= view('admin/_messages'); ?>
         <div class="card">
           <div class="card-header card-header-primary">
-            <h4 class="card-title"><b>Form Edit Jurusan</b></h4>
+            <h4 class="card-title"><b>Form Edit Lokal</b></h4>
           </div>
           <div class="card-body mx-5 my-3">
 
@@ -17,8 +17,8 @@
               <input type="hidden" name="back_url" value="<?= currentFullURL(); ?>">
 
               <div class="form-group mt-4">
-                <label for="jurusan">Nama jurusan</label>
-                <input type="text" id="jurusan" class="form-control <?= invalidFeedback('jurusan') ? 'is-invalid' : ''; ?>" name="jurusan" placeholder="'X', 'XI', '11'" value="<?= old('jurusan') ?? $jurusan->jurusan  ?? '' ?>">
+                <label for="jurusan">Nama lokal</label>
+                <input type="text" id="jurusan" class="form-control <?= invalidFeedback('jurusan') ? 'is-invalid' : ''; ?>" name="jurusan" placeholder="'A', 'B', 'C', 'D'" value="<?= old('jurusan') ?? $jurusan->jurusan  ?? '' ?>">
                 <div class="invalid-feedback">
                   <?= invalidFeedback('jurusan'); ?>
                 </div>

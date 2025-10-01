@@ -15,16 +15,16 @@
               <?= csrf_field() ?>
               <div class="form-group mt-4">
                 <label for="kelas">Kelas / Tingkat</label>
-                <input type="text" id="kelas" class="form-control <?= invalidFeedback('kelas') ? 'is-invalid' : ''; ?>" name="kelas" placeholder="'X', 'XI', '11'" , value="<?= old('kelas') ?>" required>
+                <input type="text" id="kelas" class="form-control <?= invalidFeedback('kelas') ? 'is-invalid' : ''; ?>" name="kelas" placeholder="'VII', 'VIII', 'IX'" , value="<?= old('kelas') ?>" required>
                 <div class="invalid-feedback">
                   <?= invalidFeedback('kelas'); ?>
                 </div>
               </div>
               <div class="row">
                 <div class="col-12">
-                  <label for="id_jurusan">Jurusan</label>
+                  <label for="id_jurusan">Lokal</label>
                   <select class="custom-select <?= invalidFeedback('id_jurusan') ? 'is-invalid' : ''; ?>" id="id_jurusan" name="id_jurusan">
-                    <option value="">--Pilih Jurusan--</option>
+                    <option value="">--Pilih Lokal--</option>
                     <?php foreach ($jurusan as $value) : ?>
                       <option value="<?= $value['id']; ?>" <?= old('id_jurusan') == $value['id'] ? 'selected' : ''; ?>>
                         <?= $value['jurusan']; ?>

@@ -35,11 +35,11 @@
         <div class="card">
           <div class="card-header card-header-danger">
             <h4 class="card-title"><b>Generate QR Code</b></h4>
-            <p class="card-category">Generate QR berdasarkan kode unik data siswa/guru</p>
+            <p class="card-category">Generate QR berdasarkan kode unik data siswa</p>
           </div>
           <div class="card-body">
             <div class="row">
-              <div class="col-md-6">
+              <div class="col-md-12">
                 <div class="card">
                   <div class="card-body">
                     <h4 class="text-primary"><b>Data Siswa</b></h4>
@@ -138,10 +138,14 @@
                       Untuk generate/download QR Code per masing-masing siswa kunjungi
                       <a href="<?= base_url('admin/siswa'); ?>"><b>data siswa</b></a>
                     </p>
+                    <p class="text-danger">
+                      <i class="material-icons" style="font-size: 16px;">warning</i>
+                      File image QR Code tersimpan di [folder website]/public/uploads/
+                    </p>
                   </div>
                 </div>
               </div>
-              <div class="col-md-6">
+              <!-- <div class="col-md-6">
                 <div class="card">
                   <div class="card-body">
                     <h4 class="text-success"><b>Data Guru</b></h4>
@@ -198,7 +202,7 @@
                   <i class="material-icons" style="font-size: 16px;">warning</i>
                   File image QR Code tersimpan di [folder website]/public/uploads/
                 </p>
-              </div>
+              </div> -->
             </div>
           </div>
         </div>
