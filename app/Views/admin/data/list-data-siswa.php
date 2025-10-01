@@ -8,7 +8,7 @@
             <th><b>Nama Siswa</b></th>
             <th><b>Jenis Kelamin</b></th>
             <th><b>Kelas</b></th>
-            <th><b>Jurusan</b></th>
+            <th><b>Lokal</b></th>
             <th><b>No HP</b></th>
             <th width="1%"><b>Aksi</b></th>
          </thead>
