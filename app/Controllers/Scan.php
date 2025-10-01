@@ -31,7 +31,7 @@ class Scan extends BaseController
 
    public function index($t = 'Masuk')
    {
-      $data = ['waktu' => $t, 'title' => 'Absensi Siswa dan Guru Berbasis QR Code'];
+      $data = ['waktu' => $t, 'title' => 'Absensi Siswa Berbasis QR Code'];
       return view('scan/scan', $data);
    }
 

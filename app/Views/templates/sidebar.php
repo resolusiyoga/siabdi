@@ -45,28 +45,28 @@ switch ($context) {
                <p>Absensi Siswa</p>
             </a>
          </li>
-         <li class="nav-item <?= $context == 'absen-guru' ? 'active' : ''; ?>">
+         <!-- <li class="nav-item <?= $context == 'absen-guru' ? 'active' : ''; ?>">
             <a class="nav-link" href="<?= base_url('admin/absen-guru'); ?>">
                <i class="material-icons">checklist</i>
                <p>Absensi Guru</p>
             </a>
-         </li>
+         </li> -->
          <li class="nav-item <?= $context == 'siswa' ? 'active' : ''; ?>">
             <a class="nav-link" href="<?= base_url('admin/siswa'); ?>">
                <i class="material-icons">person</i>
                <p>Data Siswa</p>
             </a>
          </li>
-         <li class="nav-item <?= $context == 'guru' ? 'active' : ''; ?>">
+         <!-- <li class="nav-item <?= $context == 'guru' ? 'active' : ''; ?>">
             <a class="nav-link" href="<?= base_url('admin/guru'); ?>">
                <i class="material-icons">person_4</i>
                <p>Data Guru</p>
             </a>
-         </li>
+         </li> -->
          <li class="nav-item <?= $context == 'kelas' ? 'active' : ''; ?>">
             <a class="nav-link" href="<?= base_url('admin/kelas'); ?>">
                <i class="material-icons">school</i>
-               <p>Data Kelas & Jurusan</p>
+               <p>Data Kelas</p>
             </a>
          </li>
          <li class="nav-item <?= $context == 'qr' ? 'active' : ''; ?>">
