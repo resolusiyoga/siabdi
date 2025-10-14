@@ -41,7 +41,7 @@ class QRGenerator extends BaseController
 
       $this->labelFont = new Font(FCPATH . 'assets/fonts/Roboto-Medium.ttf', 14);
 
-      $this->foregroundColor = new Color(44, 73, 162);
+      $this->foregroundColor = new Color(0, 0, 0);
       $this->foregroundColor2 = new Color(28, 101, 90);
       $this->backgroundColor = new Color(255, 255, 255);
 
