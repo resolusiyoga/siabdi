@@ -17,6 +17,8 @@ class PresensiSiswaModel extends Model implements PresensiInterface
       'tanggal',
       'jam_masuk',
       'jam_keluar',
+      'jam_dzuhur',
+      'jam_ashar',
       'id_kehadiran',
       'keterangan'
    ];
@@ -53,6 +55,13 @@ class PresensiSiswaModel extends Model implements PresensiInterface
       ]);
    }
 
+   public function absenWaktu(string $idPresensi, string $field, string $time)
+   {
+      $this->update($idPresensi, [
+         $field => $time
+      ]);
+   }
+
    public function getPresensiByIdSiswaTanggal($idSiswa, $date)
    {
       return $this->where(['id_siswa' => $idSiswa, 'tanggal' => $date])->first();
@@ -68,7 +77,7 @@ class PresensiSiswaModel extends Model implements PresensiInterface
       return $this->setTable('tb_siswa')
          ->select('*')
          ->join(
-            "(SELECT id_presensi, id_siswa AS id_siswa_presensi, tanggal, jam_masuk, jam_keluar, id_kehadiran, keterangan FROM tb_presensi_siswa)tb_presensi_siswa",
+            "(SELECT id_presensi, id_siswa AS id_siswa_presensi, tanggal, jam_masuk, jam_keluar, jam_dzuhur, jam_ashar, id_kehadiran, keterangan FROM tb_presensi_siswa)tb_presensi_siswa",
             "{$this->table}.id_siswa = tb_presensi_siswa.id_siswa_presensi AND tb_presensi_siswa.tanggal = '$tanggal'",
             'left'
          )
@@ -79,6 +88,44 @@ class PresensiSiswaModel extends Model implements PresensiInterface
          )
          ->where("{$this->table}.id_kelas = $idKelas")
          ->orderBy("nama_siswa")
+         ->findAll();
+   }
+
+   public function getPresensiByKelasJurusanTanggal($kelas, $jurusan, $tanggal)
+   {
+      $builder = $this->setTable('tb_siswa')
+         ->select('*')
+         ->select('tb_kelas.kelas AS kelas, tb_jurusan.jurusan AS jurusan')
+         ->join(
+            'tb_kelas',
+            "tb_kelas.id_kelas = {$this->table}.id_kelas",
+            'left'
+         )
+         ->join(
+            'tb_jurusan',
+            'tb_jurusan.id = tb_kelas.id_jurusan',
+            'left'
+         )
+         ->join(
+            "(SELECT id_presensi, id_siswa AS id_siswa_presensi, tanggal, jam_masuk, jam_keluar, jam_dzuhur, jam_ashar, id_kehadiran, keterangan FROM tb_presensi_siswa)tb_presensi_siswa",
+            "{$this->table}.id_siswa = tb_presensi_siswa.id_siswa_presensi AND tb_presensi_siswa.tanggal = '$tanggal'",
+            'left'
+         )
+         ->join(
+            'tb_kehadiran',
+            'tb_presensi_siswa.id_kehadiran = tb_kehadiran.id_kehadiran',
+            'left'
+         );
+
+      if (!empty($kelas)) {
+         $builder = $builder->where('tb_kelas.kelas', $kelas);
+      }
+
+      if (!empty($jurusan)) {
+         $builder = $builder->where('tb_jurusan.jurusan', $jurusan);
+      }
+
+      return $builder->orderBy("tb_kelas.kelas, tb_jurusan.jurusan, nama_siswa")
          ->findAll();
    }
 
@@ -116,7 +163,9 @@ class PresensiSiswaModel extends Model implements PresensiInterface
       $idKehadiran,
       $jamMasuk,
       $jamKeluar,
-      $keterangan
+      $keterangan,
+      $jamDzuhur = null,
+      $jamAshar = null
    ) {
       $presensi = $this->getPresensiByIdSiswaTanggal($idSiswa, $tanggal);
 
@@ -138,6 +187,14 @@ class PresensiSiswaModel extends Model implements PresensiInterface
 
       if ($jamKeluar != null) {
          $data['jam_keluar'] = $jamKeluar;
+      }
+
+      if ($jamDzuhur != null) {
+         $data['jam_dzuhur'] = $jamDzuhur;
+      }
+
+      if ($jamAshar != null) {
+         $data['jam_ashar'] = $jamAshar;
       }
 
       return $this->save($data);

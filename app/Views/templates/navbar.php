@@ -38,6 +38,8 @@
                </a>
                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownScan">
                   <a class="dropdown-item" href="<?= base_url('scan/masuk'); ?>">Absen masuk</a>
+                  <a class="dropdown-item" href="<?= base_url('scan/dzuhur'); ?>">Absen dzuhur</a>
+                  <a class="dropdown-item" href="<?= base_url('scan/ashar'); ?>">Absen ashar</a>
                   <a class="dropdown-item" href="<?= base_url('scan/pulang'); ?>">Absen pulang</a>
                </div>
             </li>

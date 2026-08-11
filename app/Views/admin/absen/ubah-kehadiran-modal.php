@@ -32,6 +32,18 @@
                <input class="form-control" type="time" name="jam_keluar" id="jamKeluar" value="<?= $presensi['jam_keluar'] ?? ''; ?>">
             </div>
          </div>
+         <?php if (empty($data['id_guru'])) : ?>
+            <div class="row mb-2">
+               <div class="col">
+                  <label for="jamDzuhur">Jam dzuhur</label>
+                  <input class="form-control" type="time" name="jam_dzuhur" id="jamDzuhur" value="<?= $presensi['jam_dzuhur'] ?? ''; ?>">
+               </div>
+               <div class="col">
+                  <label for="jamAshar">Jam ashar</label>
+                  <input class="form-control" type="time" name="jam_ashar" id="jamAshar" value="<?= $presensi['jam_ashar'] ?? ''; ?>">
+               </div>
+            </div>
+         <?php endif; ?>
          <label for="keterangan">Keterangan</label>
          <textarea id="keterangan" name="keterangan" class="custom-select"><?= trim($presensi['keterangan'] ?? ''); ?></textarea>
       </form>

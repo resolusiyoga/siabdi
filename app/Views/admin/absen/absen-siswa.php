@@ -5,35 +5,67 @@
       <div class="row">
          <div class="col-lg-12 col-md-12">
             <div class="card">
-               <div class="card-body">
-                  <div class="row justify-content-between">
-                     <div class="col">
-                        <div class="pt-3 pl-3">
-                           <h4><b>Daftar Kelas</b></h4>
-                           <p>Silakan pilih kelas</p>
+               <div class="card-header card-header-tabs card-header-primary">
+                  <div class="nav-tabs-navigation">
+                     <div class="row">
+                        <div class="col-md-2">
+                           <h4 class="card-title"><b>Absen Siswa</b></h4>
+                           <p class="card-category">Silakan pilih kelas</p>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="nav-tabs-wrapper">
+                              <span class="nav-tabs-title">Kelas:</span>
+                              <ul class="nav nav-tabs" data-tabs="tabs">
+                                 <li class="nav-item">
+                                    <a class="nav-link active" onclick="kelas = null; trig()" href="#" data-toggle="tab">
+                                       <i class="material-icons">check</i> Semua
+                                       <div class="ripple-container"></div>
+                                    </a>
+                                 </li>
+                                 <?php
+                                 $tempKelas = [];
+                                 foreach ($kelas as $value) : ?>
+                                    <?php if (!in_array($value['kelas'], $tempKelas)) : ?>
+                                       <li class="nav-item">
+                                          <a class="nav-link" onclick="kelas = '<?= $value['kelas']; ?>'; trig()" href="#" data-toggle="tab">
+                                             <i class="material-icons">school</i> <?= $value['kelas']; ?>
+                                             <div class="ripple-container"></div>
+                                          </a>
+                                       </li>
+                                       <?php array_push($tempKelas, $value['kelas']) ?>
+                                    <?php endif; ?>
+                                 <?php endforeach; ?>
+                              </ul>
+                           </div>
+                        </div>
+                        <div class="col-md-6">
+                           <div class="nav-tabs-wrapper">
+                              <span class="nav-tabs-title">Lokal:</span>
+                              <ul class="nav nav-tabs" data-tabs="tabs">
+                                 <li class="nav-item">
+                                    <a class="nav-link active" onclick="jurusan = null; trig()" href="#" data-toggle="tab">
+                                       <i class="material-icons">check</i> Semua
+                                       <div class="ripple-container"></div>
+                                    </a>
+                                 </li>
+                                 <?php foreach ($jurusan as $value) : ?>
+                                    <li class="nav-item">
+                                       <a class="nav-link" onclick="jurusan = '<?= $value['jurusan']; ?>'; trig();" href="#" data-toggle="tab">
+                                          <i class="material-icons">bookmark</i> <?= $value['jurusan']; ?>
+                                          <div class="ripple-container"></div>
+                                       </a>
+                                    </li>
+                                 <?php endforeach; ?>
+                              </ul>
+                           </div>
                         </div>
                      </div>
                   </div>
-
-                  <div class="card-body pt-1 px-3">
-                     <div class="row">
-                        <?php foreach ($kelas as $value) : ?>
-                           <?php
-                           $idKelas = $value['id_kelas'];
-                           $namaKelas =  $value['kelas'] . ' ' . $value['jurusan'];
-                           ?>
-                           <div class="col-md-3">
-                              <button id="kelas-<?= $idKelas; ?>" onclick="getSiswa(<?= $idKelas; ?>, '<?= $namaKelas; ?>')" class="btn btn-primary w-100">
-                                 <?= $namaKelas; ?>
-                              </button>
-                           </div>
-                        <?php endforeach; ?>
-                     </div>
-                  </div>
-
+               </div>
+               <div class="card-body">
                   <div class="row">
                      <div class="col-md-3">
-                        <div class="pt-3 pl-3 pb-2">
+                        <div class="pl-3">
                            <h4><b>Tanggal</b></h4>
                            <input class="form-control" type="date" name="tangal" id="tanggal" value="<?= date('Y-m-d'); ?>" onchange="onDateChange()">
                         </div>
@@ -73,24 +105,28 @@
    </div>
 </div>
 <script>
-   var lastIdKelas;
-   var lastKelas;
+   var kelas = null;
+   var jurusan = null;
 
-   function onDateChange() {
-      if (lastIdKelas != null && lastKelas != null) getSiswa(lastIdKelas, lastKelas);
+   getSiswa();
+
+   function trig() {
+      getSiswa();
    }
 
-   function getSiswa(idKelas, kelas) {
-      var tanggal = $('#tanggal').val();
+   function onDateChange() {
+      getSiswa();
+   }
 
-      updateBtn(idKelas);
+   function getSiswa() {
+      var tanggal = $('#tanggal').val();
 
       jQuery.ajax({
          url: "<?= base_url('/admin/absen-siswa'); ?>",
          type: 'post',
          data: {
             'kelas': kelas,
-            'id_kelas': idKelas,
+            'jurusan': jurusan,
             'tanggal': tanggal
          },
          success: function(response, status, xhr) {
@@ -106,21 +142,6 @@
             $('#dataSiswa').html(thrown);
          }
       });
-
-      lastIdKelas = idKelas;
-      lastKelas = kelas;
-   }
-
-   function updateBtn(id_btn) {
-      for (let index = 1; index <= <?= count($kelas); ?>; index++) {
-         if (index != id_btn) {
-            $('#kelas-' + index).removeClass('btn-success');
-            $('#kelas-' + index).addClass('btn-primary');
-         } else {
-            $('#kelas-' + index).removeClass('btn-primary');
-            $('#kelas-' + index).addClass('btn-success');
-         }
-      }
    }
 
    function getDataKehadiran(idPresensi, idSiswa) {
@@ -162,7 +183,7 @@
             // console.log(status);
 
             if (response['status']) {
-               getSiswa(lastIdKelas, lastKelas);
+               getSiswa();
                alert('Berhasil ubah kehadiran : ' + response['nama_siswa']);
             } else {
                alert('Gagal ubah kehadiran : ' + response['nama_siswa']);

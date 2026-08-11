@@ -6,6 +6,8 @@ use App\Models\KelasModel;
 
 use App\Models\SiswaModel;
 
+use App\Models\JurusanModel;
+
 use App\Controllers\BaseController;
 use App\Models\KehadiranModel;
 use App\Models\PresensiSiswaModel;
@@ -16,6 +18,8 @@ class DataAbsenSiswa extends BaseController
    protected KelasModel $kelasModel;
 
    protected SiswaModel $siswaModel;
+
+   protected JurusanModel $jurusanModel;
 
    protected KehadiranModel $kehadiranModel;
 
@@ -33,6 +37,8 @@ class DataAbsenSiswa extends BaseController
 
       $this->kelasModel = new KelasModel();
 
+      $this->jurusanModel = new JurusanModel();
+
       $this->presensiSiswa = new PresensiSiswaModel();
    }
 
@@ -43,7 +49,8 @@ class DataAbsenSiswa extends BaseController
       $data = [
          'title' => 'Data Absen Siswa',
          'ctx' => 'absen-siswa',
-         'kelas' => $kelas
+         'kelas' => $kelas,
+         'jurusan' => $this->jurusanModel->getDataJurusan()
       ];
 
       return view('admin/absen/absen-siswa', $data);
@@ -52,16 +59,15 @@ class DataAbsenSiswa extends BaseController
    public function ambilDataSiswa()
    {
       // ambil variabel POST
-      $kelas = $this->request->getVar('kelas');
-      $idKelas = $this->request->getVar('id_kelas');
+      $kelas = $this->request->getVar('kelas') ?? null;
+      $jurusan = $this->request->getVar('jurusan') ?? null;
       $tanggal = $this->request->getVar('tanggal');
 
       $lewat = Time::parse($tanggal)->isAfter(Time::today());
 
-      $result = $this->presensiSiswa->getPresensiByKelasTanggal($idKelas, $tanggal);
+      $result = $this->presensiSiswa->getPresensiByKelasJurusanTanggal($kelas, $jurusan, $tanggal);
 
       $data = [
-         'kelas' => $kelas,
          'data' => $result,
          'listKehadiran' => $this->kehadiranModel->getAllKehadiran(),
          'lewat' => $lewat
@@ -93,6 +99,8 @@ class DataAbsenSiswa extends BaseController
       $tanggal = $this->request->getVar('tanggal');
       $jamMasuk = $this->request->getVar('jam_masuk');
       $jamKeluar = $this->request->getVar('jam_keluar');
+      $jamDzuhur = $this->request->getVar('jam_dzuhur');
+      $jamAshar = $this->request->getVar('jam_ashar');
       $keterangan = $this->request->getVar('keterangan');
 
       $cek = $this->presensiSiswa->cekAbsen($idSiswa, $tanggal);
@@ -105,7 +113,9 @@ class DataAbsenSiswa extends BaseController
          $idKehadiran,
          $jamMasuk ?? NULL,
          $jamKeluar ?? NULL,
-         $keterangan
+         $keterangan,
+         $jamDzuhur ?? NULL,
+         $jamAshar ?? NULL
       );
 
       $response['nama_siswa'] = $this->siswaModel->getSiswaById($idSiswa)['nama_siswa'];

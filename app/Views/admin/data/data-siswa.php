@@ -57,7 +57,7 @@
                         </div>
                         <div class="col-md-6">
                            <div class="nav-tabs-wrapper">
-                              <span class="nav-tabs-title">Jurusan:</span>
+                              <span class="nav-tabs-title">Lokal:</span>
                               <ul class="nav nav-tabs" data-tabs="tabs">
                                  <li class="nav-item">
                                     <a class="nav-link active" onclick="jurusan = null; trig()" href="#" data-toggle="tab">

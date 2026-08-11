@@ -1,6 +1,7 @@
+<?php helper('datatable'); ?>
 <div class="card-body table-responsive">
    <?php if (!$empty) : ?>
-      <table class="table table-hover">
+      <table class="table table-hover" id="tableDataSiswa">
          <thead class="text-primary">
             <th width="20"><input type="checkbox" class="checkbox-table" id="checkAll"></th>
             <th><b>No</b></th>
@@ -8,7 +9,6 @@
             <th><b>Nama Siswa</b></th>
             <th><b>Jenis Kelamin</b></th>
             <th><b>Kelas</b></th>
-            <th><b>Lokal</b></th>
             <th><b>No HP</b></th>
             <th width="1%"><b>Aksi</b></th>
          </thead>
@@ -21,8 +21,7 @@
                   <td><?= $value['nis']; ?></td>
                   <td><b><?= $value['nama_siswa']; ?></b></td>
                   <td><?= $value['jenis_kelamin']; ?></td>
-                  <td><?= $value['kelas']; ?></td>
-                  <td><?= $value['jurusan']; ?></td>
+                  <td><?= ($value['kelas'] ?? '-') . (!empty($value['jurusan']) ? '.' . $value['jurusan'] : ''); ?></td>
                   <td><?= $value['no_hp']; ?></td>
                   <td>
                      <div class="d-flex justify-content-center">
@@ -54,3 +53,15 @@
       </div>
    <?php endif; ?>
 </div>
+<?php if (!$empty) : ?>
+   <script>
+      $('#tableDataSiswa').DataTable({
+         destroy: true,
+         columnDefs: [{
+            orderable: false,
+            targets: [0, 1, 7]
+         }],
+         language: <?= json_encode(datatable_lang_id()) ?>
+      });
+   </script>
+<?php endif; ?>

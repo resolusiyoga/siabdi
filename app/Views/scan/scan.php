@@ -9,9 +9,12 @@
 
  <?= $this->section('content'); ?>
  <?php
-   $oppBtn = '';
-
-   $waktu == 'Masuk' ? $oppBtn = 'pulang' : $oppBtn = 'masuk';
+   $kategoriAbsen = [
+      'masuk' => ['label' => 'Masuk', 'color' => 'success'],
+      'dzuhur' => ['label' => 'Dzuhur', 'color' => 'info'],
+      'ashar' => ['label' => 'Ashar', 'color' => 'primary'],
+      'pulang' => ['label' => 'Pulang', 'color' => 'warning'],
+   ];
    ?>
  <div class="main-panel">
     <div class="content">
@@ -26,9 +29,12 @@
                             <p class="card-category">Silahkan tunjukkan QR Code anda</p>
                          </div>
                          <div class="col-md-auto">
-                            <a href="<?= base_url("scan/$oppBtn"); ?>" class="btn btn-<?= $oppBtn == 'masuk' ? 'success' : 'warning'; ?>">
-                               Absen <?= $oppBtn; ?>
-                            </a>
+                            <?php foreach ($kategoriAbsen as $key => $item) : ?>
+                               <?php if (strtolower($waktu) == $key) continue; ?>
+                               <a href="<?= base_url("scan/$key"); ?>" class="btn btn-<?= $item['color']; ?>">
+                                  Absen <?= $item['label']; ?>
+                               </a>
+                            <?php endforeach; ?>
                          </div>
                       </div>
                    </div>

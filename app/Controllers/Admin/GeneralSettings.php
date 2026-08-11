@@ -29,6 +29,7 @@ class GeneralSettings extends BaseController
         $val->setRule('school_name', 'Nama Sekolah', 'required|max_length[200]');
         $val->setRule('school_year', 'Tahun Ajaran', 'required|max_length[200]');
         $val->setRule('copyright', 'copyright', 'max_length[200]');
+        $val->setRule('batas_absen_masuk', 'Batas Waktu Absen Masuk', 'required');
 
         if (!$this->validate(getValRules($val))) {
             $this->session->setFlashdata('errors', $val->getErrors());

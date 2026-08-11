@@ -21,6 +21,7 @@ class GeneralSettingsModel extends BaseModel
          'school_name' => inputPost('school_name'),
          'school_year' => inputPost('school_year'),
          'copyright' => inputPost('copyright'),
+         'batas_absen_masuk' => inputPost('batas_absen_masuk'),
       ];
    }
 

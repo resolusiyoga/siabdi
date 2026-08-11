@@ -29,6 +29,15 @@
                                 </div>
                             </div>
 
+                            <div class="form-group mt-4">
+                                <label for="batas_absen_masuk">Batas Waktu Absen Masuk</label>
+                                <input type="time" id="batas_absen_masuk" class="form-control <?= invalidFeedback('batas_absen_masuk') ? 'is-invalid' : ''; ?>" name="batas_absen_masuk" value="<?= substr($generalSettings->batas_absen_masuk ?? '07:20:00', 0, 5); ?>" required>
+                                <small class="text-muted">Siswa yang absen masuk melewati jam ini akan ditandai terlambat.</small>
+                                <div class="invalid-feedback">
+                                    <?= invalidFeedback('batas_absen_masuk'); ?>
+                                </div>
+                            </div>
+
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group mt-4">

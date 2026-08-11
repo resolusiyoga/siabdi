@@ -14,4 +14,7 @@
 <!-- Custom JS App -->
 <script src="<?= base_url('assets/js/plugins/file-uploader/js/jquery.dm-uploader.min.js'); ?>"></script>
 <script src="<?= base_url('assets/js/plugins/file-uploader/js/ui.js'); ?>"></script>
+<!-- DataTables -->
+<script src="<?= base_url('assets/js/plugins/datatables/jquery.dataTables.min.js') ?>"></script>
+<script src="<?= base_url('assets/js/plugins/datatables/dataTables.bootstrap4.min.js') ?>"></script>
 <script src="<?= base_url('assets/js/custom.js') ?>" type="text/javascript"></script>

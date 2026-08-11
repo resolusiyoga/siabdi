@@ -39,6 +39,8 @@ $routes->group('scan', function (RouteCollection $routes) {
    $routes->get('', 'Scan::index');
    $routes->get('masuk', 'Scan::index/Masuk');
    $routes->get('pulang', 'Scan::index/Pulang');
+   $routes->get('dzuhur', 'Scan::index/Dzuhur');
+   $routes->get('ashar', 'Scan::index/Ashar');
 
    $routes->post('cek', 'Scan::cekKode');
 });

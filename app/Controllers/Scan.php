@@ -78,6 +78,14 @@ class Scan extends BaseController
             return $this->absenPulang($type, $result);
             break;
 
+         case 'dzuhur':
+            return $this->absenShalat($type, $result, 'jam_dzuhur', 'Dzuhur');
+            break;
+
+         case 'ashar':
+            return $this->absenShalat($type, $result, 'jam_ashar', 'Ashar');
+            break;
+
          default:
             return $this->showErrorView('Data tidak valid');
             break;
@@ -196,6 +204,53 @@ class Scan extends BaseController
          default:
             return $this->showErrorView('Tipe tidak valid');
       }
+
+      // kirim notifikasi ke whatsapp
+      if ($this->WANotificationEnabled && !empty($result['no_hp'])) {
+         $message = [
+            'destination' => $result['no_hp'],
+            'message' => $messageString,
+            'delay' => 0
+         ];
+         try {
+            $this->sendNotification($message);
+         } catch (\Exception $e) {
+            log_message('error', 'Error sending notification: ' . $e->getMessage());
+         }
+      }
+
+      return view('scan/scan-result', $data);
+   }
+
+   public function absenShalat($type, $result, string $field, string $label)
+   {
+      if ($type !== TipeUser::Siswa) {
+         return $this->showErrorView('Absen ' . $label . ' hanya berlaku untuk siswa');
+      }
+
+      $data['data'] = $result;
+      $data['waktu'] = $label;
+      $data['type'] = TipeUser::Siswa;
+
+      $idSiswa = $result['id_siswa'];
+      $date = Time::today()->toDateString();
+      $time = Time::now()->toTimeString();
+
+      $presensi = $this->presensiSiswaModel->getPresensiByIdSiswaTanggal($idSiswa, $date);
+
+      if (empty($presensi)) {
+         $data['presensi'] = null;
+         return $this->showErrorView('Anda belum absen masuk hari ini', $data);
+      }
+
+      if (!empty($presensi[$field])) {
+         $data['presensi'] = $presensi;
+         return $this->showErrorView('Anda sudah absen ' . $label . ' hari ini', $data);
+      }
+
+      $this->presensiSiswaModel->absenWaktu($presensi['id_presensi'], $field, $time);
+      $messageString = 'Siswa ' . $result['nama_siswa'] . ' dengan NIS ' . $result['nis'] . " sudah absen $label pada tanggal $date jam $time";
+      $data['presensi'] = $this->presensiSiswaModel->getPresensiById($presensi['id_presensi']);
 
       // kirim notifikasi ke whatsapp
       if ($this->WANotificationEnabled && !empty($result['no_hp'])) {

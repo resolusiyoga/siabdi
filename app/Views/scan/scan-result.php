@@ -44,6 +44,8 @@ function jam($presensi)
 {
    ?>
    <p>Jam masuk : <b class="text-info"><?= $presensi['jam_masuk'] ?? '-'; ?></b></p>
+   <p>Jam dzuhur : <b class="text-info"><?= $presensi['jam_dzuhur'] ?? '-'; ?></b></p>
+   <p>Jam ashar : <b class="text-info"><?= $presensi['jam_ashar'] ?? '-'; ?></b></p>
    <p>Jam pulang : <b class="text-info"><?= $presensi['jam_keluar'] ?? '-'; ?></b></p>
 <?php
 }
