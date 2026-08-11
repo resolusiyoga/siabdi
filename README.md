@@ -167,6 +167,89 @@ Aplikasi Web Sistem Absensi Sekolah Berbasis QR Code adalah sebuah proyek yang b
 >   $password = 'superadmin';
 >   ```
 
+## Deploy ke Shared Hosting
+
+Panduan ini untuk hosting cPanel/shared hosting umum (Niagahoster, Rumahweb, Hostinger, dll) yang biasanya **document root**-nya tidak bisa diarahkan langsung ke folder `public/` proyek CodeIgniter. Ada 2 cara: dengan SSH (composer & spark tersedia) atau tanpa SSH (upload manual + import SQL).
+
+### Persyaratan Hosting
+
+- PHP 8.1+ dengan extension `intl`, `mbstring`, `mysqli`, dan `gd` aktif (aktifkan lewat menu **Select PHP Version** di cPanel).
+- Database MySQL/MariaDB (buat lewat menu **MySQL Databases**).
+- Akses **File Manager**/FTP, dan idealnya akses **SSH** + **Composer** (banyak cPanel modern sudah menyediakan menu **Terminal** & **Setup Node.js/PHP App**).
+
+### A. Dengan akses SSH (direkomendasikan)
+
+1. Upload/clone seluruh source code ke server. Lokasinya tergantung apakah document root hosting Anda bisa diubah (lihat langkah 5):
+   - Bisa diubah → upload ke folder **di luar** `public_html`, misalnya `~/siabdi`.
+   - Tidak bisa diubah (harus tetap `public_html`) → upload **langsung ke dalam** `public_html`.
+2. Masuk ke folder proyek lalu install dependency production:
+
+   ```shell
+   cd ~/siabdi   # atau cd ~/public_html jika upload langsung ke public_html
+   composer install --no-dev --optimize-autoloader
+   ```
+
+3. Salin `.env.example` menjadi `.env`, lalu atur:
+
+   ```sh
+   CI_ENVIRONMENT = production
+   app.baseURL = 'https://namadomainanda.com/'
+
+   database.default.hostname = localhost
+   database.default.database = nama_database_cpanel
+   database.default.username = user_database_cpanel
+   database.default.password = password_database_cpanel
+   ```
+
+4. Jalankan migrasi database:
+
+   ```shell
+   php spark migrate --all
+   ```
+
+   Atau jika lebih mudah, import langsung file [`database/siabdi.sql`](database/siabdi.sql) lewat phpMyAdmin (lihat bagian [Import Database](#import-database) di bawah).
+
+5. Arahkan folder web-accessible ke aplikasi:
+
+   - **Jika hosting mengizinkan mengubah document root** — arahkan document root domain/subdomain ke folder `~/siabdi/public` lewat menu **Domains**/**Addon Domains** di cPanel (kolom "Document Root"). Ini cara paling bersih karena tidak perlu mengubah file apa pun.
+
+   - **Jika harus tetap pakai `public_html`** (tidak bisa ubah document root) — pastikan seluruh proyek (folder `app/`, `public/`, `vendor/`, `writable/`, file `.htaccess`, `.env`, dll — sesuai langkah 1) memang berada langsung di dalam `public_html/`. Proyek ini sudah menyertakan file [`.htaccess`](.htaccess) di root yang otomatis meneruskan semua request ke folder `public/`, jadi tidak perlu mengedit `index.php` atau memindahkan file apa pun — cukup pastikan `.htaccess` ini ikut ter-upload. File sensitif (`.env`, folder `app/`, `writable/`, `vendor/`) tetap **tidak bisa diakses langsung** lewat URL karena semua request selalu diteruskan ke dalam `public/` terlebih dahulu.
+
+6. Set permission folder `writable/` menjadi `755` (atau `775` jika masih gagal menulis):
+
+   ```shell
+   chmod -R 755 ~/siabdi/writable
+   ```
+
+7. Buka domain Anda di browser, lalu login dengan akun superadmin default (`superadmin` / `superadmin`) dan **segera ganti password**-nya.
+
+### B. Tanpa akses SSH (upload manual)
+
+1. Jalankan `composer install --no-dev --optimize-autoloader` **di komputer lokal** terlebih dahulu (supaya folder `vendor/` sudah lengkap), lalu compress seluruh proyek (termasuk folder `vendor/`) menjadi `.zip`.
+2. Upload & extract `.zip` tersebut lewat **File Manager** cPanel — ke folder di luar `public_html` (misal `~/siabdi`) jika document root bisa diubah, atau **langsung ke dalam** `public_html` jika tidak bisa (lihat penjelasan langkah 5 pada bagian [A](#a-dengan-akses-ssh-direkomendasikan)).
+3. Atur `.env` (langkah 3 di bagian A), lalu set permission folder `writable/` lewat File Manager: klik kanan folder → **Permissions** → `755`.
+4. Untuk membuat struktur tabel & data awal (karena `php spark migrate` butuh terminal), import database lewat phpMyAdmin — lihat langkah di bawah.
+
+### Import Database
+
+Karena banyak shared hosting tidak menyediakan SSH, disediakan file SQL siap import di [`database/siabdi.sql`](database/siabdi.sql) sebagai alternatif dari `php spark migrate --all`. File ini berisi seluruh struktur tabel (termasuk tabel otentikasi Myth\Auth) **dan** data seeding awal: status kehadiran, daftar jurusan (OTKP/BDP/AKL/RPL), daftar kelas (X/XI/XII), pengaturan umum default, serta 1 akun superadmin.
+
+1. Buat database kosong lewat menu **MySQL Databases** di cPanel, lalu buat user database dan berikan **All Privileges** ke database tersebut.
+2. Buka **phpMyAdmin**, pilih database yang baru dibuat, buka tab **Import**.
+3. Pilih file `database/siabdi.sql`, lalu klik **Go**/**Kirim**.
+4. Setelah import selesai, sesuaikan kredensial database tersebut ke file `.env` (lihat langkah 3 di atas).
+5. Login dengan akun superadmin default:
+
+   ```txt
+   username : superadmin
+   password : superadmin
+   ```
+
+   **Segera ganti password ini setelah login pertama kali.**
+
+> [!NOTE]
+> File `database/siabdi.sql` **tidak** berisi data dummy siswa/guru — hanya data referensi/master yang dibutuhkan aplikasi agar bisa langsung dipakai. Tambahkan data siswa, guru, kelas tambahan, dll melalui panel admin setelah login.
+
 ## Kesimpulan
 
 Dengan aplikasi web sistem absensi sekolah berbasis QR code ini, diharapkan proses absensi di sekolah menjadi lebih efisien dan terotomatisasi. Proyek ini dapat diadaptasi dan dikembangkan lebih lanjut sesuai dengan kebutuhan dan persyaratan sekolah Anda.
