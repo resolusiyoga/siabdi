@@ -56,7 +56,7 @@
 /* Spinner styles */
 .spinner {
     border: 8px solid rgba(0, 0, 0, 0.1);
-    border-left-color: #9c27b0;
+    border-left-color: #386C0B;
     border-radius: 50%;
     width: 50px;
     height: 50px;
@@ -86,7 +86,7 @@
 .spinner-bounce > div {
     width: 18px;
     height: 18px;
-    background-color: #9c27b0;
+    background-color: #386C0B;
     border-radius: 100%;
     display: inline-block;
     -webkit-animation: sk-bouncedelay 1.4s infinite ease-in-out both;
