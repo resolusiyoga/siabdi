@@ -1,11 +1,13 @@
+<?php helper('datatable'); ?>
 <div class="card-body table-responsive">
    <?php if (!$empty) : ?>
-      <table class="table table-hover">
+      <table class="table table-hover" id="tableDataPetugas">
          <thead class="text-info">
             <th><b>No</b></th>
             <th><b>Username</b></th>
             <th><b>Email</b></th>
             <th><b>Peran</b></th>
+            <th><b>Kelas</b></th>
             <th><b>Aksi</b></th>
          </thead>
          <tbody>
@@ -16,6 +18,12 @@
                   <td><?= $value['username']; ?></td>
                   <td><b><?= $value['email']; ?></b></td>
                   <td><?= roleLabel($value['role'] ?? 'guru'); ?></td>
+                  <td>
+                     <?php // kelas hanya relevan untuk wali kelas ?>
+                     <?= ($value['role'] ?? '') === 'wali_kelas'
+                        ? labelKelas($value['kelas'] ?? null, $value['jurusan'] ?? null)
+                        : '-'; ?>
+                  </td>
                   <td>
                      <?php if ($value['username'] == 'superadmin') : ?>
                         <button disabled class="btn btn-disabled p-2" id="<?= $value['username']; ?>">
@@ -54,6 +62,19 @@
       </div>
    <?php endif; ?>
 </div>
+
+<?php if (!$empty) : ?>
+   <script>
+      $('#tableDataPetugas').DataTable({
+         destroy: true,
+         columnDefs: [{
+            orderable: false,
+            targets: [0, 5]
+         }],
+         language: <?= json_encode(datatable_lang_id()) ?>
+      });
+   </script>
+<?php endif; ?>
 
 <?php
 function roleLabel($role): string

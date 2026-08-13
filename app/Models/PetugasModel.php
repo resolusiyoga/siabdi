@@ -25,7 +25,11 @@ class PetugasModel extends Model
 
    public function getAllPetugas()
    {
-      return $this->findAll();
+      // join kelas supaya wali kelas bisa ditampilkan beserta kelas asuhannya
+      return $this->select('users.*, tb_kelas.kelas AS kelas, tb_jurusan.jurusan AS jurusan')
+         ->join('tb_kelas', 'tb_kelas.id_kelas = users.id_kelas', 'left')
+         ->join('tb_jurusan', 'tb_jurusan.id = tb_kelas.id_jurusan', 'left')
+         ->findAll();
    }
 
    public function getPetugasById($id)

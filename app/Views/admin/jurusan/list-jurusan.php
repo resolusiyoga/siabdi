@@ -1,5 +1,6 @@
+<?php helper('datatable'); ?>
 <div class="card-body table-responsive">
-  <table class="table table-hover">
+  <table class="table table-hover" id="tableDataJurusan">
     <thead class="text-primary">
       <th><b>No</b></th>
       <th><b>Lokal</b></th>
@@ -29,3 +30,14 @@
     </tbody>
   </table>
 </div>
+
+<script>
+  $('#tableDataJurusan').DataTable({
+    destroy: true,
+    columnDefs: [{
+      orderable: false,
+      targets: [0, 2]
+    }],
+    language: <?= json_encode(datatable_lang_id()) ?>
+  });
+</script>
