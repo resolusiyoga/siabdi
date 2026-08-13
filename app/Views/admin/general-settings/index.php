@@ -26,6 +26,15 @@
                             </div>
 
                             <div class="form-group mt-4">
+                                <label for="scan_subtitle">Subjudul Halaman Scan</label>
+                                <input type="text" id="scan_subtitle" class="form-control <?= invalidFeedback('scan_subtitle') ? 'is-invalid' : ''; ?>" name="scan_subtitle" placeholder="Absensi QR Code" value="<?= $generalSettings->scan_subtitle ?? 'Absensi QR Code'; ?>" <?= $readonly ? 'disabled' : ''; ?> required>
+                                <small class="text-muted">Teks kecil di bawah nama sekolah pada halaman scan QR.</small>
+                                <div class="invalid-feedback">
+                                    <?= invalidFeedback('scan_subtitle'); ?>
+                                </div>
+                            </div>
+
+                            <div class="form-group mt-4">
                                 <label for="school_year">Tahun Ajaran</label>
                                 <input type="text" id="school_year" class="form-control <?= invalidFeedback('school_year') ? 'is-invalid' : ''; ?>" name="school_year" placeholder="2024/2025" value="<?= $generalSettings->school_year; ?>" <?= $readonly ? 'disabled' : ''; ?> required>
                                 <div class="invalid-feedback">

@@ -19,6 +19,7 @@ class GeneralSettingsModel extends BaseModel
    {
       return [
          'school_name' => inputPost('school_name'),
+         'scan_subtitle' => inputPost('scan_subtitle'),
          'school_year' => inputPost('school_year'),
          'copyright' => inputPost('copyright'),
          'batas_absen_masuk' => inputPost('batas_absen_masuk'),

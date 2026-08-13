@@ -502,7 +502,7 @@
          <img class="app-bar__logo" src="<?= getLogo(); ?>" alt="Logo">
          <div class="app-bar__text">
             <p class="app-bar__title"><?= esc($generalSettings->school_name ?? 'SI-ABDI'); ?></p>
-            <p class="app-bar__sub">Absensi QR Code</p>
+            <p class="app-bar__sub"><?= esc($generalSettings->scan_subtitle ?? 'Absensi QR Code'); ?></p>
          </div>
          <a href="<?= base_url('/admin'); ?>" class="btn-ghost">
             <i class="material-icons">dashboard</i>

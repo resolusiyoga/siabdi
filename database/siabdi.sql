@@ -24,6 +24,8 @@ CREATE TABLE `users` (
   `email` varchar(255) NOT NULL,
   `username` varchar(30) DEFAULT NULL,
   `is_superadmin` tinyint(1) NOT NULL DEFAULT '0',
+  `role` enum('superadmin','guru','wali_kelas','siswa','orangtua') NOT NULL DEFAULT 'guru',
+  `id_kelas` int unsigned DEFAULT NULL,
   `password_hash` varchar(255) NOT NULL,
   `reset_hash` varchar(255) DEFAULT NULL,
   `reset_at` datetime DEFAULT NULL,
@@ -38,7 +40,9 @@ CREATE TABLE `users` (
   `deleted_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
-  UNIQUE KEY `username` (`username`)
+  UNIQUE KEY `username` (`username`),
+  KEY `users_id_kelas_foreign` (`id_kelas`),
+  CONSTRAINT `users_id_kelas_foreign` FOREIGN KEY (`id_kelas`) REFERENCES `tb_kelas` (`id_kelas`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 CREATE TABLE `auth_groups` (
@@ -222,6 +226,7 @@ CREATE TABLE `general_settings` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `logo` varchar(225) DEFAULT NULL,
   `school_name` varchar(225) DEFAULT 'SMK 1 Indonesia',
+  `scan_subtitle` varchar(225) DEFAULT 'Absensi QR Code',
   `school_year` varchar(225) DEFAULT '2024/2025',
   `batas_absen_masuk` time NOT NULL DEFAULT '07:20:00',
   `copyright` varchar(225) DEFAULT '© 2025 All rights reserved.',
@@ -274,14 +279,14 @@ INSERT INTO `tb_kelas` (`id_kelas`, `kelas`, `id_jurusan`) VALUES
 (12, 'XII', 4);
 
 -- Pengaturan umum default
-INSERT INTO `general_settings` (`id`, `school_name`, `school_year`, `batas_absen_masuk`, `copyright`) VALUES
-(1, 'SMK 1 Indonesia', '2024/2025', '07:20:00', '© 2025 All rights reserved.');
+INSERT INTO `general_settings` (`id`, `school_name`, `scan_subtitle`, `school_year`, `batas_absen_masuk`, `copyright`) VALUES
+(1, 'SMK 1 Indonesia', 'Absensi QR Code', '2024/2025', '07:20:00', '© 2025 All rights reserved.');
 
 -- Akun superadmin default
 -- username : superadmin
 -- password : superadmin  (ganti setelah login pertama kali!)
-INSERT INTO `users` (`id`, `email`, `username`, `is_superadmin`, `password_hash`, `active`) VALUES
-(1, 'adminsuper@gmail.com', 'superadmin', 1, '$2y$10$GvSqDAyxAiiDYZIkO.L1Ue9nagDqj2YYejQUb/fH.W3jLllL9y5yC', 1);
+INSERT INTO `users` (`id`, `email`, `username`, `is_superadmin`, `role`, `password_hash`, `active`) VALUES
+(1, 'adminsuper@gmail.com', 'superadmin', 1, 'superadmin', '$2y$10$GvSqDAyxAiiDYZIkO.L1Ue9nagDqj2YYejQUb/fH.W3jLllL9y5yC', 1);
 
 -- Tandai seluruh migrasi bawaan sebagai sudah dijalankan
 INSERT INTO `migrations` (`version`, `class`, `group`, `namespace`, `time`, `batch`) VALUES
@@ -292,6 +297,9 @@ INSERT INTO `migrations` (`version`, `class`, `group`, `namespace`, `time`, `bat
 ('2023-08-18-000004', '\\App\\Database\\Migrations\\AddSuperadmin', 'default', 'App', UNIX_TIMESTAMP(), 1),
 ('2024-07-24-083011', '\\App\\Database\\Migrations\\GeneralSettings', 'default', 'App', UNIX_TIMESTAMP(), 1),
 ('2026-08-11-133000', '\\App\\Database\\Migrations\\AddShalatColumns', 'default', 'App', UNIX_TIMESTAMP(), 1),
-('2026-08-11-140000', '\\App\\Database\\Migrations\\AddBatasAbsenMasuk', 'default', 'App', UNIX_TIMESTAMP(), 1);
+('2026-08-11-140000', '\\App\\Database\\Migrations\\AddBatasAbsenMasuk', 'default', 'App', UNIX_TIMESTAMP(), 1),
+('2026-08-12-090000', '\\App\\Database\\Migrations\\AddUserRole', 'default', 'App', UNIX_TIMESTAMP(), 1),
+('2026-08-13-070000', '\\App\\Database\\Migrations\\AddWaliKelasRole', 'default', 'App', UNIX_TIMESTAMP(), 1),
+('2026-08-13-120000', '\\App\\Database\\Migrations\\AddScanSubtitle', 'default', 'App', UNIX_TIMESTAMP(), 1);
 
 SET FOREIGN_KEY_CHECKS = 1;
