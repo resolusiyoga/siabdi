@@ -1,46 +1,49 @@
 <?= $this->extend('templates/laporan') ?>
 
 <?= $this->section('content') ?>
-<table>
+<table class="kop">
    <tr>
-      <td><img src="<?= getLogo(); ?>" width="100px" height="100px"></img></td>
-      <td width="100%">
-         <h2 align="center">DAFTAR HADIR SISWA</h2>
-         <h4 align="center"><?= $generalSettings->school_name; ?></h4>
-         <h4 align="center">TAHUN PELAJARAN <?= $generalSettings->school_year; ?></h4>
-      </td>
+      <td width="110"><img src="<?= getLogo(); ?>" width="90" height="90"></td>
       <td>
-         <div style="width:100px"></div>
+         <h2>DAFTAR HADIR SISWA</h2>
+         <h4><?= $generalSettings->school_name; ?></h4>
+         <h4>TAHUN PELAJARAN <?= $generalSettings->school_year; ?></h4>
       </td>
+      <td width="110"></td>
    </tr>
 </table>
-<span>Bulan : <?= $bulan; ?></span>
-<span style="position: absolute;right: 0;">Kelas : <?= labelKelas($kelas['kelas'], $kelas['jurusan']); ?></span>
-<table align="center" border="1">
+
+<table class="meta">
    <tr>
-      <td></td>
-      <td></td>
-      <th colspan="<?= count($tanggal); ?>">Hari/Tanggal</th>
+      <td>Bulan : <?= $bulan; ?></td>
+      <td class="kanan">Kelas : <?= labelKelas($kelas['kelas'], $kelas['jurusan']); ?></td>
    </tr>
-   <tr>
-      <td></td>
-      <td></td>
-      <?php foreach ($tanggal as $value) : ?>
-         <td align="center"><b><?= $value->toLocalizedString('E'); ?></b></td>
-      <?php endforeach; ?>
-      <td colspan="4" align="center">Total</td>
-   </tr>
-   <tr>
-      <th align="center">No</th>
-      <th width="1000px">Nama</th>
-      <?php foreach ($tanggal as $value) : ?>
-         <th align="center"><?= $value->format('d'); ?></th>
-      <?php endforeach; ?>
-      <th align="center" style="background-color:lightgreen;">H</th>
-      <th align="center" style="background-color:yellow;">S</th>
-      <th align="center" style="background-color:yellow;">I</th>
-      <th align="center" style="background-color:red;">A</th>
-   </tr>
+</table>
+
+<table class="absensi">
+   <thead>
+      <tr>
+         <th class="col-no" rowspan="3">No.</th>
+         <th class="col-nama" rowspan="3">Nama</th>
+         <th colspan="<?= count($tanggal); ?>">Hari/Tanggal</th>
+         <th colspan="4" rowspan="2">Total</th>
+      </tr>
+      <tr>
+         <?php foreach ($tanggal as $value) : ?>
+            <th class="col-hari"><?= $value->toLocalizedString('E'); ?></th>
+         <?php endforeach; ?>
+      </tr>
+      <tr>
+         <?php foreach ($tanggal as $value) : ?>
+            <th class="col-hari"><?= $value->format('d'); ?></th>
+         <?php endforeach; ?>
+         <th class="col-total st-h">H</th>
+         <th class="col-total st-s">S</th>
+         <th class="col-total st-i">I</th>
+         <th class="col-total st-a">A</th>
+      </tr>
+   </thead>
+   <tbody>
 
    <?php $i = 0; ?>
 
@@ -65,31 +68,23 @@
       }));
       ?>
       <tr>
-         <td align="center"><?= $i + 1; ?></td>
-         <td><?= $siswa['nama_siswa']; ?></td>
+         <td><?= $i + 1; ?></td>
+         <td class="nama"><?= $siswa['nama_siswa']; ?></td>
          <?php foreach ($listAbsen as $absen) : ?>
             <?= kehadiran($absen[$i]['id_kehadiran'] ?? ($absen['lewat'] ? 5 : 4)); ?>
          <?php endforeach; ?>
-         <td align="center">
-            <?= $jumlahHadir != 0 ? $jumlahHadir : '-'; ?>
-         </td>
-         <td align="center">
-            <?= $jumlahSakit != 0 ? $jumlahSakit : '-'; ?>
-         </td>
-         <td align="center">
-            <?= $jumlahIzin != 0 ? $jumlahIzin : '-'; ?>
-         </td>
-         <td align="center">
-            <?= $jumlahTidakHadir != 0 ? $jumlahTidakHadir : '-'; ?>
-         </td>
+         <td><?= $jumlahHadir != 0 ? $jumlahHadir : '-'; ?></td>
+         <td><?= $jumlahSakit != 0 ? $jumlahSakit : '-'; ?></td>
+         <td><?= $jumlahIzin != 0 ? $jumlahIzin : '-'; ?></td>
+         <td><?= $jumlahTidakHadir != 0 ? $jumlahTidakHadir : '-'; ?></td>
       </tr>
    <?php
       $i++;
    endforeach; ?>
-
+   </tbody>
 </table>
-<br></br>
-<table>
+
+<table class="ringkasan">
    <tr>
       <td>Jumlah siswa</td>
       <td>: <?= count($listSiswa); ?></td>
@@ -109,16 +104,16 @@ function kehadiran($kehadiran)
    $text = '';
    switch ($kehadiran) {
       case 1:
-         $text = "<td align='center' style='background-color:lightgreen;'>H</td>";
+         $text = "<td class='st-h'>H</td>";
          break;
       case 2:
-         $text = "<td align='center' style='background-color:yellow;'>S</td>";
+         $text = "<td class='st-s'>S</td>";
          break;
       case 3:
-         $text = "<td align='center' style='background-color:yellow;'>I</td>";
+         $text = "<td class='st-i'>I</td>";
          break;
       case 4:
-         $text = "<td align='center' style='background-color:red;'>A</td>";
+         $text = "<td class='st-a'>A</td>";
          break;
       case 5:
       default:
