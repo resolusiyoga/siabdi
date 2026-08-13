@@ -143,15 +143,31 @@ MANUAL = '''
               0 7px 10px -5px rgba(41, 63, 20, 0.4);
 }
 
-/* card-header-danger hanya dipakai sebagai header dekoratif (Dashboard &
-   Generate QR Code), bukan penanda error -> ikut palette.
-   btn-danger, alert-danger, dan text-danger sengaja tetap merah. */
+/* Seluruh card header memakai satu gradien yang sama - mengikuti header
+   Data Siswa & Data Absen - supaya judul halaman seragam.
+   Ini juga membuat card-header-danger (Dashboard & Generate QR Code) ikut
+   palette; btn-danger, alert-danger, dan text-danger tetap merah. */
+.card .card-header-primary .card-icon,
+.card .card-header-primary .card-text,
+.card .card-header-primary:not(.card-header-icon):not(.card-header-text),
+.card .card-header-info .card-icon,
+.card .card-header-info .card-text,
+.card .card-header-info:not(.card-header-icon):not(.card-header-text),
+.card .card-header-success .card-icon,
+.card .card-header-success .card-text,
+.card .card-header-success:not(.card-header-icon):not(.card-header-text),
+.card .card-header-warning .card-icon,
+.card .card-header-warning .card-text,
+.card .card-header-warning:not(.card-header-icon):not(.card-header-text),
 .card .card-header-danger .card-icon,
 .card .card-header-danger .card-text,
-.card .card-header-danger:not(.card-header-icon):not(.card-header-text) {
-  background: linear-gradient(60deg, #3EFF8B, #38A700);
+.card .card-header-danger:not(.card-header-icon):not(.card-header-text),
+.card .card-header-rose .card-icon,
+.card .card-header-rose .card-text,
+.card .card-header-rose:not(.card-header-icon):not(.card-header-text) {
+  background: linear-gradient(60deg, #38A700, #293F14);
   box-shadow: 0 4px 20px 0px rgba(0, 0, 0, 0.14),
-              0 7px 10px -5px rgba(56, 167, 0, 0.4);
+              0 7px 10px -5px rgba(56, 108, 11, 0.4);
 }
 '''
 
