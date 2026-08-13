@@ -72,7 +72,7 @@ $tema  = $kategoriAbsen[$aktif] ?? $kategoriAbsen['masuk'];
 <?= $this->endSection(); ?>
 
 <?= $this->section('pagescript') ?>
-<script src="<?= base_url('assets/js/plugins/zxing/zxing.min.js') ?>"></script>
+<script src="<?= assetUrl('assets/js/plugins/zxing/zxing.min.js') ?>"></script>
 <script>
    (function() {
       var COOLDOWN = 2500;

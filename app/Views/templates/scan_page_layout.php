@@ -8,7 +8,7 @@
    <meta name="theme-color" content="#293F14">
    <title><?= $title ?? 'Absensi QR Code'; ?></title>
 
-   <link href="<?= base_url('assets/fonts/fonts.css?v=1.0.0'); ?>" rel="stylesheet" />
+   <link href="<?= assetUrl('assets/fonts/fonts.css'); ?>" rel="stylesheet" />
    <link rel="apple-touch-icon" sizes="76x76" href="<?= base_url('assets/img/apple-icon.png'); ?>">
    <link rel="icon" type="image/png" href="<?= base_url('assets/img/favicon.png'); ?>">
 
@@ -513,7 +513,7 @@
       <?= $this->renderSection('content') ?>
    </main>
 
-   <script src="<?= base_url('assets/js/core/jquery-3.5.1.min.js') ?>"></script>
+   <script src="<?= assetUrl('assets/js/core/jquery-3.5.1.min.js') ?>"></script>
    <?= $this->renderSection('pagescript') ?>
 </body>
 

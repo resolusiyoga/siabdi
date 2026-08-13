@@ -208,6 +208,25 @@ if (!function_exists('removeSpecialCharacters')) {
 }
 
 /**
+ * Asset URL dengan cache busting otomatis.
+ *
+ * Versi diambil dari waktu modifikasi file, sehingga setiap perubahan
+ * CSS/JS langsung terbaca browser tanpa perlu hard refresh. Sebelumnya
+ * versi ditulis manual (?v=1.0.0) dan tidak pernah berubah, sehingga
+ * browser terus memakai salinan lama.
+ *
+ * @return string
+ */
+if (!function_exists('assetUrl')) {
+    function assetUrl(string $path)
+    {
+        $file = FCPATH . ltrim($path, '/');
+
+        return base_url($path . (is_file($file) ? '?v=' . filemtime($file) : ''));
+    }
+}
+
+/**
  * Get Logo
  *
  * @return string
