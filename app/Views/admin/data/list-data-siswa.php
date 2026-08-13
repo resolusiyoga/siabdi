@@ -25,7 +25,7 @@
                   <td><?= $value['nis']; ?></td>
                   <td><b><?= $value['nama_siswa']; ?></b></td>
                   <td><?= $value['jenis_kelamin']; ?></td>
-                  <td><?= ($value['kelas'] ?? '-') . (!empty($value['jurusan']) ? '.' . $value['jurusan'] : ''); ?></td>
+                  <td><?= labelKelas($value['kelas'] ?? null, $value['jurusan'] ?? null); ?></td>
                   <td><?= $value['no_hp']; ?></td>
                   <td>
                      <div class="d-flex justify-content-center">

@@ -19,7 +19,7 @@ $jam  = [];
 switch ($type) {
    case TipeUser::Siswa:
       $nama = $data['nama_siswa'];
-      $meta = 'NIS ' . esc($data['nis']) . ' &middot; ' . esc($data['kelas']) . '.' . esc($data['jurusan']);
+      $meta = 'NIS ' . esc($data['nis']) . ' &middot; ' . esc(labelKelas($data['kelas'], $data['jurusan']));
       $jam  = [
          'Masuk'  => $presensi['jam_masuk'] ?? null,
          'Dzuhur' => $presensi['jam_dzuhur'] ?? null,

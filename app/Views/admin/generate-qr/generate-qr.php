@@ -90,7 +90,7 @@
                         <option value="">--Pilih kelas--</option>
                         <?php foreach ($kelas as $value) : ?>
                           <option id="idKelas<?= $value['id_kelas']; ?>" value="<?= $value['id_kelas']; ?>">
-                            <?= $value['kelas'] . ' ' . $value['jurusan']; ?>
+                            <?= labelKelas($value['kelas'], $value['jurusan']); ?>
                           </option>
                         <?php endforeach; ?>
                       </select>

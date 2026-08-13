@@ -45,7 +45,7 @@
                             <td><?= $no; ?></td>
                             <td><?= $value['nis']; ?></td>
                             <td><b><?= $value['nama_siswa']; ?></b></td>
-                            <td><?= ($value['kelas'] ?? '-') . (!empty($value['jurusan']) ? '.' . $value['jurusan'] : ''); ?></td>
+                            <td><?= labelKelas($value['kelas'] ?? null, $value['jurusan'] ?? null); ?></td>
                             <td>
                                 <p class="p-2 w-100 btn btn-<?= $kehadiran['color']; ?> text-center">
                                     <b><?= $kehadiran['text']; ?></b>

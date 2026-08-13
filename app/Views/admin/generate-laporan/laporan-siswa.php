@@ -15,7 +15,7 @@
    </tr>
 </table>
 <span>Bulan : <?= $bulan; ?></span>
-<span style="position: absolute;right: 0;">Kelas : <?= "{$kelas['kelas']} {$kelas['jurusan']}"; ?></span>
+<span style="position: absolute;right: 0;">Kelas : <?= labelKelas($kelas['kelas'], $kelas['jurusan']); ?></span>
 <table align="center" border="1">
    <tr>
       <td></td>

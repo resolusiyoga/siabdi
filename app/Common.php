@@ -208,6 +208,35 @@ if (!function_exists('removeSpecialCharacters')) {
 }
 
 /**
+ * Label kelas standar: {Kelas}-{Jurusan}, mis. "X-BDP".
+ *
+ * Dipakai di seluruh aplikasi (tabel, dropdown, hasil scan, laporan)
+ * supaya penulisannya seragam.
+ *
+ * @param mixed $kelas
+ * @param mixed $jurusan
+ *
+ * @return string
+ */
+if (!function_exists('labelKelas')) {
+    function labelKelas($kelas, $jurusan = null, string $fallback = '-')
+    {
+        $kelas   = trim((string) ($kelas ?? ''));
+        $jurusan = trim((string) ($jurusan ?? ''));
+
+        if ($kelas === '' && $jurusan === '') {
+            return $fallback;
+        }
+
+        if ($kelas === '' || $jurusan === '') {
+            return $kelas !== '' ? $kelas : $jurusan;
+        }
+
+        return $kelas . '-' . $jurusan;
+    }
+}
+
+/**
  * Asset URL dengan cache busting otomatis.
  *
  * Versi diambil dari waktu modifikasi file, sehingga setiap perubahan

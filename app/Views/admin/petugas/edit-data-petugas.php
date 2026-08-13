@@ -83,7 +83,7 @@
                            <option value="">--Pilih kelas--</option>
                            <?php foreach ($kelas ?? [] as $value) : ?>
                               <option value="<?= $value['id_kelas']; ?>" <?= $selectedKelas == $value['id_kelas'] ? 'selected' : ''; ?>>
-                                 <?= $value['kelas'] . '.' . $value['jurusan']; ?>
+                                 <?= labelKelas($value['kelas'], $value['jurusan']); ?>
                               </option>
                            <?php endforeach; ?>
                         </select>

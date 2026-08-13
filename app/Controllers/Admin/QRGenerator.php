@@ -333,7 +333,7 @@ class QRGenerator extends BaseController
    {
       $kelas = (new KelasModel)->getKelas($idKelas);;
       if ($kelas) {
-         return url_title($kelas->kelas . ' ' . $kelas->jurusan, lowercase: true);
+         return url_title(labelKelas($kelas->kelas, $kelas->jurusan), lowercase: true);
       } else {
          return false;
       }
