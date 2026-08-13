@@ -134,6 +134,39 @@ MANUAL = '''
   color: #386C0B !important;
 }
 
+/* ------------------------------------------------------------------
+   Sidebar: latar hijau tua solid, tanpa foto
+   ------------------------------------------------------------------
+   Foto pegunungan bawaan template membuat kontras teks tidak merata
+   (sebagian item di atas area terang, sebagian gelap) dan tidak ada
+   kaitannya dengan identitas sekolah. */
+.sidebar[data-background-color="black"],
+.off-canvas-sidebar[data-background-color="black"] {
+  background-color: #293F14;
+}
+
+.sidebar .sidebar-background,
+.off-canvas-sidebar .sidebar-background {
+  display: none;
+}
+
+/* Item aktif memakai sorotan lembut + garis aksen, bukan blok penuh:
+   warna blok lama (#386C0B) hanya 1.83:1 terhadap latar baru sehingga
+   nyaris tak terlihat. Teks tetap putih (11.57:1). */
+.sidebar[data-color] .nav li.active > a,
+.sidebar .nav li.active > a,
+.off-canvas-sidebar .nav li.active > a {
+  background-color: rgba(255, 255, 255, .14);
+  box-shadow: inset 4px 0 0 0 #31D843;
+  color: #fff;
+}
+
+.sidebar .nav li > a:hover,
+.sidebar .nav li > a:focus,
+.off-canvas-sidebar .nav li > a:hover {
+  background-color: rgba(255, 255, 255, .08);
+}
+
 /* Sidebar section "QR" memakai data-color="danger" (merah bawaan).
    Diseragamkan ke palette agar seluruh sidebar konsisten hijau. */
 .sidebar[data-color="danger"] li.active > a,

@@ -20,11 +20,11 @@ switch ($context) {
       break;
 }
 ?>
-<div class="sidebar" data-color="<?= $sidebarColor; ?>" data-background-color="black" data-image="<?= base_url('assets/img/sidebar/sidebar-1.jpg'); ?>">
+<div class="sidebar" data-color="<?= $sidebarColor; ?>" data-background-color="black">
    <!--
-        Tip 1: You can change the color of the sidebar using: data-color="purple | azure | green | orange | danger"
-
-        Tip 2: you can also add an image using data-image tag
+        Latar sidebar diatur di theme-green.css (hijau tua solid, tanpa foto).
+        Atribut data-image sengaja dihapus: foto bawaan template membuat
+        kontras teks tidak merata. data-color hanya menandai konteks halaman.
     -->
    <div class="logo">
       <a class="simple-text logo-normal sidebar-brand" href="<?= base_url('admin/dashboard'); ?>">
