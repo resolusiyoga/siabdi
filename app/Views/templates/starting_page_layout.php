@@ -26,25 +26,6 @@
          transition: 0.33s, cubic-bezier(0.685, 0.0473, 0.346, 1);
       }
 
-      video#previewKamera {
-         width: 100%;
-         height: 400px;
-         margin: 0;
-      }
-
-      .previewParent {
-         width: auto;
-         height: auto;
-         margin: auto;
-         margin: auto;
-         border: 2px solid grey;
-      }
-
-      .unpreview {
-         background-color: aquamarine;
-         text-align: center;
-      }
-
       .form-select {
          min-width: 200px;
       }

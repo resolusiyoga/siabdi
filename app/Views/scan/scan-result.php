@@ -2,52 +2,24 @@
 
 use App\Libraries\enums\TipeUser;
 
-switch ($type) {
-   case TipeUser::Siswa:
+$valid = in_array($type, [TipeUser::Siswa, TipeUser::Guru], true);
 ?>
-      <h3 class="text-success">Absen <?= $waktu; ?> berhasil</h3>
-      <div class="row w-100">
-         <div class="col">
-            <p>Nama : <b><?= $data['nama_siswa']; ?></b></p>
-            <p>NIS : <b><?= $data['nis']; ?></b></p>
-            <p>Kelas : <b><?= $data['kelas']  . ' ' . $data['jurusan']; ?></b></p>
-         </div>
-         <div class="col">
-            <?= jam($presensi); ?>
-         </div>
+
+<?php if (!$valid) : ?>
+   <div class="result result--err">
+      <div class="result__head">
+         <i class="material-icons">close</i>
+         Tipe pengguna tidak valid
       </div>
-   <?php break;
-
-   case TipeUser::Guru:
-   ?>
-      <h3 class="text-success">Absen <?= $waktu; ?> berhasil</h3>
-      <div class="row w-100">
-         <div class="col">
-            <p>Nama : <b><?= $data['nama_guru']; ?></b></p>
-            <p>NUPTK : <b><?= $data['nuptk']; ?></b></p>
-            <p>No HP : <b><?= $data['no_hp']; ?></b></p>
-         </div>
-         <div class="col">
-            <?= jam($presensi); ?>
-         </div>
+   </div>
+<?php else : ?>
+   <div class="result result--ok">
+      <div class="result__head">
+         <i class="material-icons">check</i>
+         Absen <?= $waktu; ?> berhasil
       </div>
-   <?php break;
-
-   default:
-   ?>
-      <h3 class="text-danger">Tipe tidak valid</h3>
-   <?php
-      break;
-}
-
-function jam($presensi)
-{
-   ?>
-   <p>Jam masuk : <b class="text-info"><?= $presensi['jam_masuk'] ?? '-'; ?></b></p>
-   <p>Jam dzuhur : <b class="text-info"><?= $presensi['jam_dzuhur'] ?? '-'; ?></b></p>
-   <p>Jam ashar : <b class="text-info"><?= $presensi['jam_ashar'] ?? '-'; ?></b></p>
-   <p>Jam pulang : <b class="text-info"><?= $presensi['jam_keluar'] ?? '-'; ?></b></p>
-<?php
-}
-
-?>
+      <div class="result__body">
+         <?= $this->include('scan/_detail-presensi'); ?>
+      </div>
+   </div>
+<?php endif; ?>

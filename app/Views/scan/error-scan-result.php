@@ -1,53 +1,20 @@
-<h3 class="text-danger"><?= $msg; ?></h3>
-
 <?php
 
 use App\Libraries\enums\TipeUser;
 
-if (empty($type)) {
-   return;
-} else {
-   switch ($type) {
-      case TipeUser::Siswa: ?>
-         <div class="row w-100">
-            <div class="col">
-               <p>Nama : <b><?= $data['nama_siswa']; ?></b></p>
-               <p>NIS : <b><?= $data['nis']; ?></b></p>
-               <p>Kelas : <b><?= $data['kelas'] . ' ' . $data['jurusan']; ?></b></p>
-            </div>
-            <div class="col">
-               <?= jam($presensi ?? []); ?>
-            </div>
-         </div>
-      <?php break;
-
-      case TipeUser::Guru: ?>
-         <div class="row w-100">
-            <div class="col">
-               <p>Nama : <b><?= $data['nama_guru']; ?></b></p>
-               <p>NUPTK : <b><?= $data['nuptk']; ?></b></p>
-               <p>No HP : <b><?= $data['no_hp']; ?></b></p>
-            </div>
-            <div class="col">
-               <?= jam($presensi ?? []); ?>
-            </div>
-         </div>
-      <?php break;
-
-      default: ?>
-         <p class="text-danger">Tipe tidak valid</p>
-   <?php break;
-   }
-}
-
-function jam($presensi)
-{
-   ?>
-   <p>Jam masuk : <b class="text-info"><?= $presensi['jam_masuk'] ?? '-'; ?></b></p>
-   <p>Jam dzuhur : <b class="text-info"><?= $presensi['jam_dzuhur'] ?? '-'; ?></b></p>
-   <p>Jam ashar : <b class="text-info"><?= $presensi['jam_ashar'] ?? '-'; ?></b></p>
-   <p>Jam pulang : <b class="text-info"><?= $presensi['jam_keluar'] ?? '-'; ?></b></p>
-<?php
-}
-
+$type  = $type ?? null;
+$valid = in_array($type, [TipeUser::Siswa, TipeUser::Guru], true);
 ?>
+
+<div class="result result--err">
+   <div class="result__head">
+      <i class="material-icons">close</i>
+      <?= esc($msg); ?>
+   </div>
+
+   <?php if ($valid) : ?>
+      <div class="result__body">
+         <?= $this->include('scan/_detail-presensi'); ?>
+      </div>
+   <?php endif; ?>
+</div>

@@ -1,209 +1,209 @@
- <?= $this->extend('templates/starting_page_layout'); ?>
+<?= $this->extend('templates/scan_page_layout'); ?>
 
- <?= $this->section('navaction') ?>
- <a href="<?= base_url('/admin'); ?> " class="btn btn-primary pull-right pl-3">
-    <i class="material-icons mr-2">dashboard</i>
-    Dashboard
- </a>
- <?= $this->endSection() ?>
+<?php
+/**
+ * Warna tiap mode diambil dari palette hijau.
+ * 'on' = warna teks di atas 'accent', dipilih agar kontras tetap aman dibaca.
+ */
+$kategoriAbsen = [
+   'masuk'  => ['label' => 'Masuk',  'accent' => '#386C0B', 'on' => '#ffffff'],
+   'dzuhur' => ['label' => 'Dzuhur', 'accent' => '#31D843', 'on' => '#293F14'],
+   'ashar'  => ['label' => 'Ashar',  'accent' => '#3EFF8B', 'on' => '#293F14'],
+   'pulang' => ['label' => 'Pulang', 'accent' => '#293F14', 'on' => '#ffffff'],
+];
 
- <?= $this->section('content'); ?>
- <?php
-   $kategoriAbsen = [
-      'masuk' => ['label' => 'Masuk', 'color' => 'success'],
-      'dzuhur' => ['label' => 'Dzuhur', 'color' => 'info'],
-      'ashar' => ['label' => 'Ashar', 'color' => 'primary'],
-      'pulang' => ['label' => 'Pulang', 'color' => 'warning'],
-   ];
-   ?>
- <div class="main-panel">
-    <div class="content">
-       <div class="container-fluid">
-          <div class="row">
-             <div class="col-lg-6 col-xl-12">
-                <div class="card">
-                   <div class="col-10 mx-auto card-header card-header-primary">
-                      <div class="row">
-                         <div class="col">
-                            <h4 class="card-title"><b>Absen <?= $waktu; ?></b></h4>
-                            <p class="card-category">Silahkan tunjukkan QR Code anda</p>
-                         </div>
-                         <div class="col-md-auto">
-                            <?php foreach ($kategoriAbsen as $key => $item) : ?>
-                               <?php if (strtolower($waktu) == $key) continue; ?>
-                               <a href="<?= base_url("scan/$key"); ?>" class="btn btn-<?= $item['color']; ?>">
-                                  Absen <?= $item['label']; ?>
-                               </a>
-                            <?php endforeach; ?>
-                         </div>
-                      </div>
-                   </div>
-                   <div class="card-body my-auto px-5">
-                      <h4 class="d-inline">Pilih kamera</h4>
-                      <br>
-                      <select id="pilihKamera" class="custom-select w-100" aria-label="Default select example" style="height: 35px;">
-                         <option selected>Pilih Kamera</option>
-                      </select>
+$aktif = strtolower($waktu);
+$tema  = $kategoriAbsen[$aktif] ?? $kategoriAbsen['masuk'];
+?>
 
-                      <br><br>
+<?= $this->section('pagestyle') ?>
+<style>
+   :root {
+      --accent: <?= $tema['accent']; ?>;
+      --on-accent: <?= $tema['on']; ?>;
+   }
+</style>
+<?= $this->endSection() ?>
 
-                      <div class="row">
-                         <div class="col-sm-12 mx-auto">
-                            <div class="previewParent">
-                               <div class="text-center">
-                                  <h4 class="d-none w-100" id="searching"><b>Mencari...</b></h4>
-                               </div>
-                               <video id="previewKamera"></video>
-                            </div>
-                         </div>
-                      </div>
-                      <div id="hasilScan"></div>
-                      <br>
-                   </div>
-                </div>
-             </div>
-             <div class="col-lg-3 col-xl-12">
-                <div class="card">
-                   <div class="card-body">
-                      <h3 class="mt-2"><b>Tips</b></h3>
-                      <ul class="pl-3">
-                         <li>Tunjukkan qr code sampai terlihat jelas di kamera</li>
-                         <li>Posisikan qr code tidak terlalu jauh maupun terlalu dekat</li>
-                      </ul>
-                   </div>
-                </div>
-             </div>
-             <div class="col-lg-3 col-xl-12">
-                <div class="card">
-                   <div class="card-body">
-                      <h3 class="mt-2"><b>Penggunaan</b></h3>
-                      <ul class="pl-3">
-                         <li>Jika berhasil scan maka akan muncul data siswa dibawah preview kamera</li>
-                         <li>Klik tombol <b><span class="text-success">Absen masuk</span> / <span class="text-warning">Absen pulang</span></b> untuk mengubah waktu absensi</li>
-                         <li>Untuk melihat data absensi, klik tombol <span class="text-primary"><i class="material-icons" style="font-size: 16px;">dashboard</i> Dashboard Petugas</span></li>
-                         <li>Untuk mengakses halaman petugas anda harus login terlebih dahulu</li>
-                      </ul>
-                   </div>
-                </div>
-             </div>
-          </div>
-       </div>
-    </div>
- </div>
+<?= $this->section('content'); ?>
 
- <script type="text/javascript" src="<?= base_url('assets/js/plugins/zxing/zxing.min.js') ?>"></script>
- <script src="<?= base_url('assets/js/core/jquery-3.5.1.min.js') ?>"></script>
- <script type="text/javascript">
-    let selectedDeviceId = null;
-    let audio = new Audio("<?= base_url('assets/audio/beep.mp3'); ?>");
-    const codeReader = new ZXing.BrowserMultiFormatReader();
-    const sourceSelect = $('#pilihKamera');
+<nav class="modes">
+   <?php foreach ($kategoriAbsen as $key => $item) : ?>
+      <a href="<?= base_url("scan/$key"); ?>"
+         class="mode <?= $aktif === $key ? 'is-active' : ''; ?>"
+         <?= $aktif === $key ? 'aria-current="page"' : ''; ?>>
+         <?= $item['label']; ?>
+      </a>
+   <?php endforeach; ?>
+</nav>
 
-    $(document).on('change', '#pilihKamera', function() {
-       selectedDeviceId = $(this).val();
-       if (codeReader) {
-          codeReader.reset();
-          initScanner();
-       }
-    })
+<section class="scanner" id="scanner">
+   <video id="previewKamera" playsinline muted></video>
 
-    const previewParent = document.getElementById('previewParent');
-    const preview = document.getElementById('previewKamera');
+   <div class="frame">
+      <div class="frame__box">
+         <span></span><span></span><span></span><span></span>
+         <div class="frame__line"></div>
+      </div>
+   </div>
 
-    function initScanner() {
-       codeReader.listVideoInputDevices()
-          .then(videoInputDevices => {
-             videoInputDevices.forEach(device =>
-                console.log(`${device.label}, ${device.deviceId}`)
-             );
+   <div class="scanner__cam is-hidden" id="wrapKamera">
+      <select id="pilihKamera" aria-label="Pilih kamera"></select>
+   </div>
 
-             if (videoInputDevices.length < 1) {
-                alert("Camera not found!");
-                return;
-             }
+   <div class="scanner__hint" id="scanHint">Arahkan QR Code ke dalam bingkai</div>
+</section>
 
-             if (selectedDeviceId == null) {
-                if (videoInputDevices.length <= 1) {
-                   selectedDeviceId = videoInputDevices[0].deviceId
-                } else {
-                   selectedDeviceId = videoInputDevices[1].deviceId
-                }
-             }
+<div id="hasilScan"></div>
 
-             if (videoInputDevices.length >= 1) {
-                sourceSelect.html('');
-                videoInputDevices.forEach((element) => {
-                   const sourceOption = document.createElement('option')
-                   sourceOption.text = element.label
-                   sourceOption.value = element.deviceId
-                   if (element.deviceId == selectedDeviceId) {
-                      sourceOption.selected = 'selected';
-                   }
-                   sourceSelect.append(sourceOption)
-                })
-             }
+<details class="guide">
+   <summary>
+      Panduan penggunaan
+      <i class="material-icons">expand_more</i>
+   </summary>
+   <ul>
+      <li>Izinkan akses kamera saat diminta browser.</li>
+      <li>Posisikan QR Code di dalam bingkai, jangan terlalu jauh atau dekat.</li>
+      <li>Pilih jenis absen (Masuk / Dzuhur / Ashar / Pulang) di bagian atas.</li>
+      <li>Hasil absen otomatis muncul di bawah kamera setelah QR terbaca.</li>
+   </ul>
+</details>
 
-             $('#previewParent').removeClass('unpreview');
-             $('#previewKamera').removeClass('d-none');
-             $('#searching').addClass('d-none');
+<?= $this->endSection(); ?>
 
-             codeReader.decodeOnceFromVideoDevice(selectedDeviceId, 'previewKamera')
-                .then(result => {
-                   console.log(result.text);
-                   cekData(result.text);
+<?= $this->section('pagescript') ?>
+<script src="<?= base_url('assets/js/plugins/zxing/zxing.min.js') ?>"></script>
+<script>
+   (function() {
+      var COOLDOWN = 2500;
+      var HINT_IDLE = 'Arahkan QR Code ke dalam bingkai';
 
-                   $('#previewKamera').addClass('d-none');
-                   $('#previewParent').addClass('unpreview');
-                   $('#searching').removeClass('d-none');
+      var codeReader = new ZXing.BrowserMultiFormatReader();
+      var audio = new Audio("<?= base_url('assets/audio/beep.mp3'); ?>");
+      var scanner = document.getElementById('scanner');
+      var hint = document.getElementById('scanHint');
+      var wrapKamera = document.getElementById('wrapKamera');
+      var selectKamera = document.getElementById('pilihKamera');
 
-                   if (codeReader) {
-                      codeReader.reset();
+      var selectedDeviceId = null;
+      var busy = false;
 
-                      // delay 2,5 detik setelah berhasil meng-scan
-                      setTimeout(() => {
-                         initScanner();
-                      }, 2500);
-                   }
-                })
-                .catch(err => console.error(err));
+      function setHint(text) {
+         hint.textContent = text;
+      }
 
-          })
-          .catch(err => console.error(err));
-    }
+      function setBusy(state) {
+         busy = state;
+         scanner.classList.toggle('is-busy', state);
+      }
 
-    if (navigator.mediaDevices) {
-       initScanner();
-    } else {
-       alert('Cannot access camera.');
-    }
+      // Utamakan kamera belakang di perangkat mobile
+      function pilihKameraDefault(devices) {
+         var belakang = devices.filter(function(d) {
+            return /back|rear|environment|belakang/i.test(d.label || '');
+         });
+         return (belakang[0] || devices[devices.length - 1]).deviceId;
+      }
 
-    async function cekData(code) {
-       jQuery.ajax({
-          url: "<?= base_url('scan/cek'); ?>",
-          type: 'post',
-          data: {
-             'unique_code': code,
-             'waktu': '<?= strtolower($waktu); ?>'
-          },
-          success: function(response, status, xhr) {
-             audio.play();
-             console.log(response);
-             $('#hasilScan').html(response);
+      function isiDaftarKamera(devices) {
+         selectKamera.innerHTML = '';
+         devices.forEach(function(device, i) {
+            var opt = document.createElement('option');
+            opt.value = device.deviceId;
+            opt.text = device.label || 'Kamera ' + (i + 1);
+            opt.selected = device.deviceId === selectedDeviceId;
+            selectKamera.appendChild(opt);
+         });
+         wrapKamera.classList.toggle('is-hidden', devices.length < 2);
+      }
 
-             $('html, body').animate({
-                scrollTop: $("#hasilScan").offset().top
-             }, 500);
-          },
-          error: function(xhr, status, thrown) {
-             console.log(thrown);
-             $('#hasilScan').html(thrown);
-          }
-       });
-    }
+      function mulaiScan() {
+         codeReader.decodeFromVideoDevice(selectedDeviceId, 'previewKamera', function(result) {
+            if (!result || busy) return;
+            prosesKode(result.text);
+         });
+      }
 
-    function clearData() {
-       $('#hasilScan').html('');
-    }
- </script>
+      // Gulirkan seperlunya saja supaya kamera tetap terlihat
+      function tampilkanHasil() {
+         var el = $('#hasilScan');
+         if (!el.children().length) return;
 
- <?= $this->endSection(); ?>
+         var atas = el.offset().top;
+         var bawah = atas + el.outerHeight();
+         var layar = $(window).height();
+         var posisi = $(window).scrollTop();
+
+         if (bawah <= posisi + layar) return;
+
+         $('html, body').animate({
+            scrollTop: Math.min(atas - 16, bawah - layar + 16)
+         }, 350);
+      }
+
+      function prosesKode(kode) {
+         setBusy(true);
+         setHint('Memproses...');
+
+         jQuery.ajax({
+            url: "<?= base_url('scan/cek'); ?>",
+            type: 'post',
+            data: {
+               'unique_code': kode,
+               'waktu': '<?= strtolower($waktu); ?>'
+            },
+            success: function(response) {
+               audio.play().catch(function() {});
+               $('#hasilScan').html(response);
+               tampilkanHasil();
+            },
+            error: function(xhr, status, thrown) {
+               console.error(thrown);
+               $('#hasilScan').html(
+                  '<div class="result result--err">' +
+                  '<div class="result__head"><i class="material-icons">close</i>Gagal terhubung ke server</div>' +
+                  '</div>'
+               );
+            },
+            complete: function() {
+               setTimeout(function() {
+                  setBusy(false);
+                  setHint(HINT_IDLE);
+               }, COOLDOWN);
+            }
+         });
+      }
+
+      function gagalKamera(pesan) {
+         setHint(pesan);
+         scanner.classList.add('is-busy');
+      }
+
+      selectKamera.addEventListener('change', function() {
+         selectedDeviceId = this.value;
+         codeReader.reset();
+         mulaiScan();
+      });
+
+      if (!navigator.mediaDevices) {
+         gagalKamera('Kamera tidak didukung browser ini');
+         return;
+      }
+
+      codeReader.listVideoInputDevices()
+         .then(function(devices) {
+            if (!devices.length) {
+               gagalKamera('Kamera tidak ditemukan');
+               return;
+            }
+            selectedDeviceId = pilihKameraDefault(devices);
+            isiDaftarKamera(devices);
+            mulaiScan();
+         })
+         .catch(function(err) {
+            console.error(err);
+            gagalKamera('Tidak dapat mengakses kamera');
+         });
+   })();
+</script>
+<?= $this->endSection() ?>
