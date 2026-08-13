@@ -192,6 +192,13 @@
          color: var(--text);
       }
 
+      /* Placeholder sengaja dibuat lembut (2.71:1) - hanya petunjuk,
+         label di atas field yang jadi penanda utama. */
+      .control input::placeholder {
+         color: #8a9880;
+         opacity: 1;
+      }
+
       .control--error {
          border-color: var(--danger);
       }

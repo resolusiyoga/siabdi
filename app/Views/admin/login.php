@@ -3,7 +3,9 @@
 <?= $this->section('content'); ?>
 <?php
 // Myth\Auth menerima email maupun username, jadi label mengikuti konfigurasi
-$labelLogin = $config->validFields === ['email'] ? 'Email' : 'Email atau Username';
+$emailSaja       = $config->validFields === ['email'];
+$labelLogin      = $emailSaja ? 'Email' : 'Email atau Username';
+$placeholderLogin = $emailSaja ? 'Masukkan email' : 'Masukkan email atau username';
 ?>
 <div class="card">
    <div class="card__head"><?= esc(generalSetting('scan_subtitle', 'Absensi QR Code')); ?></div>
@@ -37,6 +39,7 @@ $labelLogin = $config->validFields === ['email'] ? 'Email' : 'Email atau Usernam
             <div class="control <?= session('errors.login') ? 'control--error' : ''; ?>">
                <i class="material-icons">mail</i>
                <input type="text" id="login" name="login" value="<?= old('login'); ?>"
+                  placeholder="<?= $placeholderLogin; ?>"
                   autocomplete="username" autofocus required>
             </div>
             <?php if (session('errors.login')) : ?>
@@ -48,7 +51,9 @@ $labelLogin = $config->validFields === ['email'] ? 'Email' : 'Email atau Usernam
             <label class="field__label" for="password">Kata Sandi</label>
             <div class="control <?= session('errors.password') ? 'control--error' : ''; ?>">
                <i class="material-icons">lock</i>
-               <input type="password" id="password" name="password" autocomplete="current-password" required>
+               <input type="password" id="password" name="password"
+                  placeholder="Masukkan kata sandi"
+                  autocomplete="current-password" required>
                <button type="button" class="toggle-pass" id="togglePass"
                   aria-label="Tampilkan kata sandi">
                   <i class="material-icons" id="togglePassIcon">visibility</i>
