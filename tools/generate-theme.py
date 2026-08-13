@@ -164,15 +164,15 @@ MANUAL = '''
   /* Sidebar lebarnya tetap 260px, jadi gambar setinggi 260*1070/1470 = 189px.
      Tinggi elemen disamakan supaya tidak ada tepi gambar di dalam kotak yang
      menyisakan garis batas; gradasi lalu memudarkan gambar dari tepi atasnya.
-     Gradasi pendek (solid s/d 65%) dipilih agar ilustrasi & jam 07:00 terbaca,
+     Gradasi pendek (solid s/d 56%) dipilih agar ilustrasi & jam 07:00 terbaca,
      sambil menjaga tepi atasnya tetap menyatu dengan latar. */
   height: 189px;
   background: url('../img/login.png') no-repeat center bottom / 100% auto;
   opacity: .20;
   pointer-events: none;
   z-index: 0;
-  -webkit-mask-image: linear-gradient(to top, #000 0%, #000 65%, transparent 100%);
-  mask-image: linear-gradient(to top, #000 0%, #000 65%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to top, #000 0%, #000 56%, transparent 100%);
+  mask-image: linear-gradient(to top, #000 0%, #000 56%, transparent 100%);
 }
 
 /* pastikan isi sidebar berada di atas watermark */
