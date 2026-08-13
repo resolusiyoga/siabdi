@@ -50,11 +50,15 @@ class DataSiswa extends BaseController
 
    public function index()
    {
+      $kelasWali = currentUserRole() === 'wali_kelas' ? currentUserKelas() : null;
+
       $data = [
          'title' => 'Data Siswa',
          'ctx' => 'siswa',
          'kelas' => $this->kelasModel->getDataKelas(),
-         'jurusan' => $this->jurusanModel->getDataJurusan()
+         'jurusan' => $this->jurusanModel->getDataJurusan(),
+         'defaultKelas' => $kelasWali['kelas'] ?? null,
+         'defaultJurusan' => $kelasWali['jurusan'] ?? null
       ];
 
       return view('admin/data/data-siswa', $data);
@@ -77,6 +81,11 @@ class DataSiswa extends BaseController
 
    public function formTambahSiswa()
    {
+      if (!isSuperadmin()) {
+         session()->setFlashdata(['msg' => 'Aksi ini khusus untuk superadmin', 'error' => true]);
+         return redirect()->to('/admin/siswa');
+      }
+
       $kelas = $this->kelasModel->getDataKelas();
 
       $data = [
@@ -90,6 +99,11 @@ class DataSiswa extends BaseController
 
    public function saveSiswa()
    {
+      if (!isSuperadmin()) {
+         session()->setFlashdata(['msg' => 'Aksi ini khusus untuk superadmin', 'error' => true]);
+         return redirect()->to('/admin/siswa');
+      }
+
       // validasi
       if (!$this->validate($this->siswaValidationRules)) {
          $kelas = $this->kelasModel->getDataKelas();
@@ -130,6 +144,11 @@ class DataSiswa extends BaseController
 
    public function formEditSiswa($id)
    {
+      if (!isSuperadmin()) {
+         session()->setFlashdata(['msg' => 'Aksi ini khusus untuk superadmin', 'error' => true]);
+         return redirect()->to('/admin/siswa');
+      }
+
       $siswa = $this->siswaModel->getSiswaById($id);
       $kelas = $this->kelasModel->getDataKelas();
 
@@ -149,6 +168,11 @@ class DataSiswa extends BaseController
 
    public function updateSiswa()
    {
+      if (!isSuperadmin()) {
+         session()->setFlashdata(['msg' => 'Aksi ini khusus untuk superadmin', 'error' => true]);
+         return redirect()->to('/admin/siswa');
+      }
+
       $idSiswa = $this->request->getVar('id');
 
       $siswaLama = $this->siswaModel->getSiswaById($idSiswa);
@@ -200,6 +224,11 @@ class DataSiswa extends BaseController
 
    public function delete($id)
    {
+      if (!isSuperadmin()) {
+         session()->setFlashdata(['msg' => 'Aksi ini khusus untuk superadmin', 'error' => true]);
+         return redirect()->to('/admin/siswa');
+      }
+
       $result = $this->siswaModel->delete($id);
 
       if ($result) {
@@ -222,6 +251,10 @@ class DataSiswa extends BaseController
     */
    public function deleteSelectedSiswa()
    {
+      if (!isSuperadmin()) {
+         exit();
+      }
+
       $siswaIds = inputPost('siswa_ids');
       $this->siswaModel->deleteMultiSelected($siswaIds);
    }
@@ -237,6 +270,11 @@ class DataSiswa extends BaseController
     */
    public function bulkPostSiswa()
    {
+      if (!isSuperadmin()) {
+         session()->setFlashdata(['msg' => 'Aksi ini khusus untuk superadmin', 'error' => true]);
+         return redirect()->to('/admin/siswa');
+      }
+
       $data['title'] = 'Import Siswa';
       $data['ctx'] = 'siswa';
       $data['kelas'] = $this->kelasModel->getDataKelas();
@@ -249,6 +287,11 @@ class DataSiswa extends BaseController
     */
    public function generateCSVObjectPost()
    {
+      if (!isSuperadmin()) {
+         echo json_encode(['result' => 0]);
+         exit();
+      }
+
       $uploadModel = new UploadModel();
       //delete old txt files
       $files = glob(FCPATH . 'uploads/tmp/*.txt');
@@ -278,6 +321,11 @@ class DataSiswa extends BaseController
     */
    public function importCSVItemPost()
    {
+      if (!isSuperadmin()) {
+         echo json_encode(['result' => 0]);
+         exit();
+      }
+
       $txtFileName = inputPost('txtFileName');
       $index = inputPost('index');
       $siswa = $this->siswaModel->importCSVItem($txtFileName, $index);

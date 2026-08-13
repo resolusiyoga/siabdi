@@ -17,7 +17,7 @@
                               <span class="nav-tabs-title">Kelas:</span>
                               <ul class="nav nav-tabs" data-tabs="tabs">
                                  <li class="nav-item">
-                                    <a class="nav-link active" onclick="kelas = null; trig()" href="#" data-toggle="tab">
+                                    <a class="nav-link <?= empty($defaultKelas) ? 'active' : ''; ?>" onclick="kelas = null; trig()" href="#" data-toggle="tab">
                                        <i class="material-icons">check</i> Semua
                                        <div class="ripple-container"></div>
                                     </a>
@@ -27,7 +27,7 @@
                                  foreach ($kelas as $value) : ?>
                                     <?php if (!in_array($value['kelas'], $tempKelas)) : ?>
                                        <li class="nav-item">
-                                          <a class="nav-link" onclick="kelas = '<?= $value['kelas']; ?>'; trig()" href="#" data-toggle="tab">
+                                          <a class="nav-link <?= $defaultKelas === $value['kelas'] ? 'active' : ''; ?>" onclick="kelas = '<?= $value['kelas']; ?>'; trig()" href="#" data-toggle="tab">
                                              <i class="material-icons">school</i> <?= $value['kelas']; ?>
                                              <div class="ripple-container"></div>
                                           </a>
@@ -43,14 +43,14 @@
                               <span class="nav-tabs-title">Lokal:</span>
                               <ul class="nav nav-tabs" data-tabs="tabs">
                                  <li class="nav-item">
-                                    <a class="nav-link active" onclick="jurusan = null; trig()" href="#" data-toggle="tab">
+                                    <a class="nav-link <?= empty($defaultJurusan) ? 'active' : ''; ?>" onclick="jurusan = null; trig()" href="#" data-toggle="tab">
                                        <i class="material-icons">check</i> Semua
                                        <div class="ripple-container"></div>
                                     </a>
                                  </li>
                                  <?php foreach ($jurusan as $value) : ?>
                                     <li class="nav-item">
-                                       <a class="nav-link" onclick="jurusan = '<?= $value['jurusan']; ?>'; trig();" href="#" data-toggle="tab">
+                                       <a class="nav-link <?= $defaultJurusan === $value['jurusan'] ? 'active' : ''; ?>" onclick="jurusan = '<?= $value['jurusan']; ?>'; trig();" href="#" data-toggle="tab">
                                           <i class="material-icons">bookmark</i> <?= $value['jurusan']; ?>
                                           <div class="ripple-container"></div>
                                        </a>
@@ -105,8 +105,8 @@
    </div>
 </div>
 <script>
-   var kelas = null;
-   var jurusan = null;
+   var kelas = <?= !empty($defaultKelas) ? json_encode($defaultKelas) : 'null'; ?>;
+   var jurusan = <?= !empty($defaultJurusan) ? json_encode($defaultJurusan) : 'null'; ?>;
 
    getSiswa();
 

@@ -25,14 +25,16 @@
                                  <p class="card-category">Angkatan <?= $generalSettings->school_year; ?></p>
                               </div>
                               <div class="ml-md-auto col-auto row">
-                                 <div class="col-12 col-sm-auto nav nav-tabs">
-                                    <div class="nav-item">
-                                       <a class="nav-link" id="tabBtn" onclick="removeHover()" href="<?= base_url('admin/guru/create'); ?>">
-                                          <i class="material-icons">add</i> Tambah data guru
-                                          <div class="ripple-container"></div>
-                                       </a>
+                                 <?php if (isSuperadmin()) : ?>
+                                    <div class="col-12 col-sm-auto nav nav-tabs">
+                                       <div class="nav-item">
+                                          <a class="nav-link" id="tabBtn" onclick="removeHover()" href="<?= base_url('admin/guru/create'); ?>">
+                                             <i class="material-icons">add</i> Tambah data guru
+                                             <div class="ripple-container"></div>
+                                          </a>
+                                       </div>
                                     </div>
-                                 </div>
+                                 <?php endif; ?>
                                  <div class="col-12 col-sm-auto nav nav-tabs">
                                     <div class="nav-item">
                                        <a class="nav-link" id="refreshBtn" onclick="getDataGuru()" href="#" data-toggle="tab">

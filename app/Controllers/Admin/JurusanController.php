@@ -57,6 +57,11 @@ class JurusanController extends BaseController
      */
     public function tambahJurusan()
     {
+        if (!isSuperadmin()) {
+            $this->session->setFlashdata('error', 'Aksi ini khusus untuk superadmin');
+            return redirect()->to('admin/kelas');
+        }
+
         $data = [
             'ctx' => 'kelas',
             'title' => 'Tambah Data Jurusan',
@@ -71,6 +76,11 @@ class JurusanController extends BaseController
      */
     public function tambahJurusanPost()
     {
+        if (!isSuperadmin()) {
+            $this->session->setFlashdata('error', 'Aksi ini khusus untuk superadmin');
+            return redirect()->to('admin/kelas');
+        }
+
         $val = \Config\Services::validation();
         $val->setRule('jurusan', 'Jurusan', 'required|max_length[32]|is_unique[tb_jurusan.jurusan]');
 
@@ -97,6 +107,11 @@ class JurusanController extends BaseController
      */
     public function editJurusan($id)
     {
+        if (!isSuperadmin()) {
+            $this->session->setFlashdata('error', 'Aksi ini khusus untuk superadmin');
+            return redirect()->to('admin/kelas');
+        }
+
         $data['title'] = 'Edit Jurusan';
         $data['ctx'] = 'kelas';
         $data['jurusan'] = $this->jurusanModel->getJurusan($id);
@@ -114,6 +129,11 @@ class JurusanController extends BaseController
      */
     public function editJurusanPost()
     {
+        if (!isSuperadmin()) {
+            $this->session->setFlashdata('error', 'Aksi ini khusus untuk superadmin');
+            return redirect()->to('admin/kelas');
+        }
+
         $val = \Config\Services::validation();
         $val->setRule('jurusan', 'Jurusan', 'required|max_length[32]|is_unique[tb_jurusan.jurusan]');
         if (!$this->validate(getValRules($val))) {
@@ -138,6 +158,11 @@ class JurusanController extends BaseController
      */
     public function deleteJurusanPost($id = null)
     {
+        if (!isSuperadmin()) {
+            $this->session->setFlashdata('error', 'Aksi ini khusus untuk superadmin');
+            exit();
+        }
+
         $id = inputPost('id');
         $jurusan = $this->jurusanModel->getJurusan($id);
         if (!empty($jurusan)) {

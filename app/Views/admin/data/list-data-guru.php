@@ -22,16 +22,18 @@
                   <td><?= $value['alamat']; ?></td>
                   <td>
                      <div class="d-flex justify-content-center">
-                        <a title="Edit" href="<?= base_url('admin/guru/edit/' . $value['id_guru']); ?>" class="btn btn-success p-2" id="<?= $value['nuptk']; ?>">
-                           <i class="material-icons">edit</i>
-                        </a>
-                        <form action="<?= base_url('admin/guru/delete/' . $value['id_guru']); ?>" method="post" class="d-inline">
-                           <?= csrf_field(); ?>
-                           <input type="hidden" name="_method" value="DELETE">
-                           <button title="Delete" onclick="return confirm('Konfirmasi untuk menghapus data');" type="submit" class="btn btn-danger p-2" id="<?= $value['nuptk']; ?>">
-                              <i class="material-icons">delete_forever</i>
-                           </button>
-                        </form>
+                        <?php if (isSuperadmin()) : ?>
+                           <a title="Edit" href="<?= base_url('admin/guru/edit/' . $value['id_guru']); ?>" class="btn btn-success p-2" id="<?= $value['nuptk']; ?>">
+                              <i class="material-icons">edit</i>
+                           </a>
+                           <form action="<?= base_url('admin/guru/delete/' . $value['id_guru']); ?>" method="post" class="d-inline">
+                              <?= csrf_field(); ?>
+                              <input type="hidden" name="_method" value="DELETE">
+                              <button title="Delete" onclick="return confirm('Konfirmasi untuk menghapus data');" type="submit" class="btn btn-danger p-2" id="<?= $value['nuptk']; ?>">
+                                 <i class="material-icons">delete_forever</i>
+                              </button>
+                           </form>
+                        <?php endif; ?>
                         <a title="Download QR Code" href="<?= base_url('admin/qr/guru/' . $value['id_guru'] . '/download'); ?>" class="btn btn-info p-2">
                            <i class="material-icons">qr_code</i>
                         </a>

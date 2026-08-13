@@ -14,13 +14,15 @@
                   </div>
                </div>
             <?php endif; ?>
-            <a class="btn btn-primary ml-3 pl-3 py-3" href="<?= base_url('admin/siswa/create'); ?>">
-               <i class="material-icons mr-2">add</i> Tambah data siswa
-            </a>
-            <a class="btn btn-primary ml-3 pl-3 py-3" href="<?= base_url('admin/siswa/bulk'); ?>">
-               <i class="material-icons mr-2">add</i> Import CSV
-            </a>
-            <button class="btn btn-danger ml-3 pl-3 py-3 btn-table-delete" onclick="deleteSelectedSiswa('Data yang sudah dihapus tidak bisa kembalikan');"><i class="material-icons mr-2">delete_forever</i>Bulk Delete</button>
+            <?php if (isSuperadmin()) : ?>
+               <a class="btn btn-primary ml-3 pl-3 py-3" href="<?= base_url('admin/siswa/create'); ?>">
+                  <i class="material-icons mr-2">add</i> Tambah data siswa
+               </a>
+               <a class="btn btn-primary ml-3 pl-3 py-3" href="<?= base_url('admin/siswa/bulk'); ?>">
+                  <i class="material-icons mr-2">add</i> Import CSV
+               </a>
+               <button class="btn btn-danger ml-3 pl-3 py-3 btn-table-delete" onclick="deleteSelectedSiswa('Data yang sudah dihapus tidak bisa kembalikan');"><i class="material-icons mr-2">delete_forever</i>Bulk Delete</button>
+            <?php endif; ?>
             <div class="card">
                <div class="card-header card-header-tabs card-header-primary">
                   <div class="nav-tabs-navigation">
@@ -34,7 +36,7 @@
                               <span class="nav-tabs-title">Kelas:</span>
                               <ul class="nav nav-tabs" data-tabs="tabs">
                                  <li class="nav-item">
-                                    <a class="nav-link active" onclick="kelas = null; trig()" href="#" data-toggle="tab">
+                                    <a class="nav-link <?= empty($defaultKelas) ? 'active' : ''; ?>" onclick="kelas = null; trig()" href="#" data-toggle="tab">
                                        <i class="material-icons">check</i> Semua
                                        <div class="ripple-container"></div>
                                     </a>
@@ -44,7 +46,7 @@
                                  foreach ($kelas as $value) : ?>
                                     <?php if (!in_array($value['kelas'], $tempKelas)) : ?>
                                        <li class="nav-item">
-                                          <a class="nav-link" onclick="kelas = '<?= $value['kelas']; ?>'; trig()" href="#" data-toggle="tab">
+                                          <a class="nav-link <?= $defaultKelas === $value['kelas'] ? 'active' : ''; ?>" onclick="kelas = '<?= $value['kelas']; ?>'; trig()" href="#" data-toggle="tab">
                                              <i class="material-icons">school</i> <?= $value['kelas']; ?>
                                              <div class="ripple-container"></div>
                                           </a>
@@ -60,14 +62,14 @@
                               <span class="nav-tabs-title">Lokal:</span>
                               <ul class="nav nav-tabs" data-tabs="tabs">
                                  <li class="nav-item">
-                                    <a class="nav-link active" onclick="jurusan = null; trig()" href="#" data-toggle="tab">
+                                    <a class="nav-link <?= empty($defaultJurusan) ? 'active' : ''; ?>" onclick="jurusan = null; trig()" href="#" data-toggle="tab">
                                        <i class="material-icons">check</i> Semua
                                        <div class="ripple-container"></div>
                                     </a>
                                  </li>
                                  <?php foreach ($jurusan as $value) : ?>
                                     <li class="nav-item">
-                                       <a class="nav-link" onclick="jurusan = '<?= $value['jurusan']; ?>'; trig();" href="#" data-toggle="tab">
+                                       <a class="nav-link <?= $defaultJurusan === $value['jurusan'] ? 'active' : ''; ?>" onclick="jurusan = '<?= $value['jurusan']; ?>'; trig();" href="#" data-toggle="tab">
                                           <i class="material-icons">bookmark</i> <?= $value['jurusan']; ?>
                                           <div class="ripple-container"></div>
                                        </a>
@@ -88,8 +90,8 @@
    </div>
 </div>
 <script>
-   var kelas = null;
-   var jurusan = null;
+   var kelas = <?= !empty($defaultKelas) ? json_encode($defaultKelas) : 'null'; ?>;
+   var jurusan = <?= !empty($defaultJurusan) ? json_encode($defaultJurusan) : 'null'; ?>;
 
    getDataSiswa(kelas, jurusan);
 

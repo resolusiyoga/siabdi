@@ -62,6 +62,11 @@ class KelasController extends BaseController
      */
     public function tambahKelas()
     {
+        if (!isSuperadmin()) {
+            $this->session->setFlashdata('error', 'Aksi ini khusus untuk superadmin');
+            return redirect()->to('admin/kelas');
+        }
+
         $data['ctx'] = 'kelas';
         $data['title'] = 'Tambah Data Kelas';
         $data['jurusan'] = $this->jurusanModel->findAll();
@@ -76,6 +81,11 @@ class KelasController extends BaseController
      */
     public function tambahKelasPost()
     {
+        if (!isSuperadmin()) {
+            $this->session->setFlashdata('error', 'Aksi ini khusus untuk superadmin');
+            return redirect()->to('admin/kelas');
+        }
+
         $val = \Config\Services::validation();
         $val->setRule('kelas', 'Kelas', 'required|max_length[32]');
         $val->setRule('id_jurusan', 'Jurusan', 'required|numeric');
@@ -103,6 +113,11 @@ class KelasController extends BaseController
      */
     public function editKelas($id)
     {
+        if (!isSuperadmin()) {
+            $this->session->setFlashdata('error', 'Aksi ini khusus untuk superadmin');
+            return redirect()->to('admin/kelas');
+        }
+
         $data['title'] = 'Edit Kelas';
         $data['ctx'] = 'kelas';
         $data['jurusan'] = $this->jurusanModel->findAll();
@@ -121,6 +136,11 @@ class KelasController extends BaseController
      */
     public function editKelasPost()
     {
+        if (!isSuperadmin()) {
+            $this->session->setFlashdata('error', 'Aksi ini khusus untuk superadmin');
+            return redirect()->to('admin/kelas');
+        }
+
         $val = \Config\Services::validation();
         $val->setRule('kelas', 'Kelas', 'required|max_length[32]');
         $val->setRule('id_jurusan', 'Jurusan', 'required|numeric');
@@ -146,6 +166,11 @@ class KelasController extends BaseController
      */
     public function deleteKelasPost($id = null)
     {
+        if (!isSuperadmin()) {
+            $this->session->setFlashdata('error', 'Aksi ini khusus untuk superadmin');
+            exit();
+        }
+
         $id = inputPost('id');
         $kelas = $this->kelasModel->getKelas($id);
         if (!empty($kelas)) {

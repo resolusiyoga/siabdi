@@ -17,13 +17,15 @@
                     </div>
 
                     <div class="col-auto row">
-                      <div class="col-12 col-sm-auto nav nav-tabs">
-                        <a class="btn-custom-tools" id="tabBtn" href="<?= base_url('admin/kelas/tambah'); ?>">
-                          <i class="material-icons">add</i> Tambah data kelas
-                          <div class="ripple-container"></div>
-                        </a>
+                      <?php if (isSuperadmin()) : ?>
+                        <div class="col-12 col-sm-auto nav nav-tabs">
+                          <a class="btn-custom-tools" id="tabBtn" href="<?= base_url('admin/kelas/tambah'); ?>">
+                            <i class="material-icons">add</i> Tambah data kelas
+                            <div class="ripple-container"></div>
+                          </a>
 
-                      </div>
+                        </div>
+                      <?php endif; ?>
                       <div class="col-12 col-sm-auto nav nav-tabs">
                         <a class="btn-custom-tools" id="refreshBtn" onclick="fetchKelasJurusanData('kelas', '#dataKelas')" href="javascript:void(0)">
                           <i class="material-icons">refresh</i> Refresh
@@ -48,12 +50,14 @@
                       <p class="card-category">Angkatan <?= $generalSettings->school_year; ?></p>
                     </div>
                     <div class="col-auto row">
-                      <div class="col-12 col-sm-auto nav nav-tabs">
-                        <a class="btn-custom-tools" id="tabBtn" href="<?= base_url('admin/jurusan/tambah'); ?>">
-                          <i class="material-icons">add</i> Tambah data lokal
-                        </a>
+                      <?php if (isSuperadmin()) : ?>
+                        <div class="col-12 col-sm-auto nav nav-tabs">
+                          <a class="btn-custom-tools" id="tabBtn" href="<?= base_url('admin/jurusan/tambah'); ?>">
+                            <i class="material-icons">add</i> Tambah data lokal
+                          </a>
 
-                      </div>
+                        </div>
+                      <?php endif; ?>
                       <div class="col-12 col-sm-auto nav nav-tabs">
                         <a class="btn-custom-tools" id="refreshBtn2" onclick="fetchKelasJurusanData('jurusan', '#dataJurusan')" href="javascript:void(0)">
                           <i class="material-icons">refresh</i> Refresh

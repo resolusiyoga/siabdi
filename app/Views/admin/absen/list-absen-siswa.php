@@ -37,7 +37,7 @@
                     ?>
                     <?php foreach ($data as $value) : ?>
                         <?php
-                        $idKehadiran = intval($value['id_kehadiran'] ?? ($lewat ? 5 : 4));
+                        $idKehadiran = $value['id_kehadiran'] !== null ? intval($value['id_kehadiran']) : 0;
                         $kehadiran = kehadiran($idKehadiran);
                         $terlambat = !empty($value['jam_masuk']) && $value['jam_masuk'] > $batasAbsenMasuk;
                         ?>
@@ -120,13 +120,10 @@ function kehadiran($kehadiran): array
             $text = 'Izin';
             break;
         case 4:
+        case 0:
+        default:
             $color = 'danger';
             $text = 'Tanpa keterangan';
-            break;
-        case 5:
-        default:
-            $color = 'disabled';
-            $text = 'Belum tersedia';
             break;
     }
 

@@ -46,11 +46,15 @@ class DataAbsenSiswa extends BaseController
    {
       $kelas = $this->kelasModel->getDataKelas();
 
+      $kelasWali = currentUserRole() === 'wali_kelas' ? currentUserKelas() : null;
+
       $data = [
          'title' => 'Data Absen Siswa',
          'ctx' => 'absen-siswa',
          'kelas' => $kelas,
-         'jurusan' => $this->jurusanModel->getDataJurusan()
+         'jurusan' => $this->jurusanModel->getDataJurusan(),
+         'defaultKelas' => $kelasWali['kelas'] ?? null,
+         'defaultJurusan' => $kelasWali['jurusan'] ?? null
       ];
 
       return view('admin/absen/absen-siswa', $data);

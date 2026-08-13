@@ -59,6 +59,11 @@ class DataGuru extends BaseController
 
    public function formTambahGuru()
    {
+      if (!isSuperadmin()) {
+         session()->setFlashdata(['msg' => 'Aksi ini khusus untuk superadmin', 'error' => true]);
+         return redirect()->to('/admin/guru');
+      }
+
       $data = [
          'ctx' => 'guru',
          'title' => 'Tambah Data Guru'
@@ -69,6 +74,11 @@ class DataGuru extends BaseController
 
    public function saveGuru()
    {
+      if (!isSuperadmin()) {
+         session()->setFlashdata(['msg' => 'Aksi ini khusus untuk superadmin', 'error' => true]);
+         return redirect()->to('/admin/guru');
+      }
+
       // validasi
       if (!$this->validate($this->guruValidationRules)) {
          $data = [
@@ -106,6 +116,11 @@ class DataGuru extends BaseController
 
    public function formEditGuru($id)
    {
+      if (!isSuperadmin()) {
+         session()->setFlashdata(['msg' => 'Aksi ini khusus untuk superadmin', 'error' => true]);
+         return redirect()->to('/admin/guru');
+      }
+
       $guru = $this->guruModel->getGuruById($id);
 
       if (empty($guru)) {
@@ -123,6 +138,11 @@ class DataGuru extends BaseController
 
    public function updateGuru()
    {
+      if (!isSuperadmin()) {
+         session()->setFlashdata(['msg' => 'Aksi ini khusus untuk superadmin', 'error' => true]);
+         return redirect()->to('/admin/guru');
+      }
+
       $idGuru = $this->request->getVar('id');
 
       // validasi
@@ -164,6 +184,11 @@ class DataGuru extends BaseController
 
    public function delete($id)
    {
+      if (!isSuperadmin()) {
+         session()->setFlashdata(['msg' => 'Aksi ini khusus untuk superadmin', 'error' => true]);
+         return redirect()->to('/admin/guru');
+      }
+
       $result = $this->guruModel->delete($id);
 
       if ($result) {

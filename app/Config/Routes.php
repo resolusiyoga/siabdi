@@ -147,6 +147,7 @@ $routes->group('admin', function (RouteCollection $routes) {
    $routes->post('petugas', 'Admin\DataPetugas::ambilDataPetugas');
    // superadmin tambah data petugas
    $routes->get('petugas/register', 'Admin\DataPetugas::registerPetugas');
+   $routes->post('petugas/register', 'Admin\DataPetugas::submitRegisterPetugas');
    // superadmin edit data petugas
    $routes->get('petugas/edit/(:any)', 'Admin\DataPetugas::formEditPetugas/$1');
    $routes->post('petugas/edit', 'Admin\DataPetugas::updatePetugas');

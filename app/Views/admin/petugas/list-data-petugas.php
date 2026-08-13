@@ -5,7 +5,7 @@
             <th><b>No</b></th>
             <th><b>Username</b></th>
             <th><b>Email</b></th>
-            <th><b>Role</b></th>
+            <th><b>Peran</b></th>
             <th><b>Aksi</b></th>
          </thead>
          <tbody>
@@ -15,7 +15,7 @@
                   <td><?= $i; ?></td>
                   <td><?= $value['username']; ?></td>
                   <td><b><?= $value['email']; ?></b></td>
-                  <td><?= $value['is_superadmin'] == '1' ? 'Super Admin' : 'Petugas'; ?></td>
+                  <td><?= roleLabel($value['role'] ?? 'guru'); ?></td>
                   <td>
                      <?php if ($value['username'] == 'superadmin') : ?>
                         <button disabled class="btn btn-disabled p-2" id="<?= $value['username']; ?>">
@@ -54,3 +54,18 @@
       </div>
    <?php endif; ?>
 </div>
+
+<?php
+function roleLabel($role): string
+{
+   $labels = [
+      'superadmin' => 'Super Admin',
+      'guru' => 'Guru',
+      'wali_kelas' => 'Wali Kelas',
+      'siswa' => 'Siswa',
+      'orangtua' => 'Orang Tua',
+   ];
+
+   return $labels[$role] ?? ucfirst($role);
+}
+?>

@@ -52,22 +52,57 @@
                         </div>
                      </div>
 
-                     <label for="role">Role</label>
-                     <select class="custom-select <?= $validation->getError('role') ? 'is-invalid' : ''; ?>" id="role" name="role">
-                        <option value="">--Pilih role--</option>
-                        <option value="0" <?= old('role') ?? $oldInput['role'] ?? $data['is_superadmin'] == "0" ? 'selected' : ''; ?>>
-                           Petugas
-                        </option>
-                        <option value="1" <?= old('role') ?? $oldInput['role'] ?? $data['is_superadmin'] ?? '' == "1" ? 'selected' : ''; ?>>
+                     <label for="role">Peran</label>
+                     <select class="custom-select <?= $validation->getError('role') ? 'is-invalid' : ''; ?>" id="role" name="role" onchange="toggleKelasField()">
+                        <option value="">--Pilih peran--</option>
+                        <?php $selectedRole = old('role') ?? $oldInput['role'] ?? $data['role'] ?? 'guru'; ?>
+                        <option value="superadmin" <?= $selectedRole == 'superadmin' ? 'selected' : ''; ?>>
                            Super Admin
+                        </option>
+                        <option value="guru" <?= $selectedRole == 'guru' ? 'selected' : ''; ?>>
+                           Guru
+                        </option>
+                        <option value="wali_kelas" <?= $selectedRole == 'wali_kelas' ? 'selected' : ''; ?>>
+                           Wali Kelas
+                        </option>
+                        <option value="siswa" <?= $selectedRole == 'siswa' ? 'selected' : ''; ?>>
+                           Siswa
+                        </option>
+                        <option value="orangtua" <?= $selectedRole == 'orangtua' ? 'selected' : ''; ?>>
+                           Orang Tua
                         </option>
                      </select>
                      <div class="invalid-feedback">
                         <?= $validation->getError('role'); ?>
                      </div>
 
+                     <div class="form-group mt-4" id="kelasFieldWrapper" style="display: none;">
+                        <label for="id_kelas">Kelas / Lokal</label>
+                        <?php $selectedKelas = old('id_kelas') ?? $oldInput['id_kelas'] ?? $data['id_kelas'] ?? ''; ?>
+                        <select class="custom-select <?= $validation->getError('id_kelas') ? 'is-invalid' : ''; ?>" id="id_kelas" name="id_kelas">
+                           <option value="">--Pilih kelas--</option>
+                           <?php foreach ($kelas ?? [] as $value) : ?>
+                              <option value="<?= $value['id_kelas']; ?>" <?= $selectedKelas == $value['id_kelas'] ? 'selected' : ''; ?>>
+                                 <?= $value['kelas'] . '.' . $value['jurusan']; ?>
+                              </option>
+                           <?php endforeach; ?>
+                        </select>
+                        <div class="invalid-feedback">
+                           <?= $validation->getError('id_kelas'); ?>
+                        </div>
+                     </div>
+
                      <button type="submit" class="btn btn-primary btn-block mt-3">Simpan</button>
                   </form>
+
+                  <script>
+                     function toggleKelasField() {
+                        var role = document.getElementById('role').value;
+                        var wrapper = document.getElementById('kelasFieldWrapper');
+                        wrapper.style.display = role === 'wali_kelas' ? 'block' : 'none';
+                     }
+                     toggleKelasField();
+                  </script>
                </div>
             </div>
          </div>

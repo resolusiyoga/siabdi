@@ -12,7 +12,10 @@ class PetugasModel extends Model
          'email',
          'username',
          'password_hash',
-         'is_superadmin'
+         'is_superadmin',
+         'role',
+         'id_kelas',
+         'active'
       ];
    }
 
@@ -30,14 +33,37 @@ class PetugasModel extends Model
       return $this->where([$this->primaryKey => $id])->first();
    }
 
-   public function savePetugas($idPetugas, $email, $username, $passwordHash, $role)
+   public const ROLES = ['superadmin', 'guru', 'wali_kelas', 'siswa', 'orangtua'];
+
+   public function savePetugas($idPetugas, $email, $username, $passwordHash, $role, $idKelas = null)
    {
+      $role = in_array($role, self::ROLES, true) ? $role : 'guru';
+      $idKelas = $role === 'wali_kelas' ? $idKelas : null;
+
       return $this->save([
          $this->primaryKey => $idPetugas,
          'email' => $email,
          'username' => $username,
          'password_hash' => $passwordHash,
-         'is_superadmin' => $role ?? '0',
+         'is_superadmin' => $role === 'superadmin' ? '1' : '0',
+         'role' => $role,
+         'id_kelas' => $idKelas,
+      ]);
+   }
+
+   public function createPetugas($email, $username, $passwordHash, $role, $idKelas = null)
+   {
+      $role = in_array($role, self::ROLES, true) ? $role : 'guru';
+      $idKelas = $role === 'wali_kelas' ? $idKelas : null;
+
+      return $this->save([
+         'email' => $email,
+         'username' => $username,
+         'password_hash' => $passwordHash,
+         'is_superadmin' => $role === 'superadmin' ? '1' : '0',
+         'role' => $role,
+         'id_kelas' => $idKelas,
+         'active' => '1',
       ]);
    }
 }
