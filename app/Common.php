@@ -208,6 +208,29 @@ if (!function_exists('removeSpecialCharacters')) {
 }
 
 /**
+ * Ambil satu nilai dari tabel Pengaturan (general_settings).
+ *
+ * Dibaca langsung dari config, bukan dari data view, supaya tetap tersedia
+ * di halaman yang dirender controller Myth\Auth (login, register, forgot)
+ * yang tidak mewarisi App\Controllers\BaseController.
+ *
+ * @return string
+ */
+if (!function_exists('generalSetting')) {
+    function generalSetting(string $key, string $fallback = '')
+    {
+        $schoolConfigurations = new \Config\School();
+        $generalSettings      = $schoolConfigurations::$generalSettings;
+
+        if (!empty($generalSettings) && !empty($generalSettings->{$key})) {
+            return $generalSettings->{$key};
+        }
+
+        return $fallback;
+    }
+}
+
+/**
  * Label kelas standar: {Kelas}-{Jurusan}, mis. "X-BDP".
  *
  * Dipakai di seluruh aplikasi (tabel, dropdown, hasil scan, laporan)

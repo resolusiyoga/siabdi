@@ -34,6 +34,18 @@ class Auth extends MythAuthConfig
 
     /**
      * --------------------------------------------------------------------
+     * Allow Persistent Login Cookies (Remember me)
+     * --------------------------------------------------------------------
+     *
+     * Diaktifkan agar opsi "Ingat saya" di halaman login berfungsi.
+     * Token disimpan ter-hash di tabel auth_tokens.
+     *
+     * @var bool
+     */
+    public $allowRemembering = true;
+
+    /**
+     * --------------------------------------------------------------------
      * Views used by Auth Controllers
      * --------------------------------------------------------------------
      *

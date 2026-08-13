@@ -1,84 +1,96 @@
- <?= $this->extend('templates/starting_page_layout'); ?>
+<?= $this->extend('templates/auth_page_layout'); ?>
 
- <?= $this->section('navaction') ?>
- <a href="<?= base_url('/'); ?>" class="btn btn-primary pull-right pl-3">
-    <i class="material-icons mr-2">qr_code</i>
-    Scan QR
- </a>
- <?= $this->endSection() ?>
+<?= $this->section('content'); ?>
+<?php
+// Myth\Auth menerima email maupun username, jadi label mengikuti konfigurasi
+$labelLogin = $config->validFields === ['email'] ? 'Email' : 'Email atau Username';
+?>
+<div class="card">
+   <div class="card__head"><?= esc(generalSetting('scan_subtitle', 'Absensi QR Code')); ?></div>
 
- <?= $this->section('content'); ?>
- <div class="main-panel">
-    <div class="content">
-       <div class="container-fluid">
-          <div class="row">
-             <div class="col-md-4 m-auto">
-                <div class="card">
-                   <div class="card-header card-header-primary mb-48">
-                      <h4 class="card-title">Login petugas</h4>
-                      <p class="card-category">Silahkan masukkan username dan password anda</p>
-                   </div>
+   <div class="card__body">
+      <?php if (session()->has('message')) : ?>
+         <div class="alert alert--ok">
+            <p><?= session('message') ?></p>
+         </div>
+      <?php endif; ?>
 
-                   <div class="card-body mx-5 my-3">
-                      <?= view('\App\Views\admin\_message_block') ?>
-                      <form action="<?= url_to('login') ?>" method="post">
-                         <?= csrf_field() ?>
-                         <div class="row">
-                            <div class="col-md-12">
-                               <?php if ($config->validFields === ['email']) : ?>
-                                  <div class="form-group">
-                                     <label class="bmd-label-floating"><?= lang('Auth.email') ?></label>
-                                     <input type="email" class="form-control <?php if (session('errors.login')) : ?>is-invalid<?php endif ?>" name="login" autofocus>
-                                     <div class="invalid-feedback">
-                                        <?= session('errors.login') ?>
-                                     </div>
-                                  </div>
-                               <?php else : ?>
-                                  <div class="form-group">
-                                     <label class="bmd-label-floating"><?= lang('Auth.emailOrUsername') ?></label>
-                                     <input type="text" class="form-control <?php if (session('errors.login')) : ?>is-invalid<?php endif ?>" name="login" autofocus>
-                                     <div class="invalid-feedback">
-                                        <?= session('errors.login') ?>
-                                     </div>
-                                  </div>
-                               <?php endif; ?>
-                            </div>
-                         </div>
-                         <div class="row mt-3">
-                            <div class="col-md-12">
-                               <div class="form-group">
-                                  <label class="bmd-label-floating">Password</label>
-                                  <input type="password" name="password" class="form-control  <?php if (session('errors.password')) : ?>is-invalid<?php endif ?>">
-                                  <div class="invalid-feedback">
-                                     <?= session('errors.password') ?>
-                                  </div>
-                               </div>
-                            </div>
-                         </div>
-                         <!-- <button type="submit" class="btn btn-primary col-md-12">Login</button> -->
-                         <?php if ($config->allowRemembering) : ?>
-                            <div class="form-check">
-                               <label class="form-check-label">
-                                  <input type="checkbox" name="remember" class="form-check-input" <?php if (old('remember')) : ?> checked <?php endif ?>>
-                                  <?= lang('Auth.rememberMe') ?>
-                               </label>
-                            </div>
-                         <?php endif; ?>
+      <?php if (session()->has('error')) : ?>
+         <div class="alert alert--err">
+            <p><?= session('error') ?></p>
+         </div>
+      <?php endif; ?>
 
-                         <br>
+      <?php if (session()->has('errors')) : ?>
+         <div class="alert alert--err">
+            <?php foreach (session('errors') as $error) : ?>
+               <p><?= $error ?></p>
+            <?php endforeach; ?>
+         </div>
+      <?php endif; ?>
 
-                         <button type="submit" class="btn btn-primary btn-block"><?= lang('Auth.loginAction') ?></button>
+      <form action="<?= url_to('login'); ?>" method="post">
+         <?= csrf_field(); ?>
 
-                         <?php if ($config->activeResetter) : ?>
-                            <p><a href="<?= url_to('forgot') ?>"><?= lang('Auth.forgotYourPassword') ?></a></p>
-                         <?php endif; ?>
-                         <div class="clearfix"></div>
-                      </form>
-                   </div>
-                </div>
-             </div>
-          </div>
-       </div>
-    </div>
- </div>
- <?= $this->endSection(); ?>
+         <div class="field">
+            <label class="field__label" for="login"><?= $labelLogin; ?></label>
+            <div class="control <?= session('errors.login') ? 'control--error' : ''; ?>">
+               <i class="material-icons">mail</i>
+               <input type="text" id="login" name="login" value="<?= old('login'); ?>"
+                  autocomplete="username" autofocus required>
+            </div>
+            <?php if (session('errors.login')) : ?>
+               <p class="field__error"><?= session('errors.login'); ?></p>
+            <?php endif; ?>
+         </div>
+
+         <div class="field">
+            <label class="field__label" for="password">Kata Sandi</label>
+            <div class="control <?= session('errors.password') ? 'control--error' : ''; ?>">
+               <i class="material-icons">lock</i>
+               <input type="password" id="password" name="password" autocomplete="current-password" required>
+               <button type="button" class="toggle-pass" id="togglePass"
+                  aria-label="Tampilkan kata sandi">
+                  <i class="material-icons" id="togglePassIcon">visibility</i>
+               </button>
+            </div>
+            <?php if (session('errors.password')) : ?>
+               <p class="field__error"><?= session('errors.password'); ?></p>
+            <?php endif; ?>
+         </div>
+
+         <div class="options">
+            <?php if ($config->allowRemembering) : ?>
+               <label class="remember">
+                  <input type="checkbox" name="remember" <?= old('remember') ? 'checked' : ''; ?>>
+                  Ingat saya
+               </label>
+            <?php else : ?>
+               <span></span>
+            <?php endif; ?>
+
+            <?php if ($config->activeResetter) : ?>
+               <a class="link" href="<?= url_to('forgot'); ?>">Lupa Kata Sandi?</a>
+            <?php endif; ?>
+         </div>
+
+         <button type="submit" class="btn-submit">Masuk</button>
+      </form>
+   </div>
+</div>
+
+<script>
+   (function() {
+      var input = document.getElementById('password');
+      var btn = document.getElementById('togglePass');
+      var icon = document.getElementById('togglePassIcon');
+
+      btn.addEventListener('click', function() {
+         var hidden = input.type === 'password';
+         input.type = hidden ? 'text' : 'password';
+         icon.textContent = hidden ? 'visibility_off' : 'visibility';
+         btn.setAttribute('aria-label', hidden ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi');
+      });
+   })();
+</script>
+<?= $this->endSection(); ?>

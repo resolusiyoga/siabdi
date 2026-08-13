@@ -32,7 +32,7 @@ class GeneralSettings extends BaseController
 
         $val = \Config\Services::validation();
         $val->setRule('school_name', 'Nama Sekolah', 'required|max_length[200]');
-        $val->setRule('scan_subtitle', 'Subjudul Halaman Scan', 'required|max_length[200]');
+        $val->setRule('scan_subtitle', 'Subjudul Aplikasi', 'required|max_length[200]');
         $val->setRule('school_year', 'Tahun Ajaran', 'required|max_length[200]');
         $val->setRule('copyright', 'copyright', 'max_length[200]');
         $val->setRule('batas_absen_masuk', 'Batas Waktu Absen Masuk', 'required');

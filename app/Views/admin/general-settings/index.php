@@ -26,9 +26,9 @@
                             </div>
 
                             <div class="form-group mt-4">
-                                <label for="scan_subtitle">Subjudul Halaman Scan</label>
+                                <label for="scan_subtitle">Subjudul Aplikasi</label>
                                 <input type="text" id="scan_subtitle" class="form-control <?= invalidFeedback('scan_subtitle') ? 'is-invalid' : ''; ?>" name="scan_subtitle" placeholder="Absensi QR Code" value="<?= $generalSettings->scan_subtitle ?? 'Absensi QR Code'; ?>" <?= $readonly ? 'disabled' : ''; ?> required>
-                                <small class="text-muted">Teks kecil di bawah nama sekolah pada halaman scan QR.</small>
+                                <small class="text-muted">Tampil di bawah nama sekolah pada halaman scan QR, dan sebagai judul kartu di halaman login.</small>
                                 <div class="invalid-feedback">
                                     <?= invalidFeedback('scan_subtitle'); ?>
                                 </div>
