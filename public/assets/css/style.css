@@ -143,9 +143,8 @@
     width: 56px;
     height: 56px;
     margin: 0 auto 10px;
-    border-radius: 12px;
-    object-fit: cover;
-    background-color: #fff;
+    /* tanpa latar: contain supaya logo tampil utuh, tidak terpotong */
+    object-fit: contain;
 }
 
 .sidebar .logo .sidebar-brand__name {

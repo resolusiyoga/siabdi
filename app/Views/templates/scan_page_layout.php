@@ -81,10 +81,9 @@
       .app-bar__logo {
          width: 38px;
          height: 38px;
-         border-radius: 10px;
-         object-fit: cover;
+         /* tanpa latar: contain supaya logo tampil utuh, tidak terpotong */
+         object-fit: contain;
          flex: none;
-         background: var(--bg);
       }
 
       .app-bar__text {
