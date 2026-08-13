@@ -122,3 +122,34 @@
         transform: scale(1.0);
     }
 }
+/* Brand sidebar: logo sekolah di atas, nama sekolah di bawahnya.
+   Keduanya diambil dari Pengaturan. */
+.sidebar .logo .sidebar-brand {
+    display: block;
+    padding: 6px 12px;
+    text-align: center;
+    text-transform: none;
+    white-space: normal;
+    line-height: 1.3;
+}
+
+.sidebar .logo .sidebar-brand:hover,
+.sidebar .logo .sidebar-brand:focus {
+    text-decoration: none;
+}
+
+.sidebar .logo .sidebar-brand__logo {
+    display: block;
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 10px;
+    border-radius: 12px;
+    object-fit: cover;
+    background-color: #fff;
+}
+
+.sidebar .logo .sidebar-brand__name {
+    display: block;
+    font-size: 15px;
+    font-weight: 700;
+}
