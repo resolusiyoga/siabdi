@@ -5,7 +5,7 @@
    <meta charset="UTF-8">
    <meta http-equiv="X-UA-Compatible" content="IE=edge">
    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-   <meta name="theme-color" content="#386C0B">
+   <meta name="theme-color" content="#ddedca">
    <?= csrf_meta(); ?>
    <title><?= $title ?? 'Masuk'; ?> &middot; <?= esc(generalSetting('school_name', 'SI-ABDI')); ?></title>
 
@@ -25,7 +25,7 @@
          --green-700: #386C0B;
          --green-500: #38A700;
          --green-300: #3EFF8B;
-         --bg: #ffffff;
+         --bg: #ddedca;
          --surface: #ffffff;
          --text: #293F14;
          --muted: #5a6b4d;
@@ -69,6 +69,29 @@
          }
       }
 
+      /* Di layar kecil ilustrasi tidak ditampilkan sebagai gambar, melainkan
+         menjadi latar belakang samar supaya form tetap jadi fokus utama. */
+      @media (max-width: 991.98px) {
+         .brand {
+            display: none;
+         }
+
+         .auth::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: url('<?= assetUrl('assets/img/login.png'); ?>') center / cover no-repeat;
+            opacity: .15;
+            pointer-events: none;
+            z-index: 0;
+         }
+
+         .panel {
+            position: relative;
+            z-index: 1;
+         }
+      }
+
       /* ---------- Kolom kiri: logo + ilustrasi ---------- */
       .brand {
          width: 100%;
@@ -98,17 +121,9 @@
       }
 
       .panel__school {
-         margin: 0 0 10px;
-         text-align: center;
-         font-size: 18px;
-         font-weight: 700;
-         color: var(--green-700);
-      }
-
-      .panel__welcome {
          margin: 0 0 18px;
          text-align: center;
-         font-size: 26px;
+         font-size: 18px;
          font-weight: 700;
          color: var(--green-700);
       }
@@ -282,7 +297,6 @@
       <section class="panel">
          <img class="panel__logo" src="<?= getLogo(); ?>" alt="Logo sekolah">
          <p class="panel__school"><?= esc(generalSetting('school_name', 'SI-ABDI')); ?></p>
-         <h1 class="panel__welcome">Selamat Datang!</h1>
          <?= $this->renderSection('content') ?>
       </section>
    </main>
