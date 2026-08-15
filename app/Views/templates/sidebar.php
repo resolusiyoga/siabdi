@@ -12,7 +12,6 @@ switch ($context) {
       break;
 
    case 'qr':
-   case 'nfc':
       $sidebarColor = 'danger';
       break;
 
@@ -75,12 +74,6 @@ switch ($context) {
             <a class="nav-link" href="<?= base_url('admin/generate'); ?>">
                <i class="material-icons">qr_code</i>
                <p>Generate QR Code</p>
-            </a>
-         </li>
-         <li class="nav-item <?= $context == 'nfc' ? 'active' : ''; ?>">
-            <a class="nav-link" href="<?= base_url('admin/nfc'); ?>">
-               <i class="material-icons">contactless</i>
-               <p>Tulis Kartu NFC</p>
             </a>
          </li>
          <li class="nav-item <?= $context == 'laporan' ? 'active' : ''; ?>">

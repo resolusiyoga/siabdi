@@ -54,14 +54,6 @@ $tema  = $kategoriAbsen[$aktif] ?? $kategoriAbsen['masuk'];
    <div class="scanner__hint" id="scanHint">Arahkan QR Code ke dalam bingkai</div>
 </section>
 
-<div class="nfc is-hidden" id="nfcBox">
-   <button type="button" class="nfc__btn" id="nfcBtn">
-      <i class="material-icons">contactless</i>
-      Aktifkan Kartu NFC
-   </button>
-   <p class="nfc__status" id="nfcStatus"></p>
-</div>
-
 <div id="hasilScan"></div>
 
 <details class="guide">
@@ -74,7 +66,6 @@ $tema  = $kategoriAbsen[$aktif] ?? $kategoriAbsen['masuk'];
       <li>Posisikan QR Code di dalam bingkai, jangan terlalu jauh atau dekat.</li>
       <li>Pilih jenis absen (Masuk / Dzuhur / Ashar / Pulang) di bagian atas.</li>
       <li>Hasil absen otomatis muncul di bawah kamera setelah QR terbaca.</li>
-      <li>Punya kartu NFC? Tekan "Aktifkan Kartu NFC" lalu tempelkan kartu ke belakang perangkat.</li>
    </ul>
 </details>
 
@@ -187,57 +178,6 @@ $tema  = $kategoriAbsen[$aktif] ?? $kategoriAbsen['masuk'];
          setHint(pesan);
          scanner.classList.add('is-busy');
       }
-
-      // ---------- Kartu NFC (Web NFC, hanya Chrome/Edge Android) ----------
-      var nfcBox = document.getElementById('nfcBox');
-      var nfcBtn = document.getElementById('nfcBtn');
-      var nfcStatus = document.getElementById('nfcStatus');
-
-      function bacaTeksNdef(pesan) {
-         var dec = new TextDecoder();
-         for (var i = 0; i < pesan.records.length; i++) {
-            var rec = pesan.records[i];
-            if (rec.recordType === 'text' || rec.recordType === 'url') {
-               return dec.decode(rec.data).trim();
-            }
-         }
-         return '';
-      }
-
-      function siapkanNfc() {
-         if (!('NDEFReader' in window)) return; // perangkat/browser tidak mendukung
-         nfcBox.classList.remove('is-hidden');
-
-         nfcBtn.addEventListener('click', function() {
-            var reader = new NDEFReader();
-            nfcStatus.textContent = 'Meminta izin...';
-
-            reader.scan().then(function() {
-               nfcBtn.disabled = true;
-               nfcBtn.classList.add('is-on');
-               nfcStatus.textContent = 'Siap - tempelkan kartu ke belakang perangkat';
-
-               reader.onreading = function(event) {
-                  if (busy) return;
-                  var kode = bacaTeksNdef(event.message);
-                  if (!kode) {
-                     nfcStatus.textContent = 'Kartu terbaca tapi kosong / belum didaftarkan';
-                     return;
-                  }
-                  prosesKode(kode);
-               };
-
-               reader.onreadingerror = function() {
-                  nfcStatus.textContent = 'Kartu gagal dibaca, coba tempelkan lagi';
-               };
-            }).catch(function(err) {
-               console.error(err);
-               nfcStatus.textContent = 'Tidak bisa mengaktifkan NFC: ' + (err.message || err.name);
-            });
-         });
-      }
-
-      siapkanNfc();
 
       selectKamera.addEventListener('change', function() {
          selectedDeviceId = this.value;

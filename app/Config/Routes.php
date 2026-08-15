@@ -137,11 +137,6 @@ $routes->group('admin', function (RouteCollection $routes) {
    $routes->get('qr/guru/download', 'Admin\QRGenerator::downloadAllQrGuru');
    $routes->get('qr/guru/(:any)/download', 'Admin\QRGenerator::downloadQrGuru/$1');
 
-   // Tulis kartu NFC (Web NFC, dibuka lewat browser Chrome/Edge Android)
-   $routes->get('nfc', 'Admin\NfcController::index');
-   $routes->post('nfc/siswa-by-kelas', 'Admin\NfcController::getSiswaByKelas');
-   $routes->post('nfc/guru', 'Admin\NfcController::getAllGuru');
-
    // admin buat laporan
    $routes->get('laporan', 'Admin\GenerateLaporan::index');
    $routes->post('laporan/siswa', 'Admin\GenerateLaporan::generateLaporanSiswa');
