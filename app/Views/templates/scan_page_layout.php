@@ -435,6 +435,47 @@
          color: #b3c2a5;
       }
 
+      /* ---------- Kartu NFC ---------- */
+      .nfc {
+         margin-top: 16px;
+         padding: 14px;
+         background: var(--surface);
+         border: 1px solid var(--border);
+         border-radius: var(--radius);
+         text-align: center;
+      }
+
+      .nfc__btn {
+         display: inline-flex;
+         align-items: center;
+         gap: 8px;
+         padding: 11px 22px;
+         border: 0;
+         border-radius: 999px;
+         background: var(--accent);
+         color: var(--on-accent);
+         font-family: inherit;
+         font-size: 14px;
+         font-weight: 700;
+         cursor: pointer;
+      }
+
+      .nfc__btn:disabled {
+         opacity: .55;
+         cursor: default;
+      }
+
+      .nfc__btn.is-on {
+         background: var(--green-500);
+      }
+
+      .nfc__status {
+         margin: 8px 0 0;
+         font-size: 13px;
+         color: var(--muted);
+         min-height: 16px;
+      }
+
       /* ---------- Guide ---------- */
       .guide {
          margin-top: 16px;
