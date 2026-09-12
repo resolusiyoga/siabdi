@@ -78,13 +78,12 @@
       background: #fafafa;
    }
 
-   .daftar-elemen {
-      background: #fff;
-   }
-
    .daftar-elemen .list-group-item {
       padding: .5rem .75rem;
       cursor: pointer;
+      /* samakan dengan latar kotak panel; hanya item aktif yang berwarna */
+      background: transparent;
+      border-color: #e6e6e6;
    }
 
    .daftar-elemen .list-group-item.aktif {
