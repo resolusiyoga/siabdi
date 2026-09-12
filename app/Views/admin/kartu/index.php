@@ -394,10 +394,13 @@
                   <div class="seksi-kartu" id="bagianTemplate" hidden>
                      <form action="<?= base_url('admin/kartu/template') ?>" method="post" enctype="multipart/form-data">
                         <?= csrf_field() ?>
-                        <div class="form-group">
-                           <label for="namaTemplate">Nama Template</label>
-                           <input type="text" class="form-control" id="namaTemplate" name="nama"
-                              value="<?= esc($template['nama']) ?>">
+                        <!-- tanpa .form-group: floating label tema menempel ke isian -->
+                        <div class="row">
+                           <div class="col-md-6 mb-4">
+                              <label for="namaTemplate">Nama Template</label>
+                              <input type="text" class="form-control" id="namaTemplate" name="nama"
+                                 value="<?= esc($template['nama']) ?>">
+                           </div>
                         </div>
 
                         <div class="row">
