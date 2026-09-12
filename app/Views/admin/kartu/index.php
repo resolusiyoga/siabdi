@@ -167,8 +167,10 @@
                            <button type="button" class="btn btn-primary" id="btnSisiDepan">Sisi Depan</button>
                            <button type="button" class="btn btn-outline-primary" id="btnSisiBelakang">Sisi Belakang</button>
                         </div>
-                        <div class="form-group mb-2">
-                           <label class="small mb-1" for="cariSiswaKartu">Pratinjau data siswa</label>
+                        <!-- tanpa .form-group: tema memakai floating label yang
+                             menumpuk di atas isian -->
+                        <div class="mb-3">
+                           <label class="d-block small mb-1" for="cariSiswaKartu">Pratinjau data siswa</label>
                            <input type="text" id="cariSiswaKartu" class="form-control form-control-sm"
                               list="daftarSiswaKartu" autocomplete="off"
                               placeholder="Ketik nama atau NIS...">
@@ -177,7 +179,7 @@
                                  <option value="<?= esc($s['nama'] . ' - ' . $s['nis'], 'attr') ?>"><?= esc($s['kelas']) ?></option>
                               <?php endforeach; ?>
                            </datalist>
-                           <small class="text-muted" id="statusCariSiswa"></small>
+                           <small class="d-block mt-1 text-muted" id="statusCariSiswa"></small>
                         </div>
                         <div class="form-inline mb-2" style="gap:8px;">
                            <label class="mr-2 mb-0" for="skala">Perbesaran</label>
