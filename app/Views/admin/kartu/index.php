@@ -95,6 +95,16 @@
       margin-top: 0;
    }
 
+   .berkas-template {
+      margin-bottom: 16px;
+   }
+
+   .berkas-template input[type="file"] {
+      display: inline-block;
+      margin-left: 8px;
+      max-width: 100%;
+   }
+
    .thumb-template {
       max-width: 90px;
       border: 1px solid #ddd;
@@ -204,8 +214,17 @@
                                  <?php else : ?>
                                     <p class="text-muted">Belum ada base template.</p>
                                  <?php endif; ?>
-                                 <div class="form-group">
-                                    <input type="file" name="svg_<?= $sisi ?>" accept=".svg,image/svg+xml,image/png,image/jpeg" class="form-control-file">
+                                 <!-- input file sengaja TIDAK dibungkus .form-group:
+                                      tema menyembunyikan input file di dalamnya (opacity 0) -->
+                                 <div class="berkas-template">
+                                    <button type="button" class="btn btn-primary btn-sm"
+                                       onclick="$('#berkas<?= ucfirst($sisi) ?>').trigger('click');">
+                                       <i class="material-icons">folder_open</i> Pilih berkas
+                                    </button>
+                                    <input type="file" id="berkas<?= ucfirst($sisi) ?>" name="svg_<?= $sisi ?>"
+                                       accept=".svg,image/svg+xml,image/png,image/jpeg"
+                                       onchange="$('#namaBerkas<?= ucfirst($sisi) ?>').text(this.value.replace(/.*[\\/]/, ''));">
+                                    <span class="text-info" id="namaBerkas<?= ucfirst($sisi) ?>"></span>
                                  </div>
                               </div>
                            <?php endforeach; ?>

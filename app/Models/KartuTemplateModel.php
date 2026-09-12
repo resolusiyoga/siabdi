@@ -65,6 +65,19 @@ class KartuTemplateModel extends Model
          json_decode((string) ($row['layout'] ?? ''), true)
       );
 
+      // Bila base template belum diunggah (atau berkasnya raib dari server),
+      // pakai desain bawaan yang ikut disertakan aplikasi.
+      foreach (self::SISI as $sisi) {
+         $kolom = 'svg_' . $sisi;
+
+         if (!empty($row[$kolom]) && is_file(FCPATH . $row[$kolom])) {
+            continue;
+         }
+
+         $bawaan = 'uploads/kartu/kartu-' . $sisi . '-bawaan.png';
+         $row[$kolom] = is_file(FCPATH . $bawaan) ? $bawaan : null;
+      }
+
       return $row;
    }
 
