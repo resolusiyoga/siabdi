@@ -631,7 +631,7 @@
          } else {
             const kosong = document.createElement('div');
             kosong.className = 'kartu__kosong';
-            kosong.textContent = 'Base template sisi ' + sisi + ' belum diunggah';
+            kosong.textContent = 'Template sisi ' + sisi + ' belum diunggah';
             kanvas.appendChild(kosong);
          }
 

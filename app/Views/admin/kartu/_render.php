@@ -18,7 +18,7 @@ $elemenSisi = $layout[$sisi] ?? [];
    <?php if (!empty($bg)) : ?>
       <img class="kartu__bg" src="<?= base_url($bg) ?>" alt="">
    <?php else : ?>
-      <div class="kartu__kosong">Base template sisi <?= esc($sisi) ?> belum diunggah</div>
+      <div class="kartu__kosong">Template sisi <?= esc($sisi) ?> belum diunggah</div>
    <?php endif; ?>
 
    <?php foreach ($elemenSisi as $kunci => $el) : ?>
