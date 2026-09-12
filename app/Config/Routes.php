@@ -147,6 +147,7 @@ $routes->group('admin', function (RouteCollection $routes) {
       $routes->post('layout', 'KartuSiswa::simpanLayout');
       $routes->get('layout/reset', 'KartuSiswa::resetLayout');
       $routes->post('siswa-by-kelas', 'KartuSiswa::siswaByKelas');
+      $routes->post('pratinjau', 'KartuSiswa::pratinjau');
       $routes->get('cetak', 'KartuSiswa::cetak');
       $routes->get('download', 'KartuSiswa::download');
    });

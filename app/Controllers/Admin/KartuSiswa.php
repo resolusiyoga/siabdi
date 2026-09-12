@@ -59,6 +59,7 @@ class KartuSiswa extends BaseController
          'kelasWali'   => $kelasWali,
          'bolehUbah'   => isSuperadmin(),
          'contoh'      => $this->dataContoh(),
+         'daftarSiswa' => $this->daftarSiswaRingkas(),
       ];
 
       return view('admin/kartu/index', $data);
@@ -268,6 +269,57 @@ class KartuSiswa extends BaseController
       ];
 
       return view('admin/kartu/cetak', $data);
+   }
+
+   /**
+    * Data satu siswa untuk pratinjau editor (foto & QR berupa data URI).
+    */
+   public function pratinjau()
+   {
+      if (!$this->bolehCetak()) {
+         return $this->response->setStatusCode(403)->setJSON(['sukses' => false]);
+      }
+
+      $idSiswa = $this->request->getVar('id_siswa');
+      $siswa = null;
+
+      foreach ($this->siswaModel->getAllSiswaWithKelas() as $s) {
+         if ((string) $s['id_siswa'] === (string) $idSiswa) {
+            $siswa = $s;
+            break;
+         }
+      }
+
+      if (empty($siswa)) {
+         return $this->response->setStatusCode(404)->setJSON([
+            'sukses' => false,
+            'pesan'  => 'Siswa tidak ditemukan',
+         ]);
+      }
+
+      return $this->response->setJSON([
+         'sukses' => true,
+         'data'   => $this->dataKartu($siswa),
+      ]);
+   }
+
+   /**
+    * Daftar siswa ringkas (tanpa foto/QR) untuk kolom pencarian editor.
+    */
+   private function daftarSiswaRingkas(): array
+   {
+      $kelasWali = currentUserRole() === 'wali_kelas' ? currentUserKelas() : null;
+
+      $siswa = $kelasWali
+         ? $this->siswaModel->getSiswaByKelas($kelasWali['id_kelas'])
+         : $this->siswaModel->getAllSiswaWithKelas();
+
+      return array_map(fn($s) => [
+         'id'    => $s['id_siswa'],
+         'nama'  => $s['nama_siswa'],
+         'nis'   => $s['nis'],
+         'kelas' => labelKelas($s['kelas'] ?? null, $s['jurusan'] ?? null, ''),
+      ], $siswa);
    }
 
    /**

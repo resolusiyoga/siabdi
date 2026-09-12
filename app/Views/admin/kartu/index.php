@@ -167,6 +167,18 @@
                            <button type="button" class="btn btn-primary" id="btnSisiDepan">Sisi Depan</button>
                            <button type="button" class="btn btn-outline-primary" id="btnSisiBelakang">Sisi Belakang</button>
                         </div>
+                        <div class="form-group mb-2">
+                           <label class="small mb-1" for="cariSiswaKartu">Pratinjau data siswa</label>
+                           <input type="text" id="cariSiswaKartu" class="form-control form-control-sm"
+                              list="daftarSiswaKartu" autocomplete="off"
+                              placeholder="Ketik nama atau NIS...">
+                           <datalist id="daftarSiswaKartu">
+                              <?php foreach ($daftarSiswa as $s) : ?>
+                                 <option value="<?= esc($s['nama'] . ' - ' . $s['nis'], 'attr') ?>"><?= esc($s['kelas']) ?></option>
+                              <?php endforeach; ?>
+                           </datalist>
+                           <small class="text-muted" id="statusCariSiswa"></small>
+                        </div>
                         <div class="form-inline mb-2" style="gap:8px;">
                            <label class="mr-2 mb-0" for="skala">Perbesaran</label>
                            <select id="skala" class="custom-select custom-select-sm">
@@ -398,7 +410,10 @@
       };
       const BOLEH_UBAH = <?= $bolehUbah ? 'true' : 'false' ?>;
 
+      const DAFTAR_SISWA = <?= json_encode($daftarSiswa) ?>;
+
       let layout = <?= json_encode($template['layout']) ?>;
+      let CONTOH_AKTIF = CONTOH;
       let sisi = 'depan';
       let terpilih = null;
       let skala = 1.6;
@@ -454,17 +469,17 @@
             kotak.style.color = el.warna;
             kotak.style.textTransform = el.kapital ? 'uppercase' : 'none';
             const span = document.createElement('span');
-            span.textContent = (el.prefiks || '') + (CONTOH[kunci] || ELEMEN[kunci].label);
+            span.textContent = (el.prefiks || '') + (CONTOH_AKTIF[kunci] || ELEMEN[kunci].label);
             kotak.appendChild(span);
          } else {
             kotak.style.borderRadius = el.radius + 'mm';
             if (el.bingkai > 0) {
                kotak.style.border = el.bingkai + 'mm solid ' + el.warnaBingkai;
             }
-            if (CONTOH[kunci]) {
+            if (CONTOH_AKTIF[kunci]) {
                const img = document.createElement('img');
                img.className = 'kartu__gambar';
-               img.src = CONTOH[kunci];
+               img.src = CONTOH_AKTIF[kunci];
                img.style.objectFit = el.isi;
                img.style.borderRadius = 'inherit';
                kotak.appendChild(img);
@@ -816,6 +831,74 @@
          });
       });
       muatDaftarUnduh();
+
+      // ---- pencarian siswa untuk pratinjau ----
+      const cariSiswa = document.getElementById('cariSiswaKartu');
+      const statusCari = document.getElementById('statusCariSiswa');
+
+      function cocokkanSiswa(teks) {
+         const bersih = teks.trim().toLowerCase();
+         if (!bersih) return null;
+
+         // cocok persis dengan format "Nama - NIS" (hasil pilih dari datalist)
+         let siswa = DAFTAR_SISWA.find(function (s) {
+            return (s.nama + ' - ' + s.nis).toLowerCase() === bersih;
+         });
+
+         // kalau diketik manual, terima NIS atau nama yang cocok penuh
+         if (!siswa) {
+            siswa = DAFTAR_SISWA.find(function (s) {
+               return String(s.nis).toLowerCase() === bersih || s.nama.toLowerCase() === bersih;
+            });
+         }
+
+         return siswa || null;
+      }
+
+      function muatPratinjauSiswa(idSiswa) {
+         statusCari.className = 'text-muted';
+         statusCari.textContent = 'Memuat data siswa...';
+
+         $.ajax({
+            type: 'POST',
+            url: '<?= base_url('admin/kartu/pratinjau') ?>',
+            data: setAjaxData({ id_siswa: idSiswa }),
+            success: function (res) {
+               if (!res || !res.sukses) {
+                  statusCari.className = 'text-danger';
+                  statusCari.textContent = (res && res.pesan) || 'Data siswa tidak ditemukan';
+                  return;
+               }
+               CONTOH_AKTIF = res.data;
+               statusCari.className = 'text-success';
+               statusCari.textContent = 'Pratinjau memakai data ' + (res.data.nama || '');
+               render();
+            },
+            error: function () {
+               statusCari.className = 'text-danger';
+               statusCari.textContent = 'Gagal memuat data siswa';
+            }
+         });
+      }
+
+      cariSiswa.addEventListener('change', function () {
+         const siswa = cocokkanSiswa(this.value);
+
+         if (!this.value.trim()) {
+            CONTOH_AKTIF = CONTOH;
+            statusCari.textContent = '';
+            render();
+            return;
+         }
+
+         if (!siswa) {
+            statusCari.className = 'text-danger';
+            statusCari.textContent = 'Siswa tidak ditemukan, pilih dari daftar saran';
+            return;
+         }
+
+         muatPratinjauSiswa(siswa.id);
+      });
 
       // ---- perpindahan tab ----
       const tombolTab = document.querySelectorAll('.nav-tabs .nav-link[data-seksi]');
