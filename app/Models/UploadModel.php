@@ -62,7 +62,7 @@ class UploadModel extends BaseModel
      }
 
     //save foto siswa dari data URI base64 (hasil crop/edit di sisi klien)
-    public function uploadFotoSiswaBase64(?string $dataUri)
+    public function uploadFotoSiswaBase64(?string $dataUri, string $nama = '', string $nis = '')
     {
         if (empty($dataUri) || !preg_match('/^data:image\/(jpe?g|png);base64,(.+)$/', $dataUri, $m)) {
             return null;
@@ -79,7 +79,12 @@ class UploadModel extends BaseModel
             mkdir(FCPATH . $directory, recursive: true);
         }
 
-        $uniqueName = 'foto_' . generateToken(true) . '.' . $ext;
+        $namaSlug = trim(preg_replace('/[^A-Za-z0-9]+/', '-', $nama), '-');
+        $nisSlug = trim(preg_replace('/[^A-Za-z0-9]+/', '-', $nis), '-');
+        $uniqueName = trim($namaSlug . '-' . $nisSlug, '-') . '.' . $ext;
+        if ($uniqueName === '.' . $ext) {
+            $uniqueName = 'foto_' . generateToken(true) . '.' . $ext;
+        }
         file_put_contents(FCPATH . $directory . $uniqueName, $binary);
 
         return ['name' => $uniqueName, 'path' => $directory . $uniqueName, 'ext' => $ext];

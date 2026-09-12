@@ -120,7 +120,11 @@ class DataSiswa extends BaseController
 
       // simpan foto (opsional, hasil crop/edit di sisi klien dikirim sebagai base64)
       $uploadModel = new UploadModel();
-      $foto = $uploadModel->uploadFotoSiswaBase64($this->request->getVar('foto_data'));
+      $foto = $uploadModel->uploadFotoSiswaBase64(
+         $this->request->getVar('foto_data'),
+         $this->request->getVar('nama'),
+         $this->request->getVar('nis')
+      );
 
       // simpan
       $result = $this->siswaModel->createSiswa(
@@ -204,7 +208,11 @@ class DataSiswa extends BaseController
 
       // simpan foto baru jika ada (opsional, hasil crop/edit di sisi klien dikirim sebagai base64)
       $uploadModel = new UploadModel();
-      $foto = $uploadModel->uploadFotoSiswaBase64($this->request->getVar('foto_data'));
+      $foto = $uploadModel->uploadFotoSiswaBase64(
+         $this->request->getVar('foto_data'),
+         $this->request->getVar('nama'),
+         $this->request->getVar('nis')
+      );
 
       // update
       $result = $this->siswaModel->updateSiswa(
@@ -217,8 +225,8 @@ class DataSiswa extends BaseController
          foto: $foto['path'] ?? null,
       );
 
-      // hapus foto lama setelah berhasil diganti
-      if ($result && !empty($foto['path']) && !empty($siswaLama['foto']) && file_exists(FCPATH . $siswaLama['foto'])) {
+      // hapus foto lama setelah berhasil diganti (kecuali nama filenya sama persis)
+      if ($result && !empty($foto['path']) && !empty($siswaLama['foto']) && $foto['path'] !== $siswaLama['foto'] && file_exists(FCPATH . $siswaLama['foto'])) {
          @unlink(FCPATH . $siswaLama['foto']);
       }
 
