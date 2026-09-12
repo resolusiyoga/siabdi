@@ -167,9 +167,13 @@ class KartuSiswa extends BaseController
          ]);
       }
 
-      $layout = $this->request->getJSON(true);
+      // Editor mengirim layout sebagai field form 'layout'; badan JSON mentah
+      // juga diterima. getJSON() sengaja tidak dipakai karena melempar
+      // HTTPException bila badan permintaan bukan JSON.
+      $layout = json_decode((string) $this->request->getVar('layout'), true);
+
       if (!is_array($layout)) {
-         $layout = json_decode((string) $this->request->getVar('layout'), true);
+         $layout = json_decode((string) $this->request->getBody(), true);
       }
 
       if (!is_array($layout)) {
