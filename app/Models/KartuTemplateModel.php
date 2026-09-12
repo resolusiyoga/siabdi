@@ -116,78 +116,32 @@ class KartuTemplateModel extends Model
          'warnaBingkai' => '#ffffff',
       ], $o);
 
+      // Koordinat bawaan mengikuti penanda posisi pada gambar tata letak
+      // (1.svg): foto bulat, nama siswa, NISN, lalu QR code.
       return [
          'depan' => [
-            'foto'    => $gambar(['x' => 16.99, 'y' => 26.0, 'w' => 20.0, 'h' => 26.0, 'radius' => 1.5]),
-            'nama'    => $teks(['y' => 54.0, 'ukuran' => 9.0, 'tebal' => 700, 'kapital' => true]),
-            'nis'     => $teks(['y' => 60.0, 'ukuran' => 7.0, 'prefiks' => 'NIS ']),
-            'nisn'    => $teks(['y' => 64.5, 'ukuran' => 7.0, 'prefiks' => 'NISN ']),
-            'kelas'   => $teks(['y' => 69.0, 'ukuran' => 7.5, 'tebal' => 600]),
-            'qrcode'  => $gambar(['tampil' => false, 'x' => 36.0, 'y' => 70.0, 'w' => 14.0, 'h' => 14.0]),
+            'foto'    => $gambar(['x' => 19.12, 'y' => 29.97, 'w' => 15.40, 'h' => 15.40, 'radius' => 7.70]),
+            'nama'    => $teks(['x' => 4.0, 'y' => 47.60, 'w' => 46.0, 'h' => 4.50, 'ukuran' => 9.5, 'tebal' => 700]),
+            'nisn'    => $teks(['x' => 4.0, 'y' => 52.80, 'w' => 46.0, 'h' => 3.50, 'ukuran' => 7.0]),
+            'qrcode'  => $gambar(['x' => 19.80, 'y' => 58.08, 'w' => 14.05, 'h' => 14.05]),
+            'nis'     => $teks(['tampil' => false, 'y' => 56.50, 'ukuran' => 6.5, 'prefiks' => 'NIS ']),
+            'kelas'   => $teks(['tampil' => false, 'y' => 73.50, 'ukuran' => 7.0, 'tebal' => 600]),
             'sekolah' => $teks(['tampil' => false, 'y' => 10.0, 'ukuran' => 8.0, 'tebal' => 700]),
             'tahun'   => $teks(['tampil' => false, 'y' => 76.0, 'ukuran' => 6.5]),
          ],
+         // Sisi belakang memakai desain polos, jadi elemen ditempatkan di
+         // area kosong bagian tengah kartu.
          'belakang' => [
-            'qrcode'  => $gambar(['x' => 14.99, 'y' => 24.0, 'w' => 24.0, 'h' => 24.0]),
-            'nama'    => $teks(['y' => 50.0, 'ukuran' => 8.0, 'tebal' => 700, 'kapital' => true]),
-            'nis'     => $teks(['y' => 55.0, 'ukuran' => 7.0, 'prefiks' => 'NIS ']),
-            'nisn'    => $teks(['tampil' => false, 'y' => 59.5, 'ukuran' => 7.0, 'prefiks' => 'NISN ']),
-            'kelas'   => $teks(['tampil' => false, 'y' => 64.0, 'ukuran' => 7.0]),
+            'qrcode'  => $gambar(['x' => 14.99, 'y' => 38.0, 'w' => 24.0, 'h' => 24.0]),
+            'nama'    => $teks(['x' => 4.0, 'y' => 64.0, 'w' => 46.0, 'h' => 4.5, 'ukuran' => 8.0, 'tebal' => 700, 'kapital' => true]),
+            'nis'     => $teks(['x' => 4.0, 'y' => 68.5, 'w' => 46.0, 'h' => 3.5, 'ukuran' => 7.0, 'prefiks' => 'NIS ']),
+            'nisn'    => $teks(['tampil' => false, 'y' => 72.0, 'ukuran' => 7.0, 'prefiks' => 'NISN ']),
+            'kelas'   => $teks(['tampil' => false, 'y' => 34.0, 'ukuran' => 7.0]),
             'foto'    => $gambar(['tampil' => false, 'x' => 4.0, 'y' => 4.0, 'w' => 15.0, 'h' => 20.0]),
-            'sekolah' => $teks(['tampil' => false, 'y' => 8.0, 'ukuran' => 7.5, 'tebal' => 700]),
+            'sekolah' => $teks(['tampil' => false, 'y' => 34.0, 'ukuran' => 7.5, 'tebal' => 700]),
             'tahun'   => $teks(['tampil' => false, 'y' => 76.0, 'ukuran' => 6.5]),
          ],
       ];
-   }
-
-   /**
-    * Pastikan layout yang tersimpan selalu punya seluruh sisi & elemen
-    * dengan tipe data yang benar, walau JSON di database sudah usang.
-    */
-   public function normalisasiLayout(?array $layout): array
-   {
-      $default = $this->layoutDefault();
-      $hasil = [];
-
-      foreach (self::SISI as $sisi) {
-         foreach (self::ELEMEN as $kunci => $meta) {
-            $bawaan = $default[$sisi][$kunci];
-            $data = $layout[$sisi][$kunci] ?? [];
-            $data = is_array($data) ? $data : [];
-
-            $item = ['tampil' => (bool) ($data['tampil'] ?? $bawaan['tampil'])];
-
-            foreach (['x', 'y', 'w', 'h'] as $angka) {
-               $item[$angka] = $this->batas(
-                  (float) ($data[$angka] ?? $bawaan[$angka]),
-                  -50,
-                  200
-               );
-            }
-
-            if ($meta['tipe'] === 'teks') {
-               $item['ukuran']  = $this->batas((float) ($data['ukuran'] ?? $bawaan['ukuran']), 3, 40);
-               $item['tebal']   = in_array((int) ($data['tebal'] ?? $bawaan['tebal']), [300, 400, 500, 600, 700, 800], true)
-                  ? (int) ($data['tebal'] ?? $bawaan['tebal'])
-                  : 400;
-               $item['warna']   = $this->warna($data['warna'] ?? $bawaan['warna']);
-               $item['rata']    = in_array($data['rata'] ?? '', ['left', 'center', 'right'], true)
-                  ? $data['rata']
-                  : $bawaan['rata'];
-               $item['kapital'] = (bool) ($data['kapital'] ?? $bawaan['kapital']);
-               $item['prefiks'] = mb_substr((string) ($data['prefiks'] ?? $bawaan['prefiks']), 0, 30);
-            } else {
-               $item['radius']       = $this->batas((float) ($data['radius'] ?? $bawaan['radius']), 0, 50);
-               $item['isi']          = ($data['isi'] ?? '') === 'contain' ? 'contain' : 'cover';
-               $item['bingkai']      = $this->batas((float) ($data['bingkai'] ?? $bawaan['bingkai']), 0, 5);
-               $item['warnaBingkai'] = $this->warna($data['warnaBingkai'] ?? $bawaan['warnaBingkai']);
-            }
-
-            $hasil[$sisi][$kunci] = $item;
-         }
-      }
-
-      return $hasil;
    }
 
    private function batas(float $nilai, float $min, float $max): float

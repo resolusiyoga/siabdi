@@ -47,7 +47,8 @@ class CreateKartuTemplate extends Migration
         $this->db->table('tb_kartu_template')->insert([
             'id'           => 1,
             'nama'         => 'Template Kartu Siswa',
-            'svg_depan'    => $this->salinContoh('1.svg', 'depan'),
+            // 2.svg adalah desain kartu polos; 1.svg hanya panduan tata letak
+            'svg_depan'    => $this->salinContoh('2.svg', 'depan'),
             'svg_belakang' => $this->salinContoh('2.svg', 'belakang'),
             'created_at'   => date('Y-m-d H:i:s'),
             'updated_at'   => date('Y-m-d H:i:s'),
