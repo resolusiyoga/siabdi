@@ -180,6 +180,14 @@ class Scan extends BaseController
                return $this->showErrorView('Anda belum absen hari ini', $data);
             }
 
+            $presensi = $this->presensiGuruModel->getPresensiById($sudahAbsen);
+
+            // scan ulang tidak boleh menimpa jam pulang yang sudah tercatat
+            if (!empty($presensi['jam_keluar'])) {
+               $data['presensi'] = $presensi;
+               return $this->showErrorView('Anda sudah absen pulang hari ini', $data);
+            }
+
             $this->presensiGuruModel->absenKeluar($sudahAbsen, $time);
             $messageString = $result['nama_guru'] . ' dengan NIP ' . $result['nuptk'] . $messageString;
             $data['presensi'] = $this->presensiGuruModel->getPresensiById($sudahAbsen);
@@ -194,6 +202,14 @@ class Scan extends BaseController
 
             if (!$sudahAbsen) {
                return $this->showErrorView('Anda belum absen hari ini', $data);
+            }
+
+            $presensi = $this->presensiSiswaModel->getPresensiById($sudahAbsen);
+
+            // scan ulang tidak boleh menimpa jam pulang yang sudah tercatat
+            if (!empty($presensi['jam_keluar'])) {
+               $data['presensi'] = $presensi;
+               return $this->showErrorView('Anda sudah absen pulang hari ini', $data);
             }
 
             $this->presensiSiswaModel->absenKeluar($sudahAbsen, $time);
