@@ -245,6 +245,70 @@ class DataSiswa extends BaseController
       return redirect()->to('/admin/siswa/edit/' . $idSiswa);
    }
 
+   /**
+    * Download foto siswa dalam bentuk zip.
+    * Superadmin: bisa semua siswa atau per kelas (?id_kelas=).
+    * Wali kelas: hanya siswa di kelasnya sendiri.
+    */
+   public function downloadFotoSiswa()
+   {
+      $role = currentUserRole();
+
+      if ($role === 'wali_kelas') {
+         $kelasWali = currentUserKelas();
+         if (empty($kelasWali)) {
+            session()->setFlashdata(['msg' => 'Kelas anda tidak ditemukan', 'error' => true]);
+            return redirect()->to('/admin/siswa');
+         }
+         $idKelas = $kelasWali['id_kelas'];
+      } elseif ($role === 'superadmin') {
+         $idKelas = $this->request->getVar('id_kelas') ?: null;
+      } else {
+         session()->setFlashdata(['msg' => 'Aksi ini tidak diizinkan', 'error' => true]);
+         return redirect()->to('/admin/siswa');
+      }
+
+      $siswa = $idKelas
+         ? $this->siswaModel->getSiswaByKelas($idKelas)
+         : $this->siswaModel->getAllSiswaWithKelas();
+
+      $siswaDenganFoto = array_filter($siswa, function ($s) {
+         return !empty($s['foto']) && file_exists(FCPATH . $s['foto']);
+      });
+
+      if (empty($siswaDenganFoto)) {
+         session()->setFlashdata(['msg' => 'Tidak ada foto siswa untuk diunduh', 'error' => true]);
+         return redirect()->back();
+      }
+
+      $namaZip = 'foto-siswa' . ($idKelas ? '_' . labelKelas($siswa[0]['kelas'] ?? null, $siswa[0]['jurusan'] ?? null) : '') . '.zip';
+      $namaZip = preg_replace('/[^A-Za-z0-9_.\-]+/', '-', $namaZip);
+      $output = FCPATH . 'uploads/tmp/' . $namaZip;
+
+      if (!file_exists(FCPATH . 'uploads/tmp/')) {
+         mkdir(FCPATH . 'uploads/tmp/', recursive: true);
+      }
+
+      $zip = new \ZipArchive();
+      $zip->open($output, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+
+      $namaTerpakai = [];
+      foreach ($siswaDenganFoto as $s) {
+         $namaFile = basename($s['foto']);
+         // hindari nama file bentrok di dalam zip (mis. dua siswa dengan nama sama persis)
+         if (isset($namaTerpakai[$namaFile])) {
+            $ext = pathinfo($namaFile, PATHINFO_EXTENSION);
+            $namaFile = pathinfo($namaFile, PATHINFO_FILENAME) . '-' . $s['id_siswa'] . '.' . $ext;
+         }
+         $namaTerpakai[$namaFile] = true;
+         $zip->addFile(FCPATH . $s['foto'], $namaFile);
+      }
+
+      $zip->close();
+
+      return $this->response->download($output, null, true);
+   }
+
    public function delete($id)
    {
       if (!isSuperadmin()) {

@@ -87,6 +87,8 @@ $routes->group('admin', function (RouteCollection $routes) {
    // admin hapus data siswa
    $routes->delete('siswa/delete/(:any)', 'Admin\DataSiswa::delete/$1');
    $routes->get('siswa/bulk', 'Admin\DataSiswa::bulkPostSiswa');
+   // admin & wali kelas download foto siswa (zip)
+   $routes->get('siswa/foto/download', 'Admin\DataSiswa::downloadFotoSiswa');
 
    // POST Data Siswa
 
