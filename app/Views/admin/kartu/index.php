@@ -98,46 +98,6 @@
       margin-top: 0;
    }
 
-   /* Tab sederhana buatan sendiri: plugin tab bawaan tema tidak dipakai
-      di proyek ini dan panelnya tidak pernah terbuka. */
-   .tab-kartu {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 24px;
-      border-bottom: 2px solid #eee;
-      padding-bottom: 8px;
-   }
-
-   .tab-kartu__tombol {
-      border: 0;
-      background: transparent;
-      padding: 8px 18px;
-      border-radius: 20px;
-      font-weight: 600;
-      color: #555;
-      cursor: pointer;
-   }
-
-   .tab-kartu__tombol:hover {
-      background: #eef4f2;
-   }
-
-   .tab-kartu__tombol.aktif {
-      background: #1c655a;
-      color: #fff;
-   }
-
-   .berkas-template {
-      margin-bottom: 16px;
-   }
-
-   .berkas-template input[type="file"] {
-      display: inline-block;
-      margin-left: 8px;
-      max-width: 100%;
-   }
-
    .thumb-template {
       max-width: 90px;
       border: 1px solid #ddd;
@@ -157,20 +117,42 @@
       <?php endif; ?>
 
       <div class="card">
-         <div class="card-header card-header-primary">
-            <h4 class="card-title"><b>Kartu Siswa</b></h4>
-            <p class="card-category">
-               Atur base template (SVG) dan posisi elemen data, lalu cetak kartu ukuran
-               <?= $tinggiMm ?> x <?= $lebarMm ?> mm (T x L)
-            </p>
+         <!-- Tab memakai markup standar tema (card-header-tabs + nav-tabs),
+              perpindahannya ditangani JavaScript halaman ini. -->
+         <div class="card-header card-header-primary card-header-tabs">
+            <div class="nav-tabs-navigation">
+               <div class="row align-items-center">
+                  <div class="col-lg-5">
+                     <h4 class="card-title"><b>Kartu Siswa</b></h4>
+                     <p class="card-category">
+                        Ukuran kartu <?= $tinggiMm ?> x <?= $lebarMm ?> mm (T x L)
+                     </p>
+                  </div>
+                  <div class="col-lg-7 ml-lg-auto">
+                     <div class="nav-tabs-wrapper">
+                        <ul class="nav nav-tabs" role="tablist">
+                           <li class="nav-item">
+                              <a class="nav-link active" href="#bagianDesain" data-seksi="bagianDesain">
+                                 <i class="material-icons">design_services</i> Desain Kartu
+                              </a>
+                           </li>
+                           <li class="nav-item">
+                              <a class="nav-link" href="#bagianTemplate" data-seksi="bagianTemplate">
+                                 <i class="material-icons">image</i> Base Template
+                              </a>
+                           </li>
+                           <li class="nav-item">
+                              <a class="nav-link" href="#bagianCetak" data-seksi="bagianCetak">
+                                 <i class="material-icons">print</i> Cetak
+                              </a>
+                           </li>
+                        </ul>
+                     </div>
+                  </div>
+               </div>
+            </div>
          </div>
          <div class="card-body">
-
-            <div class="tab-kartu" role="tablist">
-                  <button type="button" class="tab-kartu__tombol aktif" data-seksi="bagianDesain">Desain Kartu</button>
-                  <button type="button" class="tab-kartu__tombol" data-seksi="bagianTemplate">Base Template</button>
-                  <button type="button" class="tab-kartu__tombol" data-seksi="bagianCetak">Cetak / Download</button>
-               </div>
 
                <!-- ============ 1. DESAIN ============ -->
                <div class="seksi-kartu" id="bagianDesain">
@@ -700,14 +682,15 @@
       muatSiswa();
 
       // ---- perpindahan tab ----
-      const tombolTab = document.querySelectorAll('.tab-kartu__tombol');
+      const tombolTab = document.querySelectorAll('.nav-tabs .nav-link[data-seksi]');
 
       tombolTab.forEach(function (tombol) {
-         tombol.addEventListener('click', function () {
+         tombol.addEventListener('click', function (e) {
+            e.preventDefault();
             tombolTab.forEach(function (t) {
                const seksi = document.getElementById(t.dataset.seksi);
                const aktif = t === tombol;
-               t.classList.toggle('aktif', aktif);
+               t.classList.toggle('active', aktif);
                if (seksi) seksi.hidden = !aktif;
             });
             // kanvas perlu diukur ulang bila tadinya tersembunyi
