@@ -9,9 +9,7 @@ use App\Models\SiswaModel;
 use Endroid\QrCode\Color\Color;
 use Endroid\QrCode\Encoding\Encoding;
 use Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelHigh;
-use Endroid\QrCode\Label\Font\Font;
 use Endroid\QrCode\QrCode;
-use Endroid\QrCode\Label\Label;
 use Endroid\QrCode\Logo\Logo;
 use Endroid\QrCode\RoundBlockSizeMode\RoundBlockSizeModeMargin;
 use Endroid\QrCode\Writer\PngWriter;
@@ -23,8 +21,6 @@ class QRGenerator extends BaseController
    protected QrCode $qrCode;
    protected WriterInterface $writer;
    protected ?Logo $logo = null;
-   protected Label $label;
-   protected Font $labelFont;
    protected Color $foregroundColor;
    protected Color $foregroundColor2;
    protected Color $backgroundColor;
@@ -38,8 +34,6 @@ class QRGenerator extends BaseController
       $this->setQrCodeFilePath(self::UPLOADS_PATH);
 
       $this->writer = new PngWriter();
-
-      $this->labelFont = new Font(FCPATH . 'assets/fonts/Roboto-Medium.ttf', 14);
 
       $this->foregroundColor = new Color(0, 0, 0);
       $this->foregroundColor2 = new Color(28, 101, 90);
@@ -64,10 +58,6 @@ class QRGenerator extends BaseController
             }
          }
       }
-
-      $this->label = Label::create('')
-         ->setFont($this->labelFont)
-         ->setTextColor($this->foregroundColor);
 
       // Create QR code
       $this->qrCode = QrCode::create('')
@@ -111,7 +101,6 @@ class QRGenerator extends BaseController
    public function generateQrGuru()
    {
       $this->qrCode->setForegroundColor($this->foregroundColor2);
-      $this->label->setTextColor($this->foregroundColor2);
 
       $this->qrCodeFilePath .= 'qr-guru/';
 
@@ -136,14 +125,11 @@ class QRGenerator extends BaseController
       // set qr code data
       $this->qrCode->setData($unique_code);
 
-      $this->label->setText($nama);
-
       // Save it to a file
       $this->writer
          ->write(
             qrCode: $this->qrCode,
-            logo: $this->logo,
-            label: $this->label
+            logo: $this->logo
          )
          ->saveToFile(
             path: $this->qrCodeFilePath . $filename
@@ -201,7 +187,6 @@ class QRGenerator extends BaseController
       }
       try {
          $this->qrCode->setForegroundColor($this->foregroundColor2);
-         $this->label->setTextColor($this->foregroundColor2);
 
          $this->qrCodeFilePath .= 'qr-guru/';
 
