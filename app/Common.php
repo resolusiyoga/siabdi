@@ -336,16 +336,17 @@ if (!function_exists('generateToken')) {
 /**
  * Kode unik untuk QR absensi (siswa/guru).
  *
- * Panjangnya sengaja pendek (11 karakter) supaya pola QR lebih renggang
+ * Panjangnya sengaja pendek (9 karakter) supaya pola QR lebih renggang
  * dan tetap terbaca walau dicetak kecil pada kartu siswa. Alfabetnya
  * tanpa karakter yang mudah tertukar (0/O, 1/I) agar aman bila suatu saat
  * kodenya perlu diketik manual.
  *
- * Ruang kombinasi 32^11 (~3,6 x 10^16) membuat tabrakan praktis mustahil,
- * tetapi pemanggil tetap sebaiknya memeriksa keunikan ke database.
+ * Ruang kombinasi 32^9 (~3,5 x 10^13) membuat tabrakan sangat jarang,
+ * tetapi kode tetap WAJIB dicek lewat \App\Libraries\KodeUnik sebelum
+ * disimpan -- fungsi ini hanya mengacak, tidak memeriksa apa pun.
  */
 if (!function_exists('generateUniqueCode')) {
-    function generateUniqueCode(int $panjang = 11)
+    function generateUniqueCode(int $panjang = 9)
     {
         $alfabet = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
         $kode = '';

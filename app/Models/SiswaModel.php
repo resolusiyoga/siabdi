@@ -197,15 +197,11 @@ class SiswaModel extends Model
    }
 
    /**
-    * Kode unik baru yang dipastikan belum dipakai siswa lain.
+    * Kode unik baru yang dipastikan belum dipakai siswa maupun guru.
     */
    public function kodeUnikBaru(): string
    {
-      do {
-         $kode = generateUniqueCode();
-      } while ($this->db->table($this->table)->where('unique_code', $kode)->countAllResults() > 0);
-
-      return $kode;
+      return \App\Libraries\KodeUnik::buat(db: $this->db);
    }
 
    public function getSiswa($id)
