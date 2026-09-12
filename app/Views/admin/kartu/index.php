@@ -78,6 +78,10 @@
       background: #fafafa;
    }
 
+   .daftar-elemen {
+      background: #fff;
+   }
+
    .daftar-elemen .list-group-item {
       padding: .5rem .75rem;
       cursor: pointer;
@@ -356,23 +360,32 @@
                         </div>
 
                         <h5 class="mb-2"><b>Elemen data</b></h5>
-                        <ul class="list-group daftar-elemen mb-4" id="daftarElemen"></ul>
-
-                        <h5 class="mb-2"><b>Properti elemen</b></h5>
-                        <div id="panelProperti" class="mb-3">
-                           <p class="text-muted">Pilih salah satu elemen terlebih dahulu.</p>
+                        <div class="panel-kotak mb-4">
+                           <ul class="list-group daftar-elemen" id="daftarElemen"></ul>
+                           <p class="text-muted mb-0 mt-2" style="font-size:12px;">
+                              Centang untuk menampilkan elemen pada kartu, klik namanya untuk mengubah posisi &amp; gayanya.
+                           </p>
                         </div>
 
-                        <?php if ($bolehUbah) : ?>
-                           <button type="button" class="btn btn-primary" id="btnSimpanLayout">
-                              <i class="material-icons">save</i> Simpan Tata Letak
-                           </button>
-                           <a href="<?= base_url('admin/kartu/layout/reset') ?>" class="btn btn-outline-secondary"
-                              onclick="return confirm('Kembalikan tata letak ke bawaan?')">Reset</a>
-                           <span id="statusSimpan" class="ml-2 text-success"></span>
-                        <?php else : ?>
-                           <p class="text-muted">Perubahan tata letak hanya dapat disimpan oleh superadmin.</p>
-                        <?php endif; ?>
+                        <h5 class="mb-2"><b>Properti elemen</b></h5>
+                        <div class="panel-kotak mb-4">
+                           <div id="panelProperti">
+                              <p class="text-muted mb-0">Pilih salah satu elemen terlebih dahulu.</p>
+                           </div>
+
+                           <?php if ($bolehUbah) : ?>
+                              <hr>
+                              <button type="button" class="btn btn-primary btn-sm" id="btnSimpanLayout">
+                                 <i class="material-icons">save</i> Simpan Tata Letak
+                              </button>
+                              <a href="<?= base_url('admin/kartu/layout/reset') ?>" class="btn btn-outline-secondary btn-sm"
+                                 onclick="return confirm('Kembalikan tata letak ke bawaan?')">Reset</a>
+                              <span id="statusSimpan" class="ml-2 text-success"></span>
+                           <?php else : ?>
+                              <hr>
+                              <p class="text-muted mb-0">Perubahan tata letak hanya dapat disimpan oleh superadmin.</p>
+                           <?php endif; ?>
+                        </div>
                      </div>
                   </div>
                </div>
