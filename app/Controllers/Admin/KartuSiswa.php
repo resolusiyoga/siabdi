@@ -49,6 +49,7 @@ class KartuSiswa extends BaseController
          'ctx'         => 'kartu',
          'template'    => $template,
          'elemen'      => KartuTemplateModel::ELEMEN,
+         'sumberQr'    => KartuTemplateModel::SUMBER_QR,
          'lebarMm'     => KartuTemplateModel::LEBAR_MM,
          'tinggiMm'    => KartuTemplateModel::TINGGI_MM,
          'layoutDefault' => $this->kartuModel->layoutDefault(),
@@ -261,7 +262,7 @@ class KartuSiswa extends BaseController
          'sisiCetak'  => $sisi === 'keduanya' ? ['depan', 'belakang'] : [$sisi],
          'elemen'     => KartuTemplateModel::ELEMEN,
          'garisPotong' => (bool) $this->request->getVar('garis_potong'),
-         'kartu'      => array_map(fn($s) => $this->dataKartu($s), $siswa),
+         'kartu'      => array_map(fn($s) => $this->dataKartu($s, $template['layout']), $siswa),
       ];
 
       return view('admin/kartu/cetak', $data);
@@ -295,7 +296,7 @@ class KartuSiswa extends BaseController
          $png = $renderer->render(
             $template['layout'],
             $sisiCetak[0],
-            $this->dataKartu($siswa[0]),
+            $this->dataSisi($this->dataKartu($siswa[0], $template['layout']), $template['layout'], $sisiCetak[0]),
             $template['svg_' . $sisiCetak[0]]
          );
 
@@ -326,12 +327,17 @@ class KartuSiswa extends BaseController
       }
 
       foreach ($siswa as $s) {
-         $data = $this->dataKartu($s);
+         $data = $this->dataKartu($s, $template['layout']);
 
          foreach ($sisiCetak as $sisi) {
             $zip->addFromString(
                $this->namaBerkas($s, $sisi),
-               $renderer->render($template['layout'], $sisi, $data, $template['svg_' . $sisi])
+               $renderer->render(
+                  $template['layout'],
+                  $sisi,
+                  $this->dataSisi($data, $template['layout'], $sisi),
+                  $template['svg_' . $sisi]
+               )
             );
          }
       }
@@ -433,11 +439,19 @@ class KartuSiswa extends BaseController
     * Nilai tiap elemen untuk satu siswa (foto & QR sudah jadi data URI,
     * supaya halaman cetak tidak bergantung request tambahan).
     */
-   private function dataKartu(array $siswa): array
+   private function dataKartu(array $siswa, ?array $layout = null): array
    {
+      // QR hanya dibuat untuk sumber yang benar-benar dipakai layout,
+      // supaya satu kelas tidak perlu menghasilkan QR rangkap tiga.
+      $qr = [];
+      foreach ($this->sumberQrDipakai($layout) as $sumber) {
+         $qr[$sumber] = $this->qrDataUri((string) ($siswa[$sumber] ?? ''));
+      }
+
       return [
          'foto'    => $this->fotoDataUri($siswa['foto'] ?? null),
-         'qrcode'  => $this->qrDataUri($siswa['unique_code'] ?? ''),
+         'qr'      => $qr,
+         'qrcode'  => $qr['unique_code'] ?? reset($qr) ?: null,
          'nama'    => $siswa['nama_siswa'] ?? '',
          'nis'     => $siswa['nis'] ?? '',
          'nisn'    => $siswa['nisn'] ?? '',
@@ -457,24 +471,76 @@ class KartuSiswa extends BaseController
 
       foreach ($semua as $s) {
          if (!empty($s['foto']) && file_exists(FCPATH . $s['foto'])) {
-            return $this->dataKartu($s);
+            return $this->dataKartuContoh($s);
          }
       }
 
       if (!empty($semua)) {
-         return $this->dataKartu($semua[0]);
+         return $this->dataKartuContoh($semua[0]);
       }
 
-      return [
-         'foto'    => null,
-         'qrcode'  => $this->qrDataUri('CONTOH-KODE-UNIK'),
-         'nama'    => 'Nama Siswa Contoh',
-         'nis'     => '1234567',
-         'nisn'    => '0071234567',
-         'kelas'   => 'X-BDP',
-         'sekolah' => $this->generalSettings->school_name ?? 'Nama Sekolah',
-         'tahun'   => $this->generalSettings->school_year ?? '2025/2026',
-      ];
+      return $this->dataKartuContoh([
+         'foto'        => null,
+         'unique_code' => 'CONTOH-KODE-UNIK',
+         'nama_siswa'  => 'Nama Siswa Contoh',
+         'nis'         => '1234567',
+         'nisn'        => '0071234567',
+         'kelas'       => 'X',
+         'jurusan'     => 'BDP',
+      ]);
+   }
+
+   /**
+    * Data contoh untuk editor: seluruh pilihan sumber QR ikut dibuat agar
+    * pratinjau langsung berubah saat sumbernya diganti.
+    */
+   private function dataKartuContoh(array $siswa): array
+   {
+      $data = $this->dataKartu($siswa);
+
+      foreach (array_keys(KartuTemplateModel::SUMBER_QR) as $sumber) {
+         $data['qr'][$sumber] = $this->qrDataUri((string) ($siswa[$sumber] ?? ''));
+      }
+
+      $data['qrcode'] = $data['qr']['unique_code'] ?? null;
+
+      return $data;
+   }
+
+   /**
+    * Sumber teks QR yang dipakai layout (kedua sisi), minimal kode unik.
+    *
+    * @return string[]
+    */
+   private function sumberQrDipakai(?array $layout): array
+   {
+      if ($layout === null) {
+         return ['unique_code'];
+      }
+
+      $sumber = [];
+
+      foreach (KartuTemplateModel::SISI as $sisi) {
+         $qr = $layout[$sisi]['qrcode'] ?? null;
+
+         if (!empty($qr['tampil'])) {
+            $sumber[] = $qr['sumber'] ?? 'unique_code';
+         }
+      }
+
+      return array_values(array_unique($sumber ?: ['unique_code']));
+   }
+
+   /**
+    * Nilai elemen untuk satu sisi: QR disesuaikan dengan sumber teks
+    * yang dipilih pada sisi tersebut.
+    */
+   private function dataSisi(array $data, array $layout, string $sisi): array
+   {
+      $sumber = $layout[$sisi]['qrcode']['sumber'] ?? 'unique_code';
+      $data['qrcode'] = $data['qr'][$sumber] ?? null;
+
+      return $data;
    }
 
    private function fotoDataUri(?string $path): ?string

@@ -54,7 +54,10 @@ $elemenSisi = $layout[$sisi] ?? [];
          </div>
       <?php
       } else {
-         $src = $data[$kunci] ?? null;
+         // QR code memakai sumber teks yang dipilih pada sisi ini
+         $src = $kunci === 'qrcode'
+            ? ($data['qr'][$el['sumber'] ?? 'unique_code'] ?? $data['qrcode'] ?? null)
+            : ($data[$kunci] ?? null);
          $gaya = $posisi . sprintf(
             'border-radius:%smm;%s',
             $el['radius'],
