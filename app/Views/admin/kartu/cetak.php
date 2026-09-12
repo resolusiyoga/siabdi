@@ -62,9 +62,17 @@
          break-inside: avoid;
       }
 
-      .lembar--potong .kartu {
-         outline: 0.2mm dashed #b0b0b0;
-         outline-offset: 0;
+      /* Garis bantu potong digambar DI DALAM kartu sebagai lapisan sendiri.
+         Sebelumnya memakai outline yang tergambar di luar kotak, sehingga
+         sisi kiri & atas terpotong saat dirender ke PDF. */
+      .lembar--potong .kartu::after {
+         content: "";
+         position: absolute;
+         inset: 0;
+         border: 0.2mm dashed rgba(0, 0, 0, .35);
+         pointer-events: none;
+         -webkit-print-color-adjust: exact;
+         print-color-adjust: exact;
       }
 
       @media print {
