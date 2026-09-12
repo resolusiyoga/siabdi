@@ -90,7 +90,7 @@ class SiswaModel extends Model
          'id_kelas' => $idKelas,
          'jenis_kelamin' => $jenisKelamin,
          'no_hp' => $noHp,
-         'unique_code' => generateToken(),
+         'unique_code' => $this->kodeUnikBaru(),
          'foto' => $foto,
       ]);
    }
@@ -186,7 +186,7 @@ class SiswaModel extends Model
                $data['id_kelas'] = getCSVInputValue($item, 'id_kelas', 'int');
                $data['jenis_kelamin'] = getCSVInputValue($item, 'jenis_kelamin');
                $data['no_hp'] = getCSVInputValue($item, 'no_hp');
-               $data['unique_code'] = generateToken();
+               $data['unique_code'] = $this->kodeUnikBaru();
 
                $this->insert($data);
                return $data;
@@ -194,6 +194,18 @@ class SiswaModel extends Model
             $i++;
          }
       }
+   }
+
+   /**
+    * Kode unik baru yang dipastikan belum dipakai siswa lain.
+    */
+   public function kodeUnikBaru(): string
+   {
+      do {
+         $kode = generateUniqueCode();
+      } while ($this->db->table($this->table)->where('unique_code', $kode)->countAllResults() > 0);
+
+      return $kode;
    }
 
    public function getSiswa($id)

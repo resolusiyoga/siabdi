@@ -34,6 +34,18 @@ class GuruModel extends Model
       return $this->where([$this->primaryKey => $id])->first();
    }
 
+   /**
+    * Kode unik baru yang dipastikan belum dipakai guru lain.
+    */
+   public function kodeUnikBaru(): string
+   {
+      do {
+         $kode = generateUniqueCode();
+      } while ($this->db->table($this->table)->where('unique_code', $kode)->countAllResults() > 0);
+
+      return $kode;
+   }
+
    public function createGuru($nuptk, $nama, $jenisKelamin, $alamat, $noHp)
    {
       return $this->save([
@@ -42,7 +54,7 @@ class GuruModel extends Model
          'jenis_kelamin' => $jenisKelamin,
          'alamat' => $alamat,
          'no_hp' => $noHp,
-         'unique_code' => sha1($nama . md5($nuptk . $nama . $noHp)) . substr(sha1($nuptk . rand(0, 100)), 0, 24)
+         'unique_code' => $this->kodeUnikBaru()
       ]);
    }
 

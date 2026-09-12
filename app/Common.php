@@ -333,6 +333,31 @@ if (!function_exists('generateToken')) {
     }
 }
 
+/**
+ * Kode unik untuk QR absensi (siswa/guru).
+ *
+ * Panjangnya sengaja pendek (11 karakter) supaya pola QR lebih renggang
+ * dan tetap terbaca walau dicetak kecil pada kartu siswa. Alfabetnya
+ * tanpa karakter yang mudah tertukar (0/O, 1/I) agar aman bila suatu saat
+ * kodenya perlu diketik manual.
+ *
+ * Ruang kombinasi 32^11 (~3,6 x 10^16) membuat tabrakan praktis mustahil,
+ * tetapi pemanggil tetap sebaiknya memeriksa keunikan ke database.
+ */
+if (!function_exists('generateUniqueCode')) {
+    function generateUniqueCode(int $panjang = 11)
+    {
+        $alfabet = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+        $kode = '';
+
+        for ($i = 0; $i < $panjang; $i++) {
+            $kode .= $alfabet[random_int(0, strlen($alfabet) - 1)];
+        }
+
+        return $kode;
+    }
+}
+
 //current full url
 if (!function_exists('currentFullURL')) {
     function currentFullURL()
