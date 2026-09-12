@@ -127,6 +127,8 @@ class KartuTemplateModel extends Model
          'isi'       => 'cover',  // cover | contain
          'bingkai'   => 0.0,
          'warnaBingkai' => '#ffffff',
+         'rata'      => 'bebas',   // bebas | kiri | tengah | kanan
+         'margin'    => 4.0,       // jarak dari tepi kartu untuk rata kiri/kanan
       ], $o);
 
       // Koordinat bawaan mengikuti penanda posisi pada gambar tata letak
@@ -198,6 +200,14 @@ class KartuTemplateModel extends Model
                $item['isi']          = ($data['isi'] ?? '') === 'contain' ? 'contain' : 'cover';
                $item['bingkai']      = $this->batas((float) ($data['bingkai'] ?? $bawaan['bingkai']), 0, 5);
                $item['warnaBingkai'] = $this->warna($data['warnaBingkai'] ?? $bawaan['warnaBingkai']);
+               $item['rata']         = in_array($data['rata'] ?? '', ['bebas', 'kiri', 'tengah', 'kanan'], true)
+                  ? $data['rata']
+                  : $bawaan['rata'];
+               $item['margin']       = $this->batas((float) ($data['margin'] ?? $bawaan['margin']), 0, 25);
+
+               // posisi horizontal dihitung ulang supaya perataan tetap tepat
+               // walau lebar elemen atau jarak tepinya diubah
+               $item['x'] = $this->posisiRata($item);
             }
 
             $hasil[$sisi][$kunci] = $item;
@@ -205,6 +215,19 @@ class KartuTemplateModel extends Model
       }
 
       return $hasil;
+   }
+
+   /**
+    * Posisi horizontal elemen gambar sesuai perataannya.
+    */
+   private function posisiRata(array $item): float
+   {
+      return match ($item['rata']) {
+         'kiri'   => $this->batas($item['margin'], -50, 200),
+         'tengah' => $this->batas((self::LEBAR_MM - $item['w']) / 2, -50, 200),
+         'kanan'  => $this->batas(self::LEBAR_MM - $item['w'] - $item['margin'], -50, 200),
+         default  => $item['x'],
+      };
    }
 
    private function batas(float $nilai, float $min, float $max): float

@@ -595,6 +595,20 @@
          return Math.round(n * 100) / 100;
       }
 
+      // Posisi horizontal elemen gambar mengikuti perataannya (sama dengan
+      // perhitungan di sisi server), sehingga tetap pas walau lebarnya diubah.
+      function terapkanRata(el) {
+         if (!el || el.rata === undefined || el.rata === 'bebas') return;
+
+         if (el.rata === 'kiri') {
+            el.x = bulat(el.margin);
+         } else if (el.rata === 'tengah') {
+            el.x = bulat((LEBAR_MM - el.w) / 2);
+         } else if (el.rata === 'kanan') {
+            el.x = bulat(LEBAR_MM - el.w - el.margin);
+         }
+      }
+
       // ---- gambar ulang kanvas ----
       function render() {
          kanvas.innerHTML = '';
@@ -614,6 +628,7 @@
          Object.keys(ELEMEN).forEach(function (kunci) {
             const el = layout[sisi][kunci];
             if (!el.tampil) return;
+            if (ELEMEN[kunci].tipe === 'gambar') terapkanRata(el);
             kanvas.appendChild(buatElemen(kunci, el));
          });
       }
@@ -691,11 +706,15 @@
             const dy = (ev.clientY - awal.y) * MM_PER_PX / skala;
 
             if (mode === 'posisi') {
-               el.x = bulat(awal.ex + dx);
+               // elemen dengan perataan aktif hanya bisa digeser vertikal
+               if (!el.rata || el.rata === 'bebas') {
+                  el.x = bulat(awal.ex + dx);
+               }
                el.y = bulat(awal.ey + dy);
             } else {
                el.w = bulat(Math.max(2, awal.ew + dx));
                el.h = bulat(Math.max(2, awal.eh + dy));
+               terapkanRata(el);   // elemen yang diratakan tetap pas setelah diubah ukuran
             }
             render();
             isiProperti();
@@ -762,9 +781,11 @@
          const teks = ELEMEN[terpilih].tipe === 'teks';
          const nonaktif = BOLEH_UBAH ? '' : 'disabled';
 
+         const xTerkunci = !teks && el.rata && el.rata !== 'bebas';
+
          let html = '<h6 class="mb-2"><b>' + ELEMEN[terpilih].label + '</b> (sisi ' + sisi + ')</h6>';
          html += '<div class="prop-grid">';
-         html += kolomAngka('x', 'Kiri (mm)', el.x, nonaktif);
+         html += kolomAngka('x', 'Kiri (mm)', el.x, xTerkunci ? 'disabled' : nonaktif);
          html += kolomAngka('y', 'Atas (mm)', el.y, nonaktif);
          html += kolomAngka('w', 'Lebar (mm)', el.w, nonaktif);
          html += kolomAngka('h', 'Tinggi (mm)', el.h, nonaktif);
@@ -783,6 +804,15 @@
             html += '<div><label>Awalan teks</label><input type="text" class="form-control form-control-sm" data-prop="prefiks" value="' + (el.prefiks || '').replace(/"/g, '&quot;') + '" ' + nonaktif + '></div>';
             html += '<div><label>Huruf kapital</label><input type="checkbox" data-prop="kapital"' + (el.kapital ? ' checked' : '') + ' ' + nonaktif + '></div>';
          } else {
+            html += '<div style="grid-column:1/-1;"><label>Perataan horizontal</label><select class="custom-select custom-select-sm" data-prop="rata" ' + nonaktif + '>' +
+               [['bebas', 'Bebas (atur sendiri)'], ['kiri', 'Rata kiri'], ['tengah', 'Rata tengah'], ['kanan', 'Rata kanan']].map(function (r) {
+                  return '<option value="' + r[0] + '"' + (el.rata === r[0] ? ' selected' : '') + '>' + r[1] + '</option>';
+               }).join('') + '</select></div>';
+
+            if (el.rata === 'kiri' || el.rata === 'kanan') {
+               html += kolomAngka('margin', 'Jarak dari tepi (mm)', el.margin, nonaktif, 0.5);
+            }
+
             html += kolomAngka('radius', 'Sudut membulat (mm)', el.radius, nonaktif, 0.5);
             html += kolomAngka('bingkai', 'Tebal bingkai (mm)', el.bingkai, nonaktif, 0.1);
             html += '<div><label>Warna bingkai</label><input type="color" class="form-control form-control-sm" data-prop="warnaBingkai" value="' + el.warnaBingkai + '" ' + nonaktif + '></div>';
@@ -807,6 +837,17 @@
                } else {
                   el[prop] = input.value;
                }
+
+               if (ELEMEN[terpilih].tipe === 'gambar') {
+                  terapkanRata(el);
+                  // pilihan perataan mengubah kolom yang tampil di panel
+                  if (prop === 'rata') {
+                     isiProperti();
+                     render();
+                     return;
+                  }
+               }
+
                render();
             });
          });
