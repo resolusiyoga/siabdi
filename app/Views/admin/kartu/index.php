@@ -98,16 +98,34 @@
       margin-top: 0;
    }
 
-   .bagian-judul {
-      margin: 32px 0 16px;
-      padding-bottom: 8px;
+   /* Tab sederhana buatan sendiri: plugin tab bawaan tema tidak dipakai
+      di proyek ini dan panelnya tidak pernah terbuka. */
+   .tab-kartu {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 24px;
       border-bottom: 2px solid #eee;
-      color: #1c655a;
-      font-weight: 700;
+      padding-bottom: 8px;
    }
 
-   .bagian-judul:first-of-type {
-      margin-top: 0;
+   .tab-kartu__tombol {
+      border: 0;
+      background: transparent;
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-weight: 600;
+      color: #555;
+      cursor: pointer;
+   }
+
+   .tab-kartu__tombol:hover {
+      background: #eef4f2;
+   }
+
+   .tab-kartu__tombol.aktif {
+      background: #1c655a;
+      color: #fff;
    }
 
    .berkas-template {
@@ -148,9 +166,14 @@
          </div>
          <div class="card-body">
 
-            <!-- ============ 1. DESAIN ============ -->
-               <h4 class="bagian-judul">1. Desain Kartu</h4>
-               <div id="bagianDesain">
+            <div class="tab-kartu" role="tablist">
+                  <button type="button" class="tab-kartu__tombol aktif" data-seksi="bagianDesain">Desain Kartu</button>
+                  <button type="button" class="tab-kartu__tombol" data-seksi="bagianTemplate">Base Template</button>
+                  <button type="button" class="tab-kartu__tombol" data-seksi="bagianCetak">Cetak / Download</button>
+               </div>
+
+               <!-- ============ 1. DESAIN ============ -->
+               <div class="seksi-kartu" id="bagianDesain">
                   <div class="editor">
                      <div class="editor__kanvas-area">
                         <div class="btn-group btn-group-sm mb-2" role="group">
@@ -204,8 +227,7 @@
 
                <!-- ============ 2. BASE TEMPLATE ============ -->
                <?php if ($bolehUbah) : ?>
-                  <h4 class="bagian-judul">2. Base Template Kartu</h4>
-                  <div id="bagianTemplate">
+                  <div class="seksi-kartu" id="bagianTemplate" hidden>
                      <form action="<?= base_url('admin/kartu/template') ?>" method="post" enctype="multipart/form-data">
                         <?= csrf_field() ?>
                         <div class="form-group">
@@ -259,13 +281,13 @@
                      </form>
                   </div>
                <?php else : ?>
-                  <h4 class="bagian-judul">2. Base Template Kartu</h4>
-                  <p class="text-muted">Penggantian base template hanya dapat dilakukan oleh superadmin.</p>
+                  <div class="seksi-kartu" id="bagianTemplate" hidden>
+                     <p class="text-muted">Penggantian base template hanya dapat dilakukan oleh superadmin.</p>
+                  </div>
                <?php endif; ?>
 
                <!-- ============ 3. CETAK ============ -->
-               <h4 class="bagian-judul">3. Cetak / Download</h4>
-               <div id="bagianCetak">
+               <div class="seksi-kartu" id="bagianCetak" hidden>
                   <form action="<?= base_url('admin/kartu/cetak') ?>" method="get" target="_blank">
                      <div class="row">
                         <div class="col-md-4">
@@ -676,6 +698,22 @@
 
       cetakKelas.addEventListener('change', muatSiswa);
       muatSiswa();
+
+      // ---- perpindahan tab ----
+      const tombolTab = document.querySelectorAll('.tab-kartu__tombol');
+
+      tombolTab.forEach(function (tombol) {
+         tombol.addEventListener('click', function () {
+            tombolTab.forEach(function (t) {
+               const seksi = document.getElementById(t.dataset.seksi);
+               const aktif = t === tombol;
+               t.classList.toggle('aktif', aktif);
+               if (seksi) seksi.hidden = !aktif;
+            });
+            // kanvas perlu diukur ulang bila tadinya tersembunyi
+            if (tombol.dataset.seksi === 'bagianDesain') terapkanSkala();
+         });
+      });
 
       terapkanSkala();
       gambarUlang();
