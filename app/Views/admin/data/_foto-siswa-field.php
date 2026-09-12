@@ -208,9 +208,9 @@
       // Mulai stream kamera. deviceId null = kamera default (dipakai saat
       // pertama kali membuka modal, sekaligus utk memicu izin & label device).
       function mulaiStreamKamera(deviceId) {
+         hentikanStreamKamera();
          var constraints = deviceId ? { video: { deviceId: { exact: deviceId } } } : { video: true };
          return navigator.mediaDevices.getUserMedia(constraints).then(function(stream) {
-            hentikanStreamKamera();
             kameraStream = stream;
             $videoKamera.srcObject = stream;
          });
@@ -252,7 +252,9 @@
       });
 
       $selectKamera.addEventListener('change', function() {
-         mulaiStreamKamera(this.value);
+         mulaiStreamKamera(this.value).catch(function() {
+            alert('Tidak dapat beralih ke kamera yang dipilih.');
+         });
       });
 
       $('#modalKameraFoto').on('hidden.bs.modal', hentikanStreamKamera);
