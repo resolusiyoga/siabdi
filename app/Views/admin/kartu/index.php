@@ -146,6 +146,11 @@
                                  <i class="material-icons">print</i> Cetak
                               </a>
                            </li>
+                           <li class="nav-item">
+                              <a class="nav-link" href="#bagianDownload" data-seksi="bagianDownload">
+                                 <i class="material-icons">cloud_download</i> Download
+                              </a>
+                           </li>
                         </ul>
                      </div>
                   </div>
@@ -316,6 +321,62 @@
                         dengan skala 100% agar ukuran kartu tepat <?= $tinggiMm ?> x <?= $lebarMm ?> mm.
                      </p>
                   </form>
+               </div>
+
+               <!-- ============ 4. DOWNLOAD ============ -->
+               <div class="seksi-kartu" id="bagianDownload" hidden>
+                  <div class="row">
+                     <div class="col-md-5">
+                        <label for="unduhKelas">Kelas</label>
+                        <select id="unduhKelas" class="custom-select">
+                           <?php if (empty($kelasWali)) : ?>
+                              <option value="">-- Semua kelas --</option>
+                           <?php endif; ?>
+                           <?php foreach ($kelas as $value) : ?>
+                              <?php if (!empty($kelasWali) && $kelasWali['id_kelas'] != $value['id_kelas']) continue; ?>
+                              <option value="<?= $value['id_kelas']; ?>">
+                                 <?= labelKelas($value['kelas'], $value['jurusan']); ?>
+                              </option>
+                           <?php endforeach; ?>
+                        </select>
+                     </div>
+                     <div class="col-md-4">
+                        <label for="unduhSisi">Sisi kartu</label>
+                        <select id="unduhSisi" class="custom-select">
+                           <option value="keduanya">Depan &amp; belakang</option>
+                           <option value="depan">Depan saja</option>
+                           <option value="belakang">Belakang saja</option>
+                        </select>
+                     </div>
+                     <div class="col-md-3 d-flex align-items-end">
+                        <a id="unduhSemua" class="btn btn-primary w-100" href="#">
+                           <i class="material-icons">folder_zip</i> Unduh semua (ZIP)
+                        </a>
+                     </div>
+                  </div>
+
+                  <p class="text-muted mt-2" style="font-size:13px;">
+                     Berkas PNG 300 dpi (<?= $lebarMm ?> x <?= $tinggiMm ?> mm) dirender di server memakai
+                     tata letak yang tersimpan. Satu siswa dengan dua sisi diunduh sebagai ZIP.
+                  </p>
+
+                  <div class="table-responsive mt-3">
+                     <table class="table table-hover">
+                        <thead class="text-primary">
+                           <tr>
+                              <th style="width:40px;">#</th>
+                              <th>Nama Siswa</th>
+                              <th>NIS</th>
+                              <th class="text-right">Unduh</th>
+                           </tr>
+                        </thead>
+                        <tbody id="daftarUnduh">
+                           <tr>
+                              <td colspan="4" class="text-muted">Memuat data siswa...</td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
                </div>
 
 
@@ -680,6 +741,81 @@
 
       cetakKelas.addEventListener('change', muatSiswa);
       muatSiswa();
+
+      // ---- daftar unduhan per siswa ----
+      const unduhKelas = document.getElementById('unduhKelas');
+      const unduhSisi = document.getElementById('unduhSisi');
+      const daftarUnduh = document.getElementById('daftarUnduh');
+      const unduhSemua = document.getElementById('unduhSemua');
+      const URL_UNDUH = '<?= base_url('admin/kartu/download') ?>';
+
+      function tautanUnduh(params) {
+         const q = new URLSearchParams(params);
+         q.set('sisi', unduhSisi.value);
+         return URL_UNDUH + '?' + q.toString();
+      }
+
+      function perbaruiUnduhSemua() {
+         unduhSemua.href = tautanUnduh(unduhKelas.value ? { id_kelas: unduhKelas.value } : {});
+      }
+
+      function muatDaftarUnduh() {
+         perbaruiUnduhSemua();
+         daftarUnduh.innerHTML = '<tr><td colspan="4" class="text-muted">Memuat data siswa...</td></tr>';
+
+         $.ajax({
+            type: 'POST',
+            url: '<?= base_url('admin/kartu/siswa-by-kelas') ?>',
+            data: setAjaxData({ id_kelas: unduhKelas.value }),
+            success: function (res) {
+               daftarUnduh.innerHTML = '';
+
+               if (!res || !res.length) {
+                  daftarUnduh.innerHTML = '<tr><td colspan="4" class="text-muted">Tidak ada siswa pada kelas ini.</td></tr>';
+                  return;
+               }
+
+               res.forEach(function (s, i) {
+                  const tr = document.createElement('tr');
+
+                  const no = document.createElement('td');
+                  no.textContent = i + 1;
+
+                  const nama = document.createElement('td');
+                  nama.textContent = s.nama_siswa;
+
+                  const nis = document.createElement('td');
+                  nis.textContent = s.nis;
+
+                  const aksi = document.createElement('td');
+                  aksi.className = 'text-right';
+                  const tombol = document.createElement('a');
+                  tombol.className = 'btn btn-sm btn-primary';
+                  tombol.href = tautanUnduh({ id_siswa: s.id_siswa });
+                  tombol.innerHTML = '<i class="material-icons">cloud_download</i> Unduh';
+                  aksi.appendChild(tombol);
+
+                  tr.append(no, nama, nis, aksi);
+                  daftarUnduh.appendChild(tr);
+               });
+            },
+            error: function () {
+               daftarUnduh.innerHTML = '<tr><td colspan="4" class="text-danger">Gagal memuat data siswa.</td></tr>';
+            }
+         });
+      }
+
+      unduhKelas.addEventListener('change', muatDaftarUnduh);
+      // pilihan sisi cukup memperbarui tautan yang sudah tampil
+      unduhSisi.addEventListener('change', function () {
+         perbaruiUnduhSemua();
+         daftarUnduh.querySelectorAll('a[href]').forEach(function (a) {
+            const url = new URL(a.href);
+            url.searchParams.set('sisi', unduhSisi.value);
+            a.href = url.toString();
+         });
+      });
+      muatDaftarUnduh();
 
       // ---- perpindahan tab ----
       const tombolTab = document.querySelectorAll('.nav-tabs .nav-link[data-seksi]');

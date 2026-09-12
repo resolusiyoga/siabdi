@@ -3,6 +3,7 @@
 namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
+use App\Libraries\KartuRenderer;
 use App\Models\KartuTemplateModel;
 use App\Models\KelasModel;
 use App\Models\SiswaModel;
@@ -264,6 +265,146 @@ class KartuSiswa extends BaseController
       ];
 
       return view('admin/kartu/cetak', $data);
+   }
+
+   /**
+    * Unduh kartu sebagai berkas PNG 300 dpi: satu siswa (satu berkas per
+    * sisi) atau satu kelas/seluruh siswa dalam bentuk zip.
+    */
+   public function download()
+   {
+      if (!$this->bolehCetak()) {
+         session()->setFlashdata(['msg' => 'Aksi ini tidak diizinkan', 'error' => true]);
+         return redirect()->to('/admin/dashboard');
+      }
+
+      $sisiCetak = $this->sisiDiminta();
+
+      try {
+         $siswa = $this->siswaTerpilih();
+      } catch (\RuntimeException $e) {
+         session()->setFlashdata(['msg' => $e->getMessage(), 'error' => true]);
+         return redirect()->to('/admin/kartu');
+      }
+
+      $template = $this->kartuModel->getTemplateAktif();
+      $renderer = new KartuRenderer();
+
+      // satu siswa, satu sisi -> langsung berkas PNG
+      if (count($siswa) === 1 && count($sisiCetak) === 1) {
+         $png = $renderer->render(
+            $template['layout'],
+            $sisiCetak[0],
+            $this->dataKartu($siswa[0]),
+            $template['svg_' . $sisiCetak[0]]
+         );
+
+         return $this->response
+            ->setHeader('Content-Type', 'image/png')
+            ->setHeader('Content-Disposition', 'attachment; filename="' . $this->namaBerkas($siswa[0], $sisiCetak[0]) . '"')
+            ->setBody($png);
+      }
+
+      $tmp = FCPATH . 'uploads/tmp/';
+      if (!is_dir($tmp)) {
+         mkdir($tmp, 0777, true);
+      }
+
+      $namaZip = 'kartu-siswa';
+      if (count($siswa) === 1) {
+         $namaZip .= '_' . $this->slug($siswa[0]['nama_siswa'] ?? '');
+      } elseif (!empty($siswa[0]['kelas'])) {
+         $namaZip .= '_' . $this->slug(labelKelas($siswa[0]['kelas'], $siswa[0]['jurusan'] ?? null, ''));
+      }
+
+      $output = $tmp . $namaZip . '.zip';
+
+      $zip = new \ZipArchive();
+      if ($zip->open($output, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+         session()->setFlashdata(['msg' => 'Gagal membuat berkas zip', 'error' => true]);
+         return redirect()->to('/admin/kartu');
+      }
+
+      foreach ($siswa as $s) {
+         $data = $this->dataKartu($s);
+
+         foreach ($sisiCetak as $sisi) {
+            $zip->addFromString(
+               $this->namaBerkas($s, $sisi),
+               $renderer->render($template['layout'], $sisi, $data, $template['svg_' . $sisi])
+            );
+         }
+      }
+
+      $zip->close();
+
+      return $this->response->download($output, null, true);
+   }
+
+   /**
+    * Siswa yang diminta lewat parameter: satu siswa, satu kelas, atau semua.
+    * Wali kelas selalu dibatasi pada kelasnya sendiri.
+    *
+    * @throws \RuntimeException bila data tidak ditemukan / tidak diizinkan
+    */
+   private function siswaTerpilih(): array
+   {
+      $idKelas = $this->request->getVar('id_kelas') ?: null;
+      $idSiswa = $this->request->getVar('id_siswa') ?: null;
+
+      $kelasWali = null;
+      if (currentUserRole() === 'wali_kelas') {
+         $kelasWali = currentUserKelas();
+         if (empty($kelasWali)) {
+            throw new \RuntimeException('Kelas anda tidak ditemukan');
+         }
+         $idKelas = $kelasWali['id_kelas'];
+      }
+
+      if ($idSiswa) {
+         $semua = $this->siswaModel->getAllSiswaWithKelas();
+         $siswa = array_values(array_filter(
+            $semua,
+            fn($s) => (string) $s['id_siswa'] === (string) $idSiswa
+         ));
+
+         // wali kelas tidak boleh mengunduh kartu siswa kelas lain
+         if ($kelasWali && !empty($siswa) && (string) $siswa[0]['id_kelas'] !== (string) $kelasWali['id_kelas']) {
+            throw new \RuntimeException('Siswa tersebut bukan siswa kelas anda');
+         }
+      } else {
+         $siswa = $idKelas
+            ? $this->siswaModel->getSiswaByKelas($idKelas)
+            : $this->siswaModel->getAllSiswaWithKelas();
+      }
+
+      if (empty($siswa)) {
+         throw new \RuntimeException('Data siswa tidak ditemukan');
+      }
+
+      return $siswa;
+   }
+
+   /** @return string[] sisi kartu yang diminta */
+   private function sisiDiminta(): array
+   {
+      $sisi = $this->request->getVar('sisi');
+      $sisi = in_array($sisi, ['depan', 'belakang', 'keduanya'], true) ? $sisi : 'keduanya';
+
+      return $sisi === 'keduanya' ? ['depan', 'belakang'] : [$sisi];
+   }
+
+   private function namaBerkas(array $siswa, string $sisi): string
+   {
+      $nama = $this->slug($siswa['nama_siswa'] ?? 'kartu');
+      $nis = $this->slug((string) ($siswa['nis'] ?? ''));
+
+      return trim($nama . '-' . $nis, '-') . '-' . $sisi . '.png';
+   }
+
+   private function slug(string $teks): string
+   {
+      return trim(preg_replace('/[^A-Za-z0-9]+/', '-', $teks), '-');
    }
 
    /**

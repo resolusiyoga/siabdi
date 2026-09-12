@@ -148,6 +148,7 @@ $routes->group('admin', function (RouteCollection $routes) {
       $routes->get('layout/reset', 'KartuSiswa::resetLayout');
       $routes->post('siswa-by-kelas', 'KartuSiswa::siswaByKelas');
       $routes->get('cetak', 'KartuSiswa::cetak');
+      $routes->get('download', 'KartuSiswa::download');
    });
 
    // admin buat laporan
