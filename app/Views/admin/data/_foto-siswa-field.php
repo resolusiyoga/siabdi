@@ -1,17 +1,19 @@
 <?php $fotoUrl = !empty($fotoUrlSiswa) ? base_url($fotoUrlSiswa) : null; ?>
 <div class="form-group mt-4">
    <label>Foto Siswa</label>
-   <div class="d-flex align-items-center flex-wrap" style="gap: 16px;">
-      <div id="fotoPreviewWrapper" style="width:120px;height:150px;border:1px solid #ddd;border-radius:6px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;overflow:hidden;">
-         <img id="fotoPreview" src="<?= $fotoUrl ?? ''; ?>" alt="Foto siswa" style="width:100%;height:100%;object-fit:cover;<?= $fotoUrl ? '' : 'display:none;'; ?>">
-         <i class="material-icons text-secondary" id="fotoPreviewIcon" style="font-size:48px;<?= $fotoUrl ? 'display:none;' : ''; ?>">person</i>
+   <div class="row align-items-center">
+      <div class="col-auto">
+         <div id="fotoPreviewWrapper" style="width:120px;height:150px;border:1px solid #ddd;border-radius:6px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+            <img id="fotoPreview" src="<?= $fotoUrl ?? ''; ?>" alt="Foto siswa" style="width:100%;height:100%;object-fit:cover;<?= $fotoUrl ? '' : 'display:none;'; ?>">
+            <i class="material-icons text-secondary" id="fotoPreviewIcon" style="font-size:48px;<?= $fotoUrl ? 'display:none;' : ''; ?>">person</i>
+         </div>
       </div>
-      <div>
-         <button type="button" class="btn btn-primary btn-sm" id="btnUploadFoto">
-            <i class="material-icons" style="font-size:16px;vertical-align:text-bottom;">upload</i> Upload Foto
+      <div class="col">
+         <button type="button" class="btn btn-primary" id="btnUploadFoto">
+            <i class="material-icons mr-2">upload</i>Upload Foto
          </button>
-         <button type="button" class="btn btn-info btn-sm" id="btnCameraFoto">
-            <i class="material-icons" style="font-size:16px;vertical-align:text-bottom;">photo_camera</i> Ambil dari Kamera
+         <button type="button" class="btn btn-info" id="btnCameraFoto">
+            <i class="material-icons mr-2">photo_camera</i>Ambil dari Kamera
          </button>
          <input type="file" id="fotoFileInput" accept="image/png, image/jpeg" class="d-none">
          <p class="text-muted small mt-2 mb-0">Format JPG/PNG. Foto dapat dipotong dan latar belakangnya diganti warna sebelum disimpan.</p>
@@ -31,6 +33,10 @@
             </button>
          </div>
          <div class="modal-body text-center">
+            <div class="form-group text-left d-none" id="wrapPilihKameraFoto">
+               <label class="small mb-1" for="pilihKameraFoto">Pilih Kamera</label>
+               <select id="pilihKameraFoto" class="custom-select"></select>
+            </div>
             <video id="videoKameraFoto" autoplay playsinline style="width:100%;max-width:400px;background:#000;"></video>
          </div>
          <div class="modal-footer">
@@ -95,11 +101,21 @@
       var croppedDataUrl = null; // hasil crop bersih, sebelum warna background diganti (utk "Reset")
       var targetColor = null; // warna background yang dipilih (RGB) utk diganti
       var kameraStream = null;
+      var sedangBukaKamera = false;
 
       var $fotoFileInput = document.getElementById('fotoFileInput');
       var $cropFotoImage = document.getElementById('cropFotoImage');
       var $bgCanvas = document.getElementById('bgFotoCanvas');
       var bgCtx = $bgCanvas.getContext('2d');
+      var $videoKamera = document.getElementById('videoKameraFoto');
+      var $selectKamera = document.getElementById('pilihKameraFoto');
+
+      // Tombol tutup/batal pada modal kamera & edit foto diikat langsung ke
+      // modal('hide') supaya tidak bergantung sepenuhnya pada auto-binding
+      // data-dismiss bawaan Bootstrap.
+      $('#modalKameraFoto, #modalEditFoto').on('click', '[data-dismiss="modal"]', function() {
+         $(this).closest('.modal').modal('hide');
+      });
 
       function hexToRgb(hex) {
          var v = parseInt(hex.replace('#', ''), 16);
@@ -182,35 +198,70 @@
       });
 
       // --- Ambil dari kamera ---
+      function hentikanStreamKamera() {
+         if (kameraStream) {
+            kameraStream.getTracks().forEach(function(t) { t.stop(); });
+            kameraStream = null;
+         }
+      }
+
+      // Mulai stream kamera. deviceId null = kamera default (dipakai saat
+      // pertama kali membuka modal, sekaligus utk memicu izin & label device).
+      function mulaiStreamKamera(deviceId) {
+         var constraints = deviceId ? { video: { deviceId: { exact: deviceId } } } : { video: true };
+         return navigator.mediaDevices.getUserMedia(constraints).then(function(stream) {
+            hentikanStreamKamera();
+            kameraStream = stream;
+            $videoKamera.srcObject = stream;
+         });
+      }
+
+      function isiDaftarKamera(devices) {
+         $selectKamera.innerHTML = '';
+         devices.forEach(function(d, i) {
+            var opt = document.createElement('option');
+            opt.value = d.deviceId;
+            opt.text = d.label || ('Kamera ' + (i + 1));
+            $selectKamera.appendChild(opt);
+         });
+         $('#wrapPilihKameraFoto').toggleClass('d-none', devices.length < 2);
+      }
+
       $('#btnCameraFoto').on('click', function() {
          if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
             alert('Kamera tidak didukung oleh browser ini.');
             return;
          }
-         navigator.mediaDevices.getUserMedia({ video: true })
-            .then(function(stream) {
-               kameraStream = stream;
-               document.getElementById('videoKameraFoto').srcObject = stream;
+         if (sedangBukaKamera) return;
+         sedangBukaKamera = true;
+
+         mulaiStreamKamera(null)
+            .then(function() {
+               return navigator.mediaDevices.enumerateDevices();
+            })
+            .then(function(devices) {
+               isiDaftarKamera(devices.filter(function(d) { return d.kind === 'videoinput'; }));
                $('#modalKameraFoto').modal('show');
             })
             .catch(function() {
                alert('Tidak dapat mengakses kamera. Pastikan izin kamera sudah diberikan.');
+            })
+            .then(function() {
+               sedangBukaKamera = false;
             });
       });
 
-      $('#modalKameraFoto').on('hidden.bs.modal', function() {
-         if (kameraStream) {
-            kameraStream.getTracks().forEach(function(t) { t.stop(); });
-            kameraStream = null;
-         }
+      $selectKamera.addEventListener('change', function() {
+         mulaiStreamKamera(this.value);
       });
 
+      $('#modalKameraFoto').on('hidden.bs.modal', hentikanStreamKamera);
+
       $('#btnAmbilFoto').on('click', function() {
-         var video = document.getElementById('videoKameraFoto');
          var canvas = document.createElement('canvas');
-         canvas.width = video.videoWidth;
-         canvas.height = video.videoHeight;
-         canvas.getContext('2d').drawImage(video, 0, 0);
+         canvas.width = $videoKamera.videoWidth;
+         canvas.height = $videoKamera.videoHeight;
+         canvas.getContext('2d').drawImage($videoKamera, 0, 0);
          $('#modalKameraFoto').modal('hide');
          bukaModalCrop(canvas.toDataURL('image/jpeg', 0.92));
       });
