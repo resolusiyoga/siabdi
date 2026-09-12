@@ -11,6 +11,7 @@ switch ($context) {
       $sidebarColor = 'green';
       break;
 
+   case 'kartu':
    case 'qr':
       $sidebarColor = 'danger';
       break;
@@ -74,6 +75,12 @@ switch ($context) {
             <a class="nav-link" href="<?= base_url('admin/generate'); ?>">
                <i class="material-icons">qr_code</i>
                <p>Generate QR Code</p>
+            </a>
+         </li>
+         <li class="nav-item <?= $context == 'kartu' ? 'active' : ''; ?>">
+            <a class="nav-link" href="<?= base_url('admin/kartu'); ?>">
+               <i class="material-icons">badge</i>
+               <p>Kartu Siswa</p>
             </a>
          </li>
          <li class="nav-item <?= $context == 'laporan' ? 'active' : ''; ?>">

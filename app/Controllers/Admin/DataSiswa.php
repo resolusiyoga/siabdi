@@ -38,7 +38,8 @@ class DataSiswa extends BaseController
          ]
       ],
       'jk' => ['rules' => 'required', 'errors' => ['required' => 'Jenis kelamin wajib diisi']],
-      'no_hp' => 'required|numeric|max_length[20]|min_length[5]'
+      'no_hp' => 'required|numeric|max_length[20]|min_length[5]',
+      'nisn' => ['rules' => 'permit_empty|max_length[20]', 'errors' => ['max_length' => 'NISN maksimal 20 karakter']]
    ];
 
    public function __construct()
@@ -134,6 +135,7 @@ class DataSiswa extends BaseController
          jenisKelamin: $this->request->getVar('jk'),
          noHp: $this->request->getVar('no_hp'),
          foto: $foto['path'] ?? null,
+         nisn: $this->request->getVar('nisn') ?: null,
       );
 
       if ($result) {
@@ -223,6 +225,7 @@ class DataSiswa extends BaseController
          jenisKelamin: $this->request->getVar('jk'),
          noHp: $this->request->getVar('no_hp'),
          foto: $foto['path'] ?? null,
+         nisn: $this->request->getVar('nisn') ?: null,
       );
 
       // hapus foto lama setelah berhasil diganti (kecuali nama filenya sama persis)

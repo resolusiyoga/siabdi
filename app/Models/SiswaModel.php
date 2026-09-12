@@ -10,6 +10,7 @@ class SiswaModel extends Model
    {
       $this->allowedFields = [
          'nis',
+         'nisn',
          'nama_siswa',
          'id_kelas',
          'jenis_kelamin',
@@ -80,10 +81,11 @@ class SiswaModel extends Model
          ->findAll();
    }
 
-   public function createSiswa($nis, $nama, $idKelas, $jenisKelamin, $noHp, $foto = null)
+   public function createSiswa($nis, $nama, $idKelas, $jenisKelamin, $noHp, $foto = null, $nisn = null)
    {
       return $this->save([
          'nis' => $nis,
+         'nisn' => $nisn,
          'nama_siswa' => $nama,
          'id_kelas' => $idKelas,
          'jenis_kelamin' => $jenisKelamin,
@@ -93,11 +95,12 @@ class SiswaModel extends Model
       ]);
    }
 
-   public function updateSiswa($id, $nis, $nama, $idKelas, $jenisKelamin, $noHp, $foto = null)
+   public function updateSiswa($id, $nis, $nama, $idKelas, $jenisKelamin, $noHp, $foto = null, $nisn = null)
    {
       $data = [
          $this->primaryKey => $id,
          'nis' => $nis,
+         'nisn' => $nisn,
          'nama_siswa' => $nama,
          'id_kelas' => $idKelas,
          'jenis_kelamin' => $jenisKelamin,
@@ -178,6 +181,7 @@ class SiswaModel extends Model
             if ($i == $index) {
                $data = array();
                $data['nis'] = getCSVInputValue($item, 'nis', 'int');
+               $data['nisn'] = getCSVInputValue($item, 'nisn');
                $data['nama_siswa'] = getCSVInputValue($item, 'nama_siswa');
                $data['id_kelas'] = getCSVInputValue($item, 'id_kelas', 'int');
                $data['jenis_kelamin'] = getCSVInputValue($item, 'jenis_kelamin');

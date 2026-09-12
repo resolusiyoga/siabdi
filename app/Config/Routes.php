@@ -139,6 +139,17 @@ $routes->group('admin', function (RouteCollection $routes) {
    $routes->get('qr/guru/download', 'Admin\QRGenerator::downloadAllQrGuru');
    $routes->get('qr/guru/(:any)/download', 'Admin\QRGenerator::downloadQrGuru/$1');
 
+   // Kartu siswa: atur base template SVG, tata letak elemen, dan cetak kartu
+   $routes->group('kartu', ['namespace' => 'App\\Controllers\\Admin'], function ($routes) {
+      $routes->get('/', 'KartuSiswa::index');
+      $routes->post('template', 'KartuSiswa::simpanTemplate');
+      $routes->get('template/hapus/(:segment)', 'KartuSiswa::hapusTemplate/$1');
+      $routes->post('layout', 'KartuSiswa::simpanLayout');
+      $routes->get('layout/reset', 'KartuSiswa::resetLayout');
+      $routes->post('siswa-by-kelas', 'KartuSiswa::siswaByKelas');
+      $routes->get('cetak', 'KartuSiswa::cetak');
+   });
+
    // admin buat laporan
    $routes->get('laporan', 'Admin\GenerateLaporan::index');
    $routes->post('laporan/siswa', 'Admin\GenerateLaporan::generateLaporanSiswa');

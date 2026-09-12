@@ -35,6 +35,14 @@
                      </div>
 
                      <div class="form-group mt-4">
+                        <label for="nisn">NISN (opsional)</label>
+                        <input type="text" id="nisn" class="form-control <?= $validation->getError('nisn') ? 'is-invalid' : ''; ?>" name="nisn" placeholder="0071234567" value="<?= old('nisn') ?? $oldInput['nisn'] ?? '' ?>">
+                        <div class="invalid-feedback">
+                           <?= $validation->getError('nisn'); ?>
+                        </div>
+                     </div>
+
+                     <div class="form-group mt-4">
                         <label for="nama">Nama Lengkap</label>
                         <input type="text" id="nama" class="form-control <?= $validation->getError('nama') ? 'is-invalid' : ''; ?>" name="nama" placeholder="Your Name" value="<?= old('nama') ?? $oldInput['nama']  ?? '' ?>" required>
                         <div class="invalid-feedback">
