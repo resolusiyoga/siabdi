@@ -518,7 +518,7 @@
                            <?php endforeach; ?>
                         </select>
                      </div>
-                     <div class="col-md-4">
+                     <div class="col-md-3">
                         <label for="unduhSisi">Sisi kartu</label>
                         <select id="unduhSisi" class="custom-select">
                            <option value="depan" selected>Depan saja</option>
@@ -526,16 +526,25 @@
                            <option value="keduanya">Depan &amp; belakang</option>
                         </select>
                      </div>
-                     <div class="col-md-3 d-flex align-items-end">
+                     <div class="col-md-2">
+                        <label for="unduhFormat">Format</label>
+                        <select id="unduhFormat" class="custom-select">
+                           <option value="png" selected>PNG</option>
+                           <option value="svg">SVG</option>
+                        </select>
+                     </div>
+                     <div class="col-md-2 d-flex align-items-end">
                         <a id="unduhSemua" class="btn btn-primary w-100" href="#">
-                           <i class="material-icons">folder_zip</i> Unduh semua (ZIP)
+                           <i class="material-icons">folder_zip</i> ZIP
                         </a>
                      </div>
                   </div>
 
                   <p class="text-muted mt-2" style="font-size:13px;">
-                     Berkas PNG 600 dpi (<?= $lebarMm ?> x <?= $tinggiMm ?> mm, 1276 x 2022 piksel) dirender di server memakai
-                     tata letak yang tersimpan. Satu siswa dengan dua sisi diunduh sebagai ZIP.
+                     <b>PNG</b>: 600 dpi (<?= $lebarMm ?> x <?= $tinggiMm ?> mm, 1276 x 2022 piksel), siap cetak langsung.
+                     <b>SVG</b>: teks dan bingkai tetap vektor sehingga tajam di ukuran berapa pun dan masih bisa
+                     disunting (latar kartu tetap gambar dari base template). Keduanya memakai tata letak yang
+                     tersimpan; satu siswa dengan dua sisi diunduh sebagai ZIP.
                   </p>
 
                   <div class="table-responsive mt-3">
@@ -974,6 +983,7 @@
       // ---- daftar unduhan per siswa ----
       const unduhKelas = document.getElementById('unduhKelas');
       const unduhSisi = document.getElementById('unduhSisi');
+      const unduhFormat = document.getElementById('unduhFormat');
       const daftarUnduh = document.getElementById('daftarUnduh');
       const unduhSemua = document.getElementById('unduhSemua');
       const URL_UNDUH = '<?= base_url('admin/kartu/download') ?>';
@@ -981,6 +991,7 @@
       function tautanUnduh(params) {
          const q = new URLSearchParams(params);
          q.set('sisi', unduhSisi.value);
+         q.set('format', unduhFormat.value);
          return URL_UNDUH + '?' + q.toString();
       }
 
@@ -1035,15 +1046,19 @@
       }
 
       unduhKelas.addEventListener('change', muatDaftarUnduh);
-      // pilihan sisi cukup memperbarui tautan yang sudah tampil
-      unduhSisi.addEventListener('change', function () {
+      // pilihan sisi/format cukup memperbarui tautan yang sudah tampil
+      function perbaruiTautanBaris() {
          perbaruiUnduhSemua();
          daftarUnduh.querySelectorAll('a[href]').forEach(function (a) {
             const url = new URL(a.href);
             url.searchParams.set('sisi', unduhSisi.value);
+            url.searchParams.set('format', unduhFormat.value);
             a.href = url.toString();
          });
-      });
+      }
+
+      unduhSisi.addEventListener('change', perbaruiTautanBaris);
+      unduhFormat.addEventListener('change', perbaruiTautanBaris);
       muatDaftarUnduh();
 
       // ---- dropdown pilih siswa untuk pratinjau ----

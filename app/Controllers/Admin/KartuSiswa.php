@@ -4,6 +4,7 @@ namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
 use App\Libraries\KartuRenderer;
+use App\Libraries\KartuSvgRenderer;
 use App\Models\KartuTemplateModel;
 use App\Models\KelasModel;
 use App\Models\SiswaModel;
@@ -343,11 +344,13 @@ class KartuSiswa extends BaseController
       }
 
       $template = $this->kartuModel->getTemplateAktif();
-      $renderer = new KartuRenderer();
+      $svg = $this->request->getVar('format') === 'svg';
+      $renderer = $svg ? new KartuSvgRenderer() : new KartuRenderer();
+      $ext = $svg ? 'svg' : 'png';
 
-      // satu siswa, satu sisi -> langsung berkas PNG
+      // satu siswa, satu sisi -> langsung satu berkas gambar
       if (count($siswa) === 1 && count($sisiCetak) === 1) {
-         $png = $renderer->render(
+         $gambar = $renderer->render(
             $template['layout'],
             $sisiCetak[0],
             $this->dataKartu($siswa[0]),
@@ -355,9 +358,9 @@ class KartuSiswa extends BaseController
          );
 
          return $this->response
-            ->setHeader('Content-Type', 'image/png')
-            ->setHeader('Content-Disposition', 'attachment; filename="' . $this->namaBerkas($siswa[0], $sisiCetak[0]) . '"')
-            ->setBody($png);
+            ->setHeader('Content-Type', $svg ? 'image/svg+xml' : 'image/png')
+            ->setHeader('Content-Disposition', 'attachment; filename="' . $this->namaBerkas($siswa[0], $sisiCetak[0], $ext) . '"')
+            ->setBody($gambar);
       }
 
       $tmp = FCPATH . 'uploads/tmp/';
@@ -381,16 +384,16 @@ class KartuSiswa extends BaseController
          return redirect()->to('/admin/kartu');
       }
 
-      // PNG 600 dpi berukuran besar, jadi ditulis dulu ke berkas sementara:
-      // addFromString menahan seluruh isi berkas di memori sampai zip ditutup.
+      // Berkas kartu berukuran besar, jadi ditulis dulu ke berkas sementara:
+      // addFromString menahan seluruh isinya di memori sampai zip ditutup.
       $sementara = [];
 
       foreach ($siswa as $s) {
          $data = $this->dataKartu($s);
 
          foreach ($sisiCetak as $sisi) {
-            $nama = $this->namaBerkas($s, $sisi);
-            $berkas = $tmp . 'kartu-' . bin2hex(random_bytes(6)) . '.png';
+            $nama = $this->namaBerkas($s, $sisi, $ext);
+            $berkas = $tmp . 'kartu-' . bin2hex(random_bytes(6)) . '.' . $ext;
 
             file_put_contents(
                $berkas,
@@ -466,12 +469,12 @@ class KartuSiswa extends BaseController
       return $sisi === 'keduanya' ? ['depan', 'belakang'] : [$sisi];
    }
 
-   private function namaBerkas(array $siswa, string $sisi): string
+   private function namaBerkas(array $siswa, string $sisi, string $ext = 'png'): string
    {
       $nama = $this->slug($siswa['nama_siswa'] ?? 'kartu');
       $nis = $this->slug((string) ($siswa['nis'] ?? ''));
 
-      return trim($nama . '-' . $nis, '-') . '-' . $sisi . '.png';
+      return trim($nama . '-' . $nis, '-') . '-' . $sisi . '.' . $ext;
    }
 
    private function slug(string $teks): string
