@@ -59,7 +59,38 @@
          </div>
          <div class="modal-body">
             <div id="langkahCrop">
-               <p class="text-muted small">Geser dan sesuaikan area foto, lalu klik <b>Lanjut: Edit Background</b>.</p>
+               <p class="text-muted small">
+                  Geser dan tarik sudut kotak untuk mengubah ukuran area foto, lalu klik
+                  <b>Lanjut: Edit Background</b>. Ukuran kotak mengikuti rasio yang dipilih,
+                  jadi foto tidak akan gepeng.
+               </p>
+               <div class="row align-items-end mb-2">
+                  <div class="col-sm-5">
+                     <label class="small mb-1" for="rasioCropFoto">Rasio foto</label>
+                     <select id="rasioCropFoto" class="custom-select custom-select-sm">
+                        <option value="0.75">Pas foto 3 : 4 (disarankan)</option>
+                        <option value="1">Kotak 1 : 1</option>
+                        <option value="0.6667">Potret 2 : 3</option>
+                        <option value="bebas">Bebas (rasio tidak dikunci)</option>
+                     </select>
+                  </div>
+                  <div class="col-sm-7 mt-2 mt-sm-0">
+                     <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-outline-secondary" id="btnZoomInFoto" title="Perbesar">
+                           <i class="material-icons">zoom_in</i>
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" id="btnZoomOutFoto" title="Perkecil">
+                           <i class="material-icons">zoom_out</i>
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" id="btnPutarFoto" title="Putar 90 derajat">
+                           <i class="material-icons">rotate_right</i>
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" id="btnResetCropFoto" title="Kembalikan">
+                           <i class="material-icons">restart_alt</i>
+                        </button>
+                     </div>
+                  </div>
+               </div>
                <div style="max-height:420px;">
                   <img id="cropFotoImage" style="max-width:100%;display:block;">
                </div>
@@ -134,15 +165,26 @@
          $('#modalEditFoto').modal('show');
       }
 
+      function rasioTerpilih() {
+         var nilai = document.getElementById('rasioCropFoto').value;
+         // NaN = rasio bebas (Cropper membiarkan kotak diubah sesuka hati)
+         return nilai === 'bebas' ? NaN : parseFloat(nilai);
+      }
+
       function inisialisasiCropper() {
          if (cropper) {
             cropper.destroy();
          }
          cropper = new Cropper($cropFotoImage, {
-            aspectRatio: 1,
+            aspectRatio: rasioTerpilih(),
             viewMode: 1,
             autoCropArea: 1,
-            background: false
+            background: false,
+            // kotak crop bisa digeser & diubah ukurannya; dengan aspectRatio
+            // terkunci, tinggi otomatis menyesuaikan lebar
+            movable: true,
+            zoomable: true,
+            cropBoxResizable: true
          });
       }
 
@@ -282,7 +324,14 @@
       });
 
       $('#btnLanjutCropFoto').on('click', function() {
-         var canvas = cropper.getCroppedCanvas({ width: 480, height: 480 });
+         // Sisi terpanjang dibatasi 720 px dan sisi lain mengikuti rasio
+         // kotak crop, sehingga foto tidak pernah teregang.
+         var canvas = cropper.getCroppedCanvas({
+            maxWidth: 720,
+            maxHeight: 720,
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: 'high'
+         });
          $bgCanvas.width = canvas.width;
          $bgCanvas.height = canvas.height;
          bgCtx.drawImage(canvas, 0, 0);
@@ -299,6 +348,15 @@
          document.getElementById('statusBackgroundFoto').textContent =
             'Klik pada bagian latar belakang foto untuk memilih warna yang akan diganti.';
       });
+
+      document.getElementById('rasioCropFoto').addEventListener('change', function() {
+         if (cropper) cropper.setAspectRatio(rasioTerpilih());
+      });
+
+      $('#btnZoomInFoto').on('click', function() { if (cropper) cropper.zoom(0.1); });
+      $('#btnZoomOutFoto').on('click', function() { if (cropper) cropper.zoom(-0.1); });
+      $('#btnPutarFoto').on('click', function() { if (cropper) cropper.rotate(90); });
+      $('#btnResetCropFoto').on('click', function() { if (cropper) cropper.reset(); });
 
       $('#btnUlangiCropFoto').on('click', function() {
          $('#langkahBackground').addClass('d-none');
