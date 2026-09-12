@@ -3,7 +3,7 @@
    <label>Foto Siswa</label>
    <div class="row align-items-center">
       <div class="col-auto">
-         <div id="fotoPreviewWrapper" style="width:120px;height:150px;border:1px solid #ddd;border-radius:6px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+         <div id="fotoPreviewWrapper" style="width:130px;height:130px;border:1px solid #ddd;border-radius:6px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;overflow:hidden;">
             <img id="fotoPreview" src="<?= $fotoUrl ?? ''; ?>" alt="Foto siswa" style="width:100%;height:100%;object-fit:cover;<?= $fotoUrl ? '' : 'display:none;'; ?>">
             <i class="material-icons text-secondary" id="fotoPreviewIcon" style="font-size:48px;<?= $fotoUrl ? 'display:none;' : ''; ?>">person</i>
          </div>
@@ -139,7 +139,7 @@
             cropper.destroy();
          }
          cropper = new Cropper($cropFotoImage, {
-            aspectRatio: 3 / 4,
+            aspectRatio: 1,
             viewMode: 1,
             autoCropArea: 1,
             background: false
@@ -280,7 +280,7 @@
       });
 
       $('#btnLanjutCropFoto').on('click', function() {
-         var canvas = cropper.getCroppedCanvas({ width: 480, height: 640 });
+         var canvas = cropper.getCroppedCanvas({ width: 480, height: 480 });
          $bgCanvas.width = canvas.width;
          $bgCanvas.height = canvas.height;
          bgCtx.drawImage(canvas, 0, 0);
