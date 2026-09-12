@@ -71,6 +71,13 @@
       cursor: nwse-resize;
    }
 
+   .panel-kotak {
+      padding: 16px;
+      border: 1px solid #eee;
+      border-radius: 6px;
+      background: #fafafa;
+   }
+
    .daftar-elemen .list-group-item {
       padding: .5rem .75rem;
       cursor: pointer;
@@ -301,36 +308,6 @@
                            <button type="button" class="btn btn-primary" id="btnSisiDepan">Sisi Depan</button>
                            <button type="button" class="btn btn-outline-primary" id="btnSisiBelakang">Sisi Belakang</button>
                         </div>
-                        <!-- tanpa .form-group: tema memakai floating label yang
-                             menumpuk di atas isian -->
-                        <div class="mb-3">
-                           <label class="d-block small mb-1" for="cariSiswaKartu">Pratinjau data siswa</label>
-                           <div class="pilih-siswa" id="pilihSiswa">
-                              <button type="button" class="pilih-siswa__kontrol" id="pilihSiswaKontrol"
-                                 aria-haspopup="listbox" aria-expanded="false">
-                                 <span class="pilih-siswa__nilai pilih-siswa__nilai--kosong" id="pilihSiswaNilai">Data contoh bawaan</span>
-                                 <i class="material-icons pilih-siswa__ikon">arrow_drop_down</i>
-                              </button>
-                              <div class="pilih-siswa__panel" id="pilihSiswaPanel" hidden>
-                                 <div class="pilih-siswa__cari">
-                                    <i class="material-icons">search</i>
-                                    <input type="text" id="cariSiswaKartu" autocomplete="off"
-                                       placeholder="Cari nama atau NIS...">
-                                 </div>
-                                 <ul class="pilih-siswa__daftar" id="pilihSiswaDaftar" role="listbox"></ul>
-                              </div>
-                           </div>
-                           <small class="d-block mt-1 text-muted" id="statusCariSiswa"></small>
-                        </div>
-                        <div class="form-inline mb-2" style="gap:8px;">
-                           <label class="mr-2 mb-0" for="skala">Perbesaran</label>
-                           <select id="skala" class="custom-select custom-select-sm">
-                              <option value="1.2">120%</option>
-                              <option value="1.6" selected>160%</option>
-                              <option value="2">200%</option>
-                              <option value="2.6">260%</option>
-                           </select>
-                        </div>
                         <div class="kanvas-bingkai">
                            <div class="kanvas-ruang" id="kanvasRuang">
                               <div class="kanvas-skala" id="kanvasSkala">
@@ -345,6 +322,39 @@
                      </div>
 
                      <div class="editor__panel">
+                        <h5 class="mb-2"><b>Pratinjau</b></h5>
+                        <div class="panel-kotak mb-4">
+                           <!-- tanpa .form-group: tema memakai floating label yang
+                                menumpuk di atas isian -->
+                           <div class="mb-3">
+                              <label class="d-block small mb-1" for="cariSiswaKartu">Data siswa</label>
+                              <div class="pilih-siswa" id="pilihSiswa">
+                                 <button type="button" class="pilih-siswa__kontrol" id="pilihSiswaKontrol"
+                                    aria-haspopup="listbox" aria-expanded="false">
+                                    <span class="pilih-siswa__nilai pilih-siswa__nilai--kosong" id="pilihSiswaNilai">Data contoh bawaan</span>
+                                    <i class="material-icons pilih-siswa__ikon">arrow_drop_down</i>
+                                 </button>
+                                 <div class="pilih-siswa__panel" id="pilihSiswaPanel" hidden>
+                                    <div class="pilih-siswa__cari">
+                                       <i class="material-icons">search</i>
+                                       <input type="text" id="cariSiswaKartu" autocomplete="off"
+                                          placeholder="Cari nama atau NIS...">
+                                    </div>
+                                    <ul class="pilih-siswa__daftar" id="pilihSiswaDaftar" role="listbox"></ul>
+                                 </div>
+                              </div>
+                              <small class="d-block mt-1 text-muted" id="statusCariSiswa"></small>
+                           </div>
+
+                           <label class="d-block small mb-1" for="skala">Perbesaran kanvas</label>
+                           <select id="skala" class="custom-select custom-select-sm" style="max-width:160px;">
+                              <option value="1.2">120%</option>
+                              <option value="1.6" selected>160%</option>
+                              <option value="2">200%</option>
+                              <option value="2.6">260%</option>
+                           </select>
+                        </div>
+
                         <h5 class="mb-2"><b>Elemen data</b></h5>
                         <ul class="list-group daftar-elemen mb-4" id="daftarElemen"></ul>
 
