@@ -721,17 +721,24 @@
             li.className = 'list-group-item d-flex align-items-center justify-content-between' +
                (kunci === terpilih ? ' aktif' : '');
 
-            const nama = document.createElement('span');
-            nama.textContent = ELEMEN[kunci].label;
-            nama.addEventListener('click', function () {
+            // seluruh baris bisa diklik, bukan hanya teksnya
+            li.addEventListener('click', function () {
                pilih(kunci);
             });
+
+            const nama = document.createElement('span');
+            nama.className = 'flex-grow-1';
+            nama.textContent = ELEMEN[kunci].label;
 
             const toggle = document.createElement('input');
             toggle.type = 'checkbox';
             toggle.checked = !!el.tampil;
             toggle.disabled = !BOLEH_UBAH;
             toggle.title = 'Tampilkan elemen pada kartu';
+            // klik pada centang tidak boleh ikut memicu klik baris
+            toggle.addEventListener('click', function (e) {
+               e.stopPropagation();
+            });
             toggle.addEventListener('change', function () {
                el.tampil = toggle.checked;
                if (el.tampil) terpilih = kunci;
