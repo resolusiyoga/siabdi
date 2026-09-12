@@ -144,6 +144,56 @@ class KartuTemplateModel extends Model
       ];
    }
 
+   /**
+    * Pastikan layout yang tersimpan selalu punya seluruh sisi & elemen
+    * dengan tipe data yang benar, walau JSON di database sudah usang.
+    */
+   public function normalisasiLayout(?array $layout): array
+   {
+      $default = $this->layoutDefault();
+      $hasil = [];
+
+      foreach (self::SISI as $sisi) {
+         foreach (self::ELEMEN as $kunci => $meta) {
+            $bawaan = $default[$sisi][$kunci];
+            $data = $layout[$sisi][$kunci] ?? [];
+            $data = is_array($data) ? $data : [];
+
+            $item = ['tampil' => (bool) ($data['tampil'] ?? $bawaan['tampil'])];
+
+            foreach (['x', 'y', 'w', 'h'] as $angka) {
+               $item[$angka] = $this->batas(
+                  (float) ($data[$angka] ?? $bawaan[$angka]),
+                  -50,
+                  200
+               );
+            }
+
+            if ($meta['tipe'] === 'teks') {
+               $item['ukuran']  = $this->batas((float) ($data['ukuran'] ?? $bawaan['ukuran']), 3, 40);
+               $item['tebal']   = in_array((int) ($data['tebal'] ?? $bawaan['tebal']), [300, 400, 500, 600, 700, 800], true)
+                  ? (int) ($data['tebal'] ?? $bawaan['tebal'])
+                  : 400;
+               $item['warna']   = $this->warna($data['warna'] ?? $bawaan['warna']);
+               $item['rata']    = in_array($data['rata'] ?? '', ['left', 'center', 'right'], true)
+                  ? $data['rata']
+                  : $bawaan['rata'];
+               $item['kapital'] = (bool) ($data['kapital'] ?? $bawaan['kapital']);
+               $item['prefiks'] = mb_substr((string) ($data['prefiks'] ?? $bawaan['prefiks']), 0, 30);
+            } else {
+               $item['radius']       = $this->batas((float) ($data['radius'] ?? $bawaan['radius']), 0, 50);
+               $item['isi']          = ($data['isi'] ?? '') === 'contain' ? 'contain' : 'cover';
+               $item['bingkai']      = $this->batas((float) ($data['bingkai'] ?? $bawaan['bingkai']), 0, 5);
+               $item['warnaBingkai'] = $this->warna($data['warnaBingkai'] ?? $bawaan['warnaBingkai']);
+            }
+
+            $hasil[$sisi][$kunci] = $item;
+         }
+      }
+
+      return $hasil;
+   }
+
    private function batas(float $nilai, float $min, float $max): float
    {
       return round(max($min, min($max, $nilai)), 2);
