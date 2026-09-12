@@ -106,6 +106,8 @@
                         </div>
                      </div>
 
+                     <?= $this->include('admin/data/_foto-siswa-field') ?>
+
                      <button type="submit" class="btn btn-primary btn-block">Simpan</button>
                   </form>
 

@@ -17,4 +17,6 @@
 <!-- DataTables -->
 <script src="<?= assetUrl('assets/js/plugins/datatables/jquery.dataTables.min.js') ?>"></script>
 <script src="<?= assetUrl('assets/js/plugins/datatables/dataTables.bootstrap4.min.js') ?>"></script>
+<!-- Cropper.js: crop foto siswa -->
+<script src="<?= assetUrl('assets/js/plugins/cropperjs/cropper.min.js') ?>"></script>
 <script src="<?= assetUrl('assets/js/custom.js') ?>" type="text/javascript"></script>

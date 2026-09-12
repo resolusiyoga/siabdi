@@ -61,6 +61,30 @@ class UploadModel extends BaseModel
          return $this->upload($inputName, 'uploads/tmp/', 'temp_', ['csv']);
      }
 
+    //save foto siswa dari data URI base64 (hasil crop/edit di sisi klien)
+    public function uploadFotoSiswaBase64(?string $dataUri)
+    {
+        if (empty($dataUri) || !preg_match('/^data:image\/(jpe?g|png);base64,(.+)$/', $dataUri, $m)) {
+            return null;
+        }
+
+        $ext = $m[1] === 'png' ? 'png' : 'jpg';
+        $binary = base64_decode($m[2]);
+        if ($binary === false) {
+            return null;
+        }
+
+        $directory = 'uploads/foto-siswa/';
+        if (!file_exists(FCPATH . $directory)) {
+            mkdir(FCPATH . $directory, recursive: true);
+        }
+
+        $uniqueName = 'foto_' . generateToken(true) . '.' . $ext;
+        file_put_contents(FCPATH . $directory . $uniqueName, $binary);
+
+        return ['name' => $uniqueName, 'path' => $directory . $uniqueName, 'ext' => $ext];
+    }
+
     //check allowed file types
     public function checkAllowedFileTypes($fileName, $allowedTypes)
     {

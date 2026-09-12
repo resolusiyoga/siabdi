@@ -5,6 +5,7 @@
 <link rel="stylesheet" href="<?= assetUrl('assets/js/plugins/file-uploader/css/jquery.dm-uploader.min.css'); ?>" />
 <link rel="stylesheet" href="<?= assetUrl('assets/js/plugins/file-uploader/css/styles-1.0.css'); ?>" />
 <link rel="stylesheet" href="<?= assetUrl('assets/css/plugins/dataTables.bootstrap4.min.css'); ?>" />
+<link rel="stylesheet" href="<?= assetUrl('assets/css/plugins/cropper.min.css'); ?>" />
 <!-- Tema warna (palette hijau) - harus dimuat paling akhir -->
 <link rel="stylesheet" href="<?= assetUrl('assets/css/theme-green.css'); ?>" />
 

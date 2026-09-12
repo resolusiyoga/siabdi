@@ -107,6 +107,9 @@
                         </div>
                      </div>
 
+                     <?php $this->setVar('fotoUrlSiswa', $data['foto'] ?? null); ?>
+                     <?= $this->include('admin/data/_foto-siswa-field') ?>
+
                      <button type="submit" class="btn btn-primary btn-block">Simpan</button>
                   </form>
 
