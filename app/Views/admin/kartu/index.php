@@ -83,6 +83,18 @@
       margin-top: 0;
    }
 
+   .bagian-judul {
+      margin: 32px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #eee;
+      color: #1c655a;
+      font-weight: 700;
+   }
+
+   .bagian-judul:first-of-type {
+      margin-top: 0;
+   }
+
    .thumb-template {
       max-width: 90px;
       border: 1px solid #ddd;
@@ -111,18 +123,9 @@
          </div>
          <div class="card-body">
 
-            <ul class="nav nav-pills nav-pills-primary mb-4" role="tablist">
-               <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#tabDesain">Desain Kartu</a></li>
-               <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tabCetak">Cetak / Download</a></li>
-               <?php if ($bolehUbah) : ?>
-                  <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tabTemplate">Base Template (SVG)</a></li>
-               <?php endif; ?>
-            </ul>
-
-            <div class="tab-content">
-
-               <!-- ============ DESAIN ============ -->
-               <div class="tab-pane active" id="tabDesain">
+            <!-- ============ 1. DESAIN ============ -->
+               <h4 class="bagian-judul">1. Desain Kartu</h4>
+               <div id="bagianDesain">
                   <div class="editor">
                      <div class="editor__kanvas-area">
                         <div class="btn-group btn-group-sm mb-2" role="group">
@@ -172,8 +175,61 @@
                   </div>
                </div>
 
-               <!-- ============ CETAK ============ -->
-               <div class="tab-pane" id="tabCetak">
+               <!-- ============ 2. BASE TEMPLATE ============ -->
+               <?php if ($bolehUbah) : ?>
+                  <h4 class="bagian-judul">2. Base Template Kartu</h4>
+                  <div id="bagianTemplate">
+                     <form action="<?= base_url('admin/kartu/template') ?>" method="post" enctype="multipart/form-data">
+                        <?= csrf_field() ?>
+                        <div class="form-group">
+                           <label for="namaTemplate">Nama Template</label>
+                           <input type="text" class="form-control" id="namaTemplate" name="nama"
+                              value="<?= esc($template['nama']) ?>">
+                        </div>
+
+                        <div class="row">
+                           <?php foreach (['depan', 'belakang'] as $sisi) : ?>
+                              <div class="col-md-6">
+                                 <h5 class="text-capitalize"><b>Sisi <?= $sisi ?></b></h5>
+                                 <?php if (!empty($template['svg_' . $sisi])) : ?>
+                                    <p>
+                                       <img class="thumb-template" src="<?= base_url($template['svg_' . $sisi]) ?>" alt="template <?= $sisi ?>">
+                                    </p>
+                                    <p class="text-muted" style="font-size:12px;">
+                                       <?= esc(basename($template['svg_' . $sisi])) ?>
+                                       &middot;
+                                       <a class="text-danger" href="<?= base_url('admin/kartu/template/hapus/' . $sisi) ?>"
+                                          onclick="return confirm('Hapus base template sisi <?= $sisi ?>?')">hapus</a>
+                                    </p>
+                                 <?php else : ?>
+                                    <p class="text-muted">Belum ada base template.</p>
+                                 <?php endif; ?>
+                                 <div class="form-group">
+                                    <input type="file" name="svg_<?= $sisi ?>" accept=".svg,image/svg+xml,image/png,image/jpeg" class="form-control-file">
+                                 </div>
+                              </div>
+                           <?php endforeach; ?>
+                        </div>
+
+                        <p class="text-muted" style="font-size:13px;">
+                           Gunakan rasio kartu <?= $lebarMm ?> : <?= $tinggiMm ?> (potret); template diregangkan
+                           tepat seukuran kartu. <b>Disarankan PNG</b> (mis. 638 x 1011 piksel, setara 300 dpi)
+                           karena antivirus hosting kerap menghapus berkas SVG yang diunggah. SVG dan JPG tetap diterima.
+                        </p>
+
+                        <button type="submit" class="btn btn-primary">
+                           <i class="material-icons">upload</i> Simpan Base Template
+                        </button>
+                     </form>
+                  </div>
+               <?php else : ?>
+                  <h4 class="bagian-judul">2. Base Template Kartu</h4>
+                  <p class="text-muted">Penggantian base template hanya dapat dilakukan oleh superadmin.</p>
+               <?php endif; ?>
+
+               <!-- ============ 3. CETAK ============ -->
+               <h4 class="bagian-judul">3. Cetak / Download</h4>
+               <div id="bagianCetak">
                   <form action="<?= base_url('admin/kartu/cetak') ?>" method="get" target="_blank">
                      <div class="row">
                         <div class="col-md-4">
@@ -222,54 +278,7 @@
                   </form>
                </div>
 
-               <!-- ============ BASE TEMPLATE ============ -->
-               <?php if ($bolehUbah) : ?>
-                  <div class="tab-pane" id="tabTemplate">
-                     <form action="<?= base_url('admin/kartu/template') ?>" method="post" enctype="multipart/form-data">
-                        <?= csrf_field() ?>
-                        <div class="form-group">
-                           <label for="namaTemplate">Nama Template</label>
-                           <input type="text" class="form-control" id="namaTemplate" name="nama"
-                              value="<?= esc($template['nama']) ?>">
-                        </div>
 
-                        <div class="row">
-                           <?php foreach (['depan', 'belakang'] as $sisi) : ?>
-                              <div class="col-md-6">
-                                 <h5 class="text-capitalize"><b>Sisi <?= $sisi ?></b></h5>
-                                 <?php if (!empty($template['svg_' . $sisi])) : ?>
-                                    <p>
-                                       <img class="thumb-template" src="<?= base_url($template['svg_' . $sisi]) ?>" alt="template <?= $sisi ?>">
-                                    </p>
-                                    <p class="text-muted" style="font-size:12px;">
-                                       <?= esc(basename($template['svg_' . $sisi])) ?>
-                                       &middot;
-                                       <a class="text-danger" href="<?= base_url('admin/kartu/template/hapus/' . $sisi) ?>"
-                                          onclick="return confirm('Hapus base template sisi <?= $sisi ?>?')">hapus</a>
-                                    </p>
-                                 <?php else : ?>
-                                    <p class="text-muted">Belum ada base template.</p>
-                                 <?php endif; ?>
-                                 <div class="form-group">
-                                    <input type="file" name="svg_<?= $sisi ?>" accept=".svg,image/svg+xml,image/png,image/jpeg" class="form-control-file">
-                                 </div>
-                              </div>
-                           <?php endforeach; ?>
-                        </div>
-
-                        <p class="text-muted" style="font-size:13px;">
-                           Gunakan berkas SVG dengan rasio kartu <?= $lebarMm ?> : <?= $tinggiMm ?> (potret).
-                           Berkas PNG/JPG juga diterima. Template diregangkan tepat seukuran kartu.
-                        </p>
-
-                        <button type="submit" class="btn btn-primary">
-                           <i class="material-icons">upload</i> Simpan Base Template
-                        </button>
-                     </form>
-                  </div>
-               <?php endif; ?>
-
-            </div>
          </div>
       </div>
    </div>
