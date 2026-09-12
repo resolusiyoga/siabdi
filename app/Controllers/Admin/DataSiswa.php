@@ -38,7 +38,7 @@ class DataSiswa extends BaseController
          ]
       ],
       'jk' => ['rules' => 'required', 'errors' => ['required' => 'Jenis kelamin wajib diisi']],
-      'no_hp' => 'required|numeric|max_length[20]|min_length[5]',
+      'no_hp' => 'permit_empty|numeric|max_length[20]|min_length[5]',
       'nisn' => ['rules' => 'permit_empty|max_length[20]', 'errors' => ['max_length' => 'NISN maksimal 20 karakter']]
    ];
 
@@ -133,7 +133,7 @@ class DataSiswa extends BaseController
          nama: $this->request->getVar('nama'),
          idKelas: intval($this->request->getVar('id_kelas')),
          jenisKelamin: $this->request->getVar('jk'),
-         noHp: $this->request->getVar('no_hp'),
+         noHp: $this->request->getVar('no_hp') ?: null,
          foto: $foto['path'] ?? null,
          nisn: $this->request->getVar('nisn') ?: null,
       );
@@ -223,7 +223,7 @@ class DataSiswa extends BaseController
          nama: $this->request->getVar('nama'),
          idKelas: intval($this->request->getVar('id_kelas')),
          jenisKelamin: $this->request->getVar('jk'),
-         noHp: $this->request->getVar('no_hp'),
+         noHp: $this->request->getVar('no_hp') ?: null,
          foto: $foto['path'] ?? null,
          nisn: $this->request->getVar('nisn') ?: null,
       );

@@ -27,7 +27,7 @@ class DataGuru extends BaseController
          ]
       ],
       'jk' => ['rules' => 'required', 'errors' => ['required' => 'Jenis kelamin wajib diisi']],
-      'no_hp' => 'required|numeric|max_length[20]|min_length[5]'
+      'no_hp' => 'permit_empty|numeric|max_length[20]|min_length[5]'
    ];
 
    public function __construct()
@@ -96,7 +96,7 @@ class DataGuru extends BaseController
          nama: $this->request->getVar('nama'),
          jenisKelamin: $this->request->getVar('jk'),
          alamat: $this->request->getVar('alamat'),
-         noHp: $this->request->getVar('no_hp'),
+         noHp: $this->request->getVar('no_hp') ?: null,
       );
 
       if ($result) {
@@ -164,7 +164,7 @@ class DataGuru extends BaseController
          nama: $this->request->getVar('nama'),
          jenisKelamin: $this->request->getVar('jk'),
          alamat: $this->request->getVar('alamat'),
-         noHp: $this->request->getVar('no_hp'),
+         noHp: $this->request->getVar('no_hp') ?: null,
       );
 
       if ($result) {

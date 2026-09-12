@@ -18,7 +18,7 @@
                   <td><?= $value['nuptk']; ?></td>
                   <td><b><?= $value['nama_guru']; ?></b></td>
                   <td><?= $value['jenis_kelamin']; ?></td>
-                  <td><?= $value['no_hp']; ?></td>
+                  <td><?= $value['no_hp'] !== null && $value['no_hp'] !== '' ? esc($value['no_hp']) : '-'; ?></td>
                   <td><?= $value['alamat']; ?></td>
                   <td>
                      <div class="d-flex justify-content-center">

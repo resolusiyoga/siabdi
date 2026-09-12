@@ -107,7 +107,7 @@
                      </div>
 
                      <div class="form-group mt-5">
-                        <label for="hp">No HP</label>
+                        <label for="hp">No HP (opsional)</label>
                         <input type="number" id="hp" name="no_hp" class="form-control <?= $validation->getError('no_hp') ? 'is-invalid' : ''; ?>" value="<?= old('no_hp') ?? $oldInput['no_hp'] ?? '' ?>">
                         <div class="invalid-feedback">
                            <?= $validation->getError('no_hp'); ?>

@@ -26,7 +26,7 @@
                   <td><b><?= $value['nama_siswa']; ?></b></td>
                   <td><?= $value['jenis_kelamin']; ?></td>
                   <td><?= labelKelas($value['kelas'] ?? null, $value['jurusan'] ?? null); ?></td>
-                  <td><?= $value['no_hp']; ?></td>
+                  <td><?= $value['no_hp'] !== null && $value['no_hp'] !== '' ? esc($value['no_hp']) : '-'; ?></td>
                   <td>
                      <div class="d-flex justify-content-center">
                         <button title="Lihat Foto" type="button" class="btn btn-info p-2 btn-lihat-foto-siswa" data-foto="<?= !empty($value['foto']) ? base_url($value['foto']) : ''; ?>" data-nama="<?= esc($value['nama_siswa']); ?>" data-edit-url="<?= isSuperadmin() ? base_url('admin/siswa/edit/' . $value['id_siswa']) : ''; ?>">
