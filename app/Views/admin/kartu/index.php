@@ -282,7 +282,7 @@
                            </li>
                            <li class="nav-item">
                               <a class="nav-link" href="#bagianTemplate" data-seksi="bagianTemplate">
-                                 <i class="material-icons">image</i> Base Template
+                                 <i class="material-icons">image</i> Template
                               </a>
                            </li>
                            <li class="nav-item">
@@ -412,10 +412,10 @@
                                        <?= esc(basename($template['svg_' . $sisi])) ?>
                                        &middot;
                                        <a class="text-danger" href="<?= base_url('admin/kartu/template/hapus/' . $sisi) ?>"
-                                          onclick="return confirm('Hapus base template sisi <?= $sisi ?>?')">hapus</a>
+                                          onclick="return confirm('Hapus template sisi <?= $sisi ?>?')">hapus</a>
                                     </p>
                                  <?php else : ?>
-                                    <p class="text-muted">Belum ada base template.</p>
+                                    <p class="text-muted">Belum ada template.</p>
                                  <?php endif; ?>
                                  <!-- input file sengaja TIDAK dibungkus .form-group:
                                       tema menyembunyikan input file di dalamnya (opacity 0) -->
@@ -441,13 +441,13 @@
                         </p>
 
                         <button type="submit" class="btn btn-primary">
-                           <i class="material-icons">upload</i> Simpan Base Template
+                           <i class="material-icons">upload</i> Simpan Template
                         </button>
                      </form>
                   </div>
                <?php else : ?>
                   <div class="seksi-kartu" id="bagianTemplate" hidden>
-                     <p class="text-muted">Penggantian base template hanya dapat dilakukan oleh superadmin.</p>
+                     <p class="text-muted">Penggantian template hanya dapat dilakukan oleh superadmin.</p>
                   </div>
                <?php endif; ?>
 
@@ -543,7 +543,7 @@
                   <p class="text-muted mt-2" style="font-size:13px;">
                      <b>PNG</b>: 600 dpi (<?= $lebarMm ?> x <?= $tinggiMm ?> mm, 1276 x 2022 piksel), siap cetak langsung.
                      <b>SVG</b>: teks dan bingkai tetap vektor sehingga tajam di ukuran berapa pun dan masih bisa
-                     disunting (latar kartu tetap gambar dari base template). Keduanya memakai tata letak yang
+                     disunting (latar kartu tetap gambar dari template). Keduanya memakai tata letak yang
                      tersimpan; satu siswa dengan dua sisi diunduh sebagai ZIP.
                   </p>
 
