@@ -389,7 +389,6 @@
    (function () {
       // ---- data dari server ----
       const ELEMEN = <?= json_encode($elemen) ?>;
-      const SUMBER_QR = <?= json_encode($sumberQr) ?>;
       const CONTOH = <?= json_encode($contoh) ?>;
       const LEBAR_MM = <?= $lebarMm ?>;
       const TINGGI_MM = <?= $tinggiMm ?>;
@@ -462,14 +461,10 @@
             if (el.bingkai > 0) {
                kotak.style.border = el.bingkai + 'mm solid ' + el.warnaBingkai;
             }
-            const sumberGambar = kunci === 'qrcode'
-               ? ((CONTOH.qr || {})[el.sumber] || CONTOH.qrcode)
-               : CONTOH[kunci];
-
-            if (sumberGambar) {
+            if (CONTOH[kunci]) {
                const img = document.createElement('img');
                img.className = 'kartu__gambar';
-               img.src = sumberGambar;
+               img.src = CONTOH[kunci];
                img.style.objectFit = el.isi;
                img.style.borderRadius = 'inherit';
                kotak.appendChild(img);
@@ -604,13 +599,6 @@
             html += kolomAngka('radius', 'Sudut membulat (mm)', el.radius, nonaktif, 0.5);
             html += kolomAngka('bingkai', 'Tebal bingkai (mm)', el.bingkai, nonaktif, 0.1);
             html += '<div><label>Warna bingkai</label><input type="color" class="form-control form-control-sm" data-prop="warnaBingkai" value="' + el.warnaBingkai + '" ' + nonaktif + '></div>';
-            if (terpilih === 'qrcode') {
-               html += '<div style="grid-column:1/-1;"><label>Isi QR (teks yang di-encode)</label><select class="custom-select custom-select-sm" data-prop="sumber" ' + nonaktif + '>' +
-                  Object.keys(SUMBER_QR).map(function (k) {
-                     return '<option value="' + k + '"' + (el.sumber === k ? ' selected' : '') + '>' + SUMBER_QR[k] + '</option>';
-                  }).join('') + '</select>' +
-                  '<small class="text-muted">QR tidak dicetak bila field yang dipilih kosong pada data siswa.</small></div>';
-            }
             html += '<div><label>Penyesuaian gambar</label><select class="custom-select custom-select-sm" data-prop="isi" ' + nonaktif + '>' +
                [['cover', 'Penuhi kotak (crop)'], ['contain', 'Muat seluruhnya']].map(function (r) {
                   return '<option value="' + r[0] + '"' + (el.isi === r[0] ? ' selected' : '') + '>' + r[1] + '</option>';

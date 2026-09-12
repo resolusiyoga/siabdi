@@ -30,17 +30,6 @@ class KartuTemplateModel extends Model
    public const SISI = ['depan', 'belakang'];
 
    /**
-    * Sumber teks yang bisa dijadikan isi QR code.
-    * Kode unik dipakai mesin absensi; NIS/NISN untuk kartu yang dipindai
-    * sistem lain (mis. perpustakaan).
-    */
-   public const SUMBER_QR = [
-      'unique_code' => 'Kode unik (untuk absensi)',
-      'nis'         => 'NIS',
-      'nisn'        => 'NISN',
-   ];
-
-   /**
     * Daftar elemen data yang bisa ditata pada kartu.
     * Kunci array dipakai sebagai kunci di JSON layout.
     */
@@ -138,7 +127,6 @@ class KartuTemplateModel extends Model
          'isi'       => 'cover',  // cover | contain
          'bingkai'   => 0.0,
          'warnaBingkai' => '#ffffff',
-         'sumber'    => 'unique_code',   // khusus elemen QR code
       ], $o);
 
       // Koordinat bawaan mengikuti penanda posisi pada gambar tata letak
@@ -210,9 +198,6 @@ class KartuTemplateModel extends Model
                $item['isi']          = ($data['isi'] ?? '') === 'contain' ? 'contain' : 'cover';
                $item['bingkai']      = $this->batas((float) ($data['bingkai'] ?? $bawaan['bingkai']), 0, 5);
                $item['warnaBingkai'] = $this->warna($data['warnaBingkai'] ?? $bawaan['warnaBingkai']);
-               $item['sumber']       = isset(self::SUMBER_QR[$data['sumber'] ?? ''])
-                  ? $data['sumber']
-                  : $bawaan['sumber'];
             }
 
             $hasil[$sisi][$kunci] = $item;
