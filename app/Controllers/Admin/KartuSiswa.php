@@ -27,6 +27,9 @@ class KartuSiswa extends BaseController
    /** Folder penyimpanan base template SVG */
    private const DIR_TEMPLATE = 'uploads/kartu/';
 
+   /** Kelas yang benar-benar dipakai menyaring siswa (null = seluruh kelas) */
+   private ?string $kelasTersaring = null;
+
    public function __construct()
    {
       $this->kartuModel = new KartuTemplateModel();
@@ -314,7 +317,8 @@ class KartuSiswa extends BaseController
       $namaZip = 'kartu-siswa';
       if (count($siswa) === 1) {
          $namaZip .= '_' . $this->slug($siswa[0]['nama_siswa'] ?? '');
-      } elseif (!empty($siswa[0]['kelas'])) {
+      } elseif ($this->kelasTersaring !== null && !empty($siswa[0]['kelas'])) {
+         // nama kelas hanya ditempelkan bila unduhan memang disaring per kelas
          $namaZip .= '_' . $this->slug(labelKelas($siswa[0]['kelas'], $siswa[0]['jurusan'] ?? null, ''));
       }
 
@@ -379,6 +383,8 @@ class KartuSiswa extends BaseController
             throw new \RuntimeException('Siswa tersebut bukan siswa kelas anda');
          }
       } else {
+         $this->kelasTersaring = $idKelas ? (string) $idKelas : null;
+
          $siswa = $idKelas
             ? $this->siswaModel->getSiswaByKelas($idKelas)
             : $this->siswaModel->getAllSiswaWithKelas();
