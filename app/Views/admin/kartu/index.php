@@ -98,6 +98,140 @@
       margin-top: 0;
    }
 
+   /* Dropdown pilih siswa: tombol + kolom cari + daftar hasil. Dibuat
+      sendiri agar gayanya menyatu dengan tema tanpa menambah pustaka. */
+   .pilih-siswa {
+      position: relative;
+      max-width: 360px;
+   }
+
+   .pilih-siswa__kontrol {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      gap: 8px;
+      padding: 8px 12px;
+      background: #fff;
+      border: 1px solid #d2d2d2;
+      border-radius: 4px;
+      color: #3c4858;
+      font-size: 14px;
+      text-align: left;
+      cursor: pointer;
+   }
+
+   .pilih-siswa__kontrol:hover {
+      border-color: #1c655a;
+   }
+
+   .pilih-siswa--buka .pilih-siswa__kontrol {
+      border-color: #1c655a;
+      box-shadow: 0 0 0 2px rgba(28, 101, 90, .15);
+   }
+
+   .pilih-siswa__nilai {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+   }
+
+   .pilih-siswa__nilai--kosong {
+      color: #9a9a9a;
+   }
+
+   .pilih-siswa__ikon {
+      font-size: 20px;
+      color: #7b7b7b;
+      flex: 0 0 auto;
+   }
+
+   .pilih-siswa__panel {
+      position: absolute;
+      z-index: 20;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      background: #fff;
+      border-radius: 6px;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, .18);
+      overflow: hidden;
+   }
+
+   .pilih-siswa__cari {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border-bottom: 1px solid #eee;
+   }
+
+   .pilih-siswa__cari i {
+      font-size: 18px;
+      color: #9a9a9a;
+   }
+
+   .pilih-siswa__cari input {
+      flex: 1 1 auto;
+      border: 0;
+      outline: 0;
+      font-size: 14px;
+      background: transparent;
+   }
+
+   .pilih-siswa__daftar {
+      list-style: none;
+      margin: 0;
+      padding: 4px 0;
+      max-height: 260px;
+      overflow-y: auto;
+   }
+
+   .pilih-siswa__item {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 14px;
+   }
+
+   .pilih-siswa__item:hover,
+   .pilih-siswa__item.sorot {
+      background: #eef4f2;
+   }
+
+   .pilih-siswa__item mark {
+      padding: 0;
+      background: #fff3bf;
+      color: inherit;
+   }
+
+   .pilih-siswa__meta {
+      flex: 0 0 auto;
+      font-size: 12px;
+      color: #8a8a8a;
+   }
+
+   .pilih-siswa__kosong {
+      padding: 12px;
+      color: #9a9a9a;
+      font-size: 13px;
+      text-align: center;
+   }
+
+   /* input berkas tidak boleh berada di dalam .form-group (disembunyikan tema) */
+   .berkas-template {
+      margin-bottom: 16px;
+   }
+
+   .berkas-template input[type="file"] {
+      display: inline-block;
+      margin-left: 8px;
+      max-width: 100%;
+   }
+
    .thumb-template {
       max-width: 90px;
       border: 1px solid #ddd;
@@ -171,14 +305,21 @@
                              menumpuk di atas isian -->
                         <div class="mb-3">
                            <label class="d-block small mb-1" for="cariSiswaKartu">Pratinjau data siswa</label>
-                           <input type="text" id="cariSiswaKartu" class="form-control form-control-sm"
-                              list="daftarSiswaKartu" autocomplete="off"
-                              placeholder="Ketik nama atau NIS...">
-                           <datalist id="daftarSiswaKartu">
-                              <?php foreach ($daftarSiswa as $s) : ?>
-                                 <option value="<?= esc($s['nama'] . ' - ' . $s['nis'], 'attr') ?>"><?= esc($s['kelas']) ?></option>
-                              <?php endforeach; ?>
-                           </datalist>
+                           <div class="pilih-siswa" id="pilihSiswa">
+                              <button type="button" class="pilih-siswa__kontrol" id="pilihSiswaKontrol"
+                                 aria-haspopup="listbox" aria-expanded="false">
+                                 <span class="pilih-siswa__nilai pilih-siswa__nilai--kosong" id="pilihSiswaNilai">Data contoh bawaan</span>
+                                 <i class="material-icons pilih-siswa__ikon">arrow_drop_down</i>
+                              </button>
+                              <div class="pilih-siswa__panel" id="pilihSiswaPanel" hidden>
+                                 <div class="pilih-siswa__cari">
+                                    <i class="material-icons">search</i>
+                                    <input type="text" id="cariSiswaKartu" autocomplete="off"
+                                       placeholder="Cari nama atau NIS...">
+                                 </div>
+                                 <ul class="pilih-siswa__daftar" id="pilihSiswaDaftar" role="listbox"></ul>
+                              </div>
+                           </div>
                            <small class="d-block mt-1 text-muted" id="statusCariSiswa"></small>
                         </div>
                         <div class="form-inline mb-2" style="gap:8px;">
@@ -834,31 +975,126 @@
       });
       muatDaftarUnduh();
 
-      // ---- pencarian siswa untuk pratinjau ----
+      // ---- dropdown pilih siswa untuk pratinjau ----
+      const pilihSiswa = document.getElementById('pilihSiswa');
+      const pilihKontrol = document.getElementById('pilihSiswaKontrol');
+      const pilihNilai = document.getElementById('pilihSiswaNilai');
+      const pilihPanel = document.getElementById('pilihSiswaPanel');
+      const pilihDaftar = document.getElementById('pilihSiswaDaftar');
       const cariSiswa = document.getElementById('cariSiswaKartu');
       const statusCari = document.getElementById('statusCariSiswa');
 
-      function cocokkanSiswa(teks) {
-         const bersih = teks.trim().toLowerCase();
-         if (!bersih) return null;
+      let hasilCari = [];
+      let sorot = -1;
 
-         // cocok persis dengan format "Nama - NIS" (hasil pilih dari datalist)
-         let siswa = DAFTAR_SISWA.find(function (s) {
-            return (s.nama + ' - ' + s.nis).toLowerCase() === bersih;
+      function escHtml(teks) {
+         return String(teks).replace(/[&<>"]/g, function (c) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
          });
+      }
 
-         // kalau diketik manual, terima NIS atau nama yang cocok penuh
-         if (!siswa) {
-            siswa = DAFTAR_SISWA.find(function (s) {
-               return String(s.nis).toLowerCase() === bersih || s.nama.toLowerCase() === bersih;
+      // tandai bagian teks yang cocok dengan kata kunci
+      function tandai(teks, kunci) {
+         const aman = escHtml(teks);
+         if (!kunci) return aman;
+
+         const posisi = aman.toLowerCase().indexOf(kunci.toLowerCase());
+         if (posisi < 0) return aman;
+
+         return aman.slice(0, posisi) +
+            '<mark>' + aman.slice(posisi, posisi + kunci.length) + '</mark>' +
+            aman.slice(posisi + kunci.length);
+      }
+
+      function renderDaftarSiswa() {
+         const kunci = cariSiswa.value.trim();
+         const kunciKecil = kunci.toLowerCase();
+
+         hasilCari = DAFTAR_SISWA.filter(function (s) {
+            return !kunci ||
+               s.nama.toLowerCase().includes(kunciKecil) ||
+               String(s.nis).toLowerCase().includes(kunciKecil);
+         }).slice(0, 50);
+
+         pilihDaftar.innerHTML = '';
+         sorot = hasilCari.length ? 0 : -1;
+
+         // opsi pertama: kembali ke data contoh
+         if (!kunci) {
+            const bawaan = document.createElement('li');
+            bawaan.className = 'pilih-siswa__item';
+            bawaan.innerHTML = '<span class="text-muted">Data contoh bawaan</span>';
+            bawaan.addEventListener('click', function () {
+               CONTOH_AKTIF = CONTOH;
+               pilihNilai.textContent = 'Data contoh bawaan';
+               pilihNilai.classList.add('pilih-siswa__nilai--kosong');
+               statusCari.textContent = '';
+               tutupPanel();
+               render();
             });
+            pilihDaftar.appendChild(bawaan);
          }
 
-         return siswa || null;
+         if (!hasilCari.length) {
+            const kosong = document.createElement('li');
+            kosong.className = 'pilih-siswa__kosong';
+            kosong.textContent = 'Siswa tidak ditemukan';
+            pilihDaftar.appendChild(kosong);
+            return;
+         }
+
+         hasilCari.forEach(function (s, i) {
+            const li = document.createElement('li');
+            li.className = 'pilih-siswa__item' + (i === sorot ? ' sorot' : '');
+            li.setAttribute('role', 'option');
+            li.innerHTML = '<span>' + tandai(s.nama, kunci) + '</span>' +
+               '<span class="pilih-siswa__meta">' + tandai(String(s.nis), kunci) +
+               (s.kelas ? ' &middot; ' + escHtml(s.kelas) : '') + '</span>';
+            li.addEventListener('click', function () {
+               pilihSiswaTerpilih(s);
+            });
+            li.addEventListener('mousemove', function () {
+               sorot = i;
+               perbaruiSorot();
+            });
+            pilihDaftar.appendChild(li);
+         });
+      }
+
+      function perbaruiSorot() {
+         const item = pilihDaftar.querySelectorAll('[role="option"]');
+         item.forEach(function (el, i) {
+            el.classList.toggle('sorot', i === sorot);
+         });
+         if (item[sorot]) {
+            item[sorot].scrollIntoView({ block: 'nearest' });
+         }
+      }
+
+      function bukaPanel() {
+         pilihPanel.hidden = false;
+         pilihSiswa.classList.add('pilih-siswa--buka');
+         pilihKontrol.setAttribute('aria-expanded', 'true');
+         cariSiswa.value = '';
+         renderDaftarSiswa();
+         cariSiswa.focus();
+      }
+
+      function tutupPanel() {
+         pilihPanel.hidden = true;
+         pilihSiswa.classList.remove('pilih-siswa--buka');
+         pilihKontrol.setAttribute('aria-expanded', 'false');
+      }
+
+      function pilihSiswaTerpilih(s) {
+         pilihNilai.textContent = s.nama + ' - ' + s.nis;
+         pilihNilai.classList.remove('pilih-siswa__nilai--kosong');
+         tutupPanel();
+         muatPratinjauSiswa(s.id);
       }
 
       function muatPratinjauSiswa(idSiswa) {
-         statusCari.className = 'text-muted';
+         statusCari.className = 'd-block mt-1 text-muted';
          statusCari.textContent = 'Memuat data siswa...';
 
          $.ajax({
@@ -867,39 +1103,51 @@
             data: setAjaxData({ id_siswa: idSiswa }),
             success: function (res) {
                if (!res || !res.sukses) {
-                  statusCari.className = 'text-danger';
+                  statusCari.className = 'd-block mt-1 text-danger';
                   statusCari.textContent = (res && res.pesan) || 'Data siswa tidak ditemukan';
                   return;
                }
                CONTOH_AKTIF = res.data;
-               statusCari.className = 'text-success';
-               statusCari.textContent = 'Pratinjau memakai data ' + (res.data.nama || '');
+               statusCari.className = 'd-block mt-1 text-success';
+               statusCari.textContent = 'Pratinjau memakai data siswa ini';
                render();
             },
             error: function () {
-               statusCari.className = 'text-danger';
+               statusCari.className = 'd-block mt-1 text-danger';
                statusCari.textContent = 'Gagal memuat data siswa';
             }
          });
       }
 
-      cariSiswa.addEventListener('change', function () {
-         const siswa = cocokkanSiswa(this.value);
-
-         if (!this.value.trim()) {
-            CONTOH_AKTIF = CONTOH;
-            statusCari.textContent = '';
-            render();
-            return;
+      pilihKontrol.addEventListener('click', function () {
+         if (pilihPanel.hidden) {
+            bukaPanel();
+         } else {
+            tutupPanel();
          }
+      });
 
-         if (!siswa) {
-            statusCari.className = 'text-danger';
-            statusCari.textContent = 'Siswa tidak ditemukan, pilih dari daftar saran';
-            return;
+      cariSiswa.addEventListener('input', renderDaftarSiswa);
+
+      cariSiswa.addEventListener('keydown', function (e) {
+         if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (!hasilCari.length) return;
+            sorot = (sorot + (e.key === 'ArrowDown' ? 1 : -1) + hasilCari.length) % hasilCari.length;
+            perbaruiSorot();
+         } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (hasilCari[sorot]) pilihSiswaTerpilih(hasilCari[sorot]);
+         } else if (e.key === 'Escape') {
+            tutupPanel();
+            pilihKontrol.focus();
          }
+      });
 
-         muatPratinjauSiswa(siswa.id);
+      document.addEventListener('click', function (e) {
+         if (!pilihPanel.hidden && !pilihSiswa.contains(e.target)) {
+            tutupPanel();
+         }
       });
 
       // ---- perpindahan tab ----
