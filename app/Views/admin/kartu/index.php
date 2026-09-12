@@ -10,7 +10,9 @@
    }
 
    .editor__kanvas-area {
-      flex: 0 0 auto;
+      flex: 0 1 auto;
+      min-width: 0;
+      max-width: 100%;
    }
 
    .editor__panel {
@@ -23,10 +25,23 @@
       background: #f3f3f3;
       padding: 16px;
       border-radius: 6px;
-      display: inline-block;
+      display: flex;
+      justify-content: center;
+      max-width: 100%;
+      overflow: auto;
+   }
+
+   /* Ruang penampung seukuran kartu setelah diperbesar, supaya kartu yang
+      di-scale tetap berada di dalam kotak dan tidak menimpa elemen lain. */
+   .kanvas-ruang {
+      position: relative;
+      flex: 0 0 auto;
    }
 
    .kanvas-skala {
+      position: absolute;
+      top: 0;
+      left: 0;
       transform-origin: top left;
    }
 
@@ -152,8 +167,10 @@
                            </select>
                         </div>
                         <div class="kanvas-bingkai">
-                           <div class="kanvas-skala" id="kanvasSkala">
-                              <div class="kartu kanvas" id="kanvas"></div>
+                           <div class="kanvas-ruang" id="kanvasRuang">
+                              <div class="kanvas-skala" id="kanvasSkala">
+                                 <div class="kartu kanvas" id="kanvas"></div>
+                              </div>
                            </div>
                         </div>
                         <p class="text-muted mt-2" style="max-width:320px;font-size:12px;">
@@ -323,6 +340,7 @@
 
       const kanvas = document.getElementById('kanvas');
       const kanvasSkala = document.getElementById('kanvasSkala');
+      const kanvasRuang = document.getElementById('kanvasRuang');
       const daftarElemen = document.getElementById('daftarElemen');
       const panelProperti = document.getElementById('panelProperti');
 
@@ -581,9 +599,12 @@
 
       function terapkanSkala() {
          kanvasSkala.style.transform = 'scale(' + skala + ')';
-         // sediakan ruang sesuai kartu yang sudah diperbesar
-         kanvasSkala.parentElement.style.width = (LEBAR_MM * skala) + 'mm';
-         kanvasSkala.parentElement.style.height = (TINGGI_MM * skala) + 'mm';
+
+         // Kartu yang di-scale tidak lagi menempati ruang aslinya, jadi
+         // penampungnya diberi ukuran px sebesar kartu setelah diperbesar.
+         const PX_PER_MM = 96 / 25.4;
+         kanvasRuang.style.width = Math.ceil(LEBAR_MM * PX_PER_MM * skala) + 'px';
+         kanvasRuang.style.height = Math.ceil(TINGGI_MM * PX_PER_MM * skala) + 'px';
       }
 
       // geser halus dengan tombol panah
