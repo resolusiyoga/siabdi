@@ -478,9 +478,9 @@
                         <div class="col-md-4">
                            <label for="cetakSisi">Sisi kartu</label>
                            <select name="sisi" id="cetakSisi" class="custom-select">
-                              <option value="keduanya">Depan &amp; belakang</option>
-                              <option value="depan">Depan saja</option>
+                              <option value="depan" selected>Depan saja</option>
                               <option value="belakang">Belakang saja</option>
+                              <option value="keduanya">Depan &amp; belakang</option>
                            </select>
                         </div>
                      </div>
@@ -521,9 +521,9 @@
                      <div class="col-md-4">
                         <label for="unduhSisi">Sisi kartu</label>
                         <select id="unduhSisi" class="custom-select">
-                           <option value="keduanya">Depan &amp; belakang</option>
-                           <option value="depan">Depan saja</option>
+                           <option value="depan" selected>Depan saja</option>
                            <option value="belakang">Belakang saja</option>
+                           <option value="keduanya">Depan &amp; belakang</option>
                         </select>
                      </div>
                      <div class="col-md-3 d-flex align-items-end">

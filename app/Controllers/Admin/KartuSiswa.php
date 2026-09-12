@@ -253,7 +253,7 @@ class KartuSiswa extends BaseController
       }
 
       $sisi = $this->request->getVar('sisi');
-      $sisi = in_array($sisi, ['depan', 'belakang', 'keduanya'], true) ? $sisi : 'keduanya';
+      $sisi = in_array($sisi, ['depan', 'belakang', 'keduanya'], true) ? $sisi : 'depan';
 
       $template = $this->kartuModel->getTemplateAktif();
 
@@ -461,7 +461,7 @@ class KartuSiswa extends BaseController
    private function sisiDiminta(): array
    {
       $sisi = $this->request->getVar('sisi');
-      $sisi = in_array($sisi, ['depan', 'belakang', 'keduanya'], true) ? $sisi : 'keduanya';
+      $sisi = in_array($sisi, ['depan', 'belakang', 'keduanya'], true) ? $sisi : 'depan';
 
       return $sisi === 'keduanya' ? ['depan', 'belakang'] : [$sisi];
    }
