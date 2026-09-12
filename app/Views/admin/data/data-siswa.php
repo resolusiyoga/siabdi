@@ -24,14 +24,13 @@
                <button class="btn btn-danger ml-3 pl-3 py-3 btn-table-delete" onclick="deleteSelectedSiswa('Data yang sudah dihapus tidak bisa kembalikan');"><i class="material-icons mr-2">delete_forever</i>Bulk Delete</button>
             <?php endif; ?>
             <?php if (isSuperadmin()) : ?>
-               <a class="btn btn-info ml-3 pl-3 py-3" href="<?= base_url('admin/siswa/foto/download'); ?>">
-                  <i class="material-icons mr-2">photo_library</i> Download Semua Foto
-               </a>
                <div class="dropdown d-inline-block">
                   <button class="btn btn-info ml-3 pl-3 py-3 dropdown-toggle" type="button" id="dropdownDownloadFotoKelas" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                     <i class="material-icons mr-2">photo_library</i> Download Foto per Kelas
+                     <i class="material-icons mr-2">photo_library</i> Download Foto Siswa
                   </button>
                   <div class="dropdown-menu" aria-labelledby="dropdownDownloadFotoKelas">
+                     <a class="dropdown-item" href="<?= base_url('admin/siswa/foto/download'); ?>">Semua</a>
+                     <div class="dropdown-divider"></div>
                      <?php foreach ($kelas as $value) : ?>
                         <a class="dropdown-item" href="<?= base_url('admin/siswa/foto/download?id_kelas=' . $value['id_kelas']); ?>">
                            <?= labelKelas($value['kelas'], $value['jurusan']); ?>
