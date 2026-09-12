@@ -111,7 +111,7 @@ class Scan extends BaseController
 
             if ($sudahAbsen) {
                $data['presensi'] = $this->presensiGuruModel->getPresensiById($sudahAbsen);
-               return $this->showErrorView('Anda sudah absen hari ini', $data);
+               return $this->showErrorView('Anda sudah absen masuk hari ini', $data);
             }
 
             $this->presensiGuruModel->absenMasuk($idGuru, $date, $time);
@@ -129,7 +129,7 @@ class Scan extends BaseController
 
             if ($sudahAbsen) {
                $data['presensi'] = $this->presensiSiswaModel->getPresensiById($sudahAbsen);
-               return $this->showErrorView('Anda sudah absen hari ini', $data);
+               return $this->showErrorView('Anda sudah absen masuk hari ini', $data);
             }
 
             $this->presensiSiswaModel->absenMasuk($idSiswa, $date, $time, $idKelas);
@@ -177,7 +177,7 @@ class Scan extends BaseController
             $sudahAbsen = $this->presensiGuruModel->cekAbsen($idGuru, $date);
 
             if (!$sudahAbsen) {
-               return $this->showErrorView('Anda belum absen hari ini', $data);
+               return $this->showErrorView('Anda belum absen masuk hari ini', $data);
             }
 
             $presensi = $this->presensiGuruModel->getPresensiById($sudahAbsen);
@@ -201,7 +201,7 @@ class Scan extends BaseController
             $sudahAbsen = $this->presensiSiswaModel->cekAbsen($idSiswa, $date);
 
             if (!$sudahAbsen) {
-               return $this->showErrorView('Anda belum absen hari ini', $data);
+               return $this->showErrorView('Anda belum absen masuk hari ini', $data);
             }
 
             $presensi = $this->presensiSiswaModel->getPresensiById($sudahAbsen);
