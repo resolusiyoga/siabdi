@@ -14,8 +14,14 @@ use App\Models\KartuTemplateModel;
  */
 class KartuRenderer
 {
-   /** Resolusi keluaran (dot per inch) */
-   public const DPI = 300;
+   /**
+    * Resolusi keluaran (dot per inch).
+    *
+    * 600 dpi menghasilkan kartu 1276 x 2022 piksel: teks dan QR tetap tajam
+    * saat dicetak. Ketajaman latar tetap dibatasi resolusi base template
+    * yang diunggah, jadi sebaiknya unggah gambar minimal seukuran itu.
+    */
+   public const DPI = 600;
 
    private float $pxPerMm;
    private int $lebarPx;
@@ -66,7 +72,7 @@ class KartuRenderer
       }
 
       ob_start();
-      imagepng($kartu, null, 6);
+      imagepng($kartu, null, 9);
       $png = (string) ob_get_clean();
       imagedestroy($kartu);
 

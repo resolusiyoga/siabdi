@@ -381,18 +381,32 @@ class KartuSiswa extends BaseController
          return redirect()->to('/admin/kartu');
       }
 
+      // PNG 600 dpi berukuran besar, jadi ditulis dulu ke berkas sementara:
+      // addFromString menahan seluruh isi berkas di memori sampai zip ditutup.
+      $sementara = [];
+
       foreach ($siswa as $s) {
          $data = $this->dataKartu($s);
 
          foreach ($sisiCetak as $sisi) {
-            $zip->addFromString(
-               $this->namaBerkas($s, $sisi),
+            $nama = $this->namaBerkas($s, $sisi);
+            $berkas = $tmp . 'kartu-' . bin2hex(random_bytes(6)) . '.png';
+
+            file_put_contents(
+               $berkas,
                $renderer->render($template['layout'], $sisi, $data, $template['svg_' . $sisi])
             );
+
+            $zip->addFile($berkas, $nama);
+            $sementara[] = $berkas;
          }
       }
 
       $zip->close();
+
+      foreach ($sementara as $berkas) {
+         @unlink($berkas);
+      }
 
       return $this->response->download($output, null, true);
    }
@@ -555,7 +569,7 @@ class KartuSiswa extends BaseController
       $qr = QrCode::create($kode)
          ->setEncoding(new Encoding('UTF-8'))
          ->setErrorCorrectionLevel(new ErrorCorrectionLevelHigh())
-         ->setSize(400)
+         ->setSize(900)
          ->setMargin(0)
          ->setRoundBlockSizeMode(new RoundBlockSizeModeMargin());
 

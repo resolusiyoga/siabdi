@@ -435,8 +435,9 @@
 
                         <p class="text-muted" style="font-size:13px;">
                            Gunakan rasio kartu <?= $lebarMm ?> : <?= $tinggiMm ?> (potret); template diregangkan
-                           tepat seukuran kartu. <b>Disarankan PNG</b> (mis. 638 x 1011 piksel, setara 300 dpi)
-                           karena antivirus hosting kerap menghapus berkas SVG yang diunggah. SVG dan JPG tetap diterima.
+                           tepat seukuran kartu. <b>Disarankan PNG 1276 x 2022 piksel</b> (setara 600 dpi) karena
+                           itulah resolusi unduhan kartu; gambar yang lebih kecil akan tampak kabur saat dicetak.
+                           Format SVG sebaiknya dihindari karena antivirus hosting kerap menghapusnya. SVG dan JPG tetap diterima.
                         </p>
 
                         <button type="submit" class="btn btn-primary">
@@ -533,7 +534,7 @@
                   </div>
 
                   <p class="text-muted mt-2" style="font-size:13px;">
-                     Berkas PNG 300 dpi (<?= $lebarMm ?> x <?= $tinggiMm ?> mm) dirender di server memakai
+                     Berkas PNG 600 dpi (<?= $lebarMm ?> x <?= $tinggiMm ?> mm, 1276 x 2022 piksel) dirender di server memakai
                      tata letak yang tersimpan. Satu siswa dengan dua sisi diunduh sebagai ZIP.
                   </p>
 
