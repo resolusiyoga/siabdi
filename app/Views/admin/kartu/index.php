@@ -276,13 +276,13 @@
                      <div class="nav-tabs-wrapper">
                         <ul class="nav nav-tabs" role="tablist">
                            <li class="nav-item">
-                              <a class="nav-link active" href="#bagianDesain" data-seksi="bagianDesain">
-                                 <i class="material-icons">design_services</i> Desain Kartu
+                              <a class="nav-link" href="#bagianTemplate" data-seksi="bagianTemplate">
+                                 <i class="material-icons">image</i> Template
                               </a>
                            </li>
                            <li class="nav-item">
-                              <a class="nav-link" href="#bagianTemplate" data-seksi="bagianTemplate">
-                                 <i class="material-icons">image</i> Template
+                              <a class="nav-link active" href="#bagianDesain" data-seksi="bagianDesain">
+                                 <i class="material-icons">design_services</i> Desain Kartu
                               </a>
                            </li>
                            <li class="nav-item">
