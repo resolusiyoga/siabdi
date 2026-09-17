@@ -282,7 +282,7 @@
                            </li>
                            <li class="nav-item">
                               <a class="nav-link active" href="#bagianDesain" data-seksi="bagianDesain">
-                                 <i class="material-icons">design_services</i> Desain Kartu
+                                 <i class="material-icons">design_services</i> Desain
                               </a>
                            </li>
                            <li class="nav-item">
