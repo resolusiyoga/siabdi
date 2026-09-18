@@ -181,11 +181,13 @@ class SiswaModel extends Model
             if ($i == $index) {
                $data = array();
                $data['nis'] = getCSVInputValue($item, 'nis', 'int');
-               $data['nisn'] = getCSVInputValue($item, 'nisn');
+               // NISN & no HP opsional: kolom kosong (atau tidak ada di CSV)
+               // disimpan sebagai NULL, bukan string kosong
+               $data['nisn'] = getCSVInputValue($item, 'nisn') ?: null;
                $data['nama_siswa'] = getCSVInputValue($item, 'nama_siswa');
                $data['id_kelas'] = getCSVInputValue($item, 'id_kelas', 'int');
                $data['jenis_kelamin'] = getCSVInputValue($item, 'jenis_kelamin');
-               $data['no_hp'] = getCSVInputValue($item, 'no_hp');
+               $data['no_hp'] = getCSVInputValue($item, 'no_hp') ?: null;
                $data['unique_code'] = $this->kodeUnikBaru();
 
                $this->insert($data);
