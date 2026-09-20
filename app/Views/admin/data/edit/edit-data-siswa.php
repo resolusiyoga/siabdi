@@ -68,6 +68,7 @@
                         </div>
                         <div class="col-md-6">
                            <?php $this->setVar('jkNilai', old('jk') ?? $oldInput['jk'] ?? $data['jenis_kelamin']); ?>
+                           <?php $this->setVar('validation', $validation); ?>
                            <?= $this->include('admin/data/_jenis-kelamin-field') ?>
                         </div>
                      </div>
