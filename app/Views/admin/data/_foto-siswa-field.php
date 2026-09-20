@@ -39,7 +39,11 @@
       position: absolute;
       top: 50%;
       left: 50%;
+      /* Ukuran mengikuti sisi terpendek bingkai: pada layar ponsel video
+         berorientasi potret, sehingga lingkaran setinggi 86% akan lebih
+         lebar daripada bingkainya dan terpotong di kiri-kanan. */
       height: 86%;
+      max-width: 86%;
       aspect-ratio: 1;
       transform: translate(-50%, -50%);
       border: 2px dashed rgba(255, 255, 255, .9);
