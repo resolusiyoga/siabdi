@@ -84,17 +84,17 @@
       position: absolute;
       top: 50%;
       left: 50%;
-      /* Ukuran mengikuti sisi terpendek bingkai: pada layar ponsel video
-         berorientasi potret, sehingga lingkaran setinggi 86% akan lebih
-         lebar daripada bingkainya dan terpotong di kiri-kanan. */
-      height: 86%;
-      max-width: 86%;
-      aspect-ratio: 1;
       transform: translate(-50%, -50%);
       border: 2px dashed rgba(255, 255, 255, .9);
       border-radius: 50%;
       /* area di luar lingkaran diredupkan agar batasnya jelas */
       box-shadow: 0 0 0 100vmax rgba(0, 0, 0, .35);
+      /* lebar & tinggi diisi via JS (lihat sesuaikanPanduanKamera): CSS
+         murni tidak bisa membuat lingkaran yang selalu pas dengan sisi
+         terpendek bingkai, karena persentase lebar & tinggi masing-masing
+         dihitung dari sumbu yang berbeda (lebar dari lebar bingkai, tinggi
+         dari tinggi bingkai) -- pada video potret (kamera HP) keduanya
+         menghasilkan angka berbeda dan lingkaran jadi oval. */
    }
 
    .kamera-panduan__garis {
@@ -392,6 +392,26 @@
          $fotoFileInput.value = '';
       });
 
+      // --- Panduan bingkai kamera: lingkaran selalu pas dengan sisi
+      // terpendek bingkai (video kamera HP biasanya potret, jadi lebih
+      // tinggi daripada lebar), dihitung ulang tiap kali ukurannya berubah
+      // (rotasi layar, video baru mulai, dst).
+      var $kameraBingkai = document.querySelector('.kamera-bingkai');
+      var $lingkaranPanduan = document.querySelector('.kamera-panduan__lingkaran');
+
+      function sesuaikanPanduanKamera() {
+         var sisi = Math.min($kameraBingkai.clientWidth, $kameraBingkai.clientHeight) * 0.86;
+         $lingkaranPanduan.style.width = sisi + 'px';
+         $lingkaranPanduan.style.height = sisi + 'px';
+      }
+
+      if (window.ResizeObserver) {
+         new ResizeObserver(sesuaikanPanduanKamera).observe($kameraBingkai);
+      } else {
+         window.addEventListener('resize', sesuaikanPanduanKamera);
+      }
+      $videoKamera.addEventListener('loadedmetadata', sesuaikanPanduanKamera);
+
       // --- Ambil dari kamera ---
       function hentikanStreamKamera() {
          if (kameraStream) {
@@ -400,23 +420,33 @@
          }
       }
 
-      // Mulai stream kamera. deviceId null = kamera default (dipakai saat
-      // pertama kali membuka modal, sekaligus utk memicu izin & label device).
+      // Mulai stream kamera.
+      // deviceId diisi -> kamera spesifik itu (dipilih dari dropdown).
+      // deviceId kosong -> kamera belakang diutamakan (facingMode: ideal
+      // 'environment'); browser tetap boleh memberi kamera lain jika
+      // perangkat tidak punya kamera belakang (mis. laptop).
       function mulaiStreamKamera(deviceId) {
          hentikanStreamKamera();
-         var constraints = deviceId ? { video: { deviceId: { exact: deviceId } } } : { video: true };
+         var constraints = deviceId
+            ? { video: { deviceId: { exact: deviceId } } }
+            : { video: { facingMode: { ideal: 'environment' } } };
          return navigator.mediaDevices.getUserMedia(constraints).then(function(stream) {
             kameraStream = stream;
             $videoKamera.srcObject = stream;
+            return stream;
          });
       }
 
-      function isiDaftarKamera(devices) {
+      // Tandai kamera yang sedang aktif di dropdown, supaya pilihannya
+      // konsisten dengan stream yang benar-benar tampil (bukan selalu
+      // opsi pertama), termasuk saat dibuka otomatis ke kamera belakang.
+      function isiDaftarKamera(devices, deviceIdAktif) {
          $selectKamera.innerHTML = '';
          devices.forEach(function(d, i) {
             var opt = document.createElement('option');
             opt.value = d.deviceId;
             opt.text = d.label || ('Kamera ' + (i + 1));
+            opt.selected = d.deviceId === deviceIdAktif;
             $selectKamera.appendChild(opt);
          });
          $('#wrapPilihKameraFoto').toggleClass('d-none', devices.length < 2);
@@ -431,12 +461,19 @@
          sedangBukaKamera = true;
 
          mulaiStreamKamera(null)
-            .then(function() {
-               return navigator.mediaDevices.enumerateDevices();
+            .then(function(stream) {
+               var deviceIdAktif = stream.getVideoTracks()[0].getSettings().deviceId;
+               return navigator.mediaDevices.enumerateDevices().then(function(devices) {
+                  return { devices: devices, deviceIdAktif: deviceIdAktif };
+               });
             })
-            .then(function(devices) {
-               isiDaftarKamera(devices.filter(function(d) { return d.kind === 'videoinput'; }));
+            .then(function(hasil) {
+               isiDaftarKamera(
+                  hasil.devices.filter(function(d) { return d.kind === 'videoinput'; }),
+                  hasil.deviceIdAktif
+               );
                $('#modalKameraFoto').modal('show');
+               sesuaikanPanduanKamera();
             })
             .catch(function() {
                alert('Tidak dapat mengakses kamera. Pastikan izin kamera sudah diberikan.');
