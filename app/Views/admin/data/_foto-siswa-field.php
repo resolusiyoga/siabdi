@@ -11,6 +11,71 @@
    .crop-bulat .cropper-view-box {
       outline-color: rgba(255, 255, 255, .85);
    }
+
+   /* ---- Garis bantu pada pratinjau kamera ---- */
+   .kamera-bingkai {
+      position: relative;
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+      background: #000;
+      line-height: 0;
+   }
+
+   .kamera-bingkai video {
+      width: 100%;
+      display: block;
+   }
+
+   .kamera-panduan {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      /* menahan bayangan peredup agar tidak meluber ke luar bingkai video */
+      overflow: hidden;
+   }
+
+   .kamera-panduan__lingkaran {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      height: 86%;
+      aspect-ratio: 1;
+      transform: translate(-50%, -50%);
+      border: 2px dashed rgba(255, 255, 255, .9);
+      border-radius: 50%;
+      /* area di luar lingkaran diredupkan agar batasnya jelas */
+      box-shadow: 0 0 0 100vmax rgba(0, 0, 0, .35);
+   }
+
+   .kamera-panduan__garis {
+      position: absolute;
+      background: rgba(255, 255, 255, .45);
+   }
+
+   .kamera-panduan__garis--v {
+      top: 8%;
+      bottom: 8%;
+      left: 50%;
+      width: 1px;
+   }
+
+   .kamera-panduan__garis--h {
+      left: 12%;
+      right: 12%;
+      top: 45%;
+      height: 1px;
+   }
+
+   /* garis bantu batas bahu di bagian bawah bingkai */
+   .kamera-panduan__bahu {
+      position: absolute;
+      left: 18%;
+      right: 18%;
+      bottom: 10%;
+      height: 1px;
+      background: rgba(255, 255, 255, .3);
+   }
 </style>
 <div class="form-group mt-4">
    <label>Foto Siswa</label>
@@ -50,7 +115,21 @@
                <label class="small mb-1" for="pilihKameraFoto">Pilih Kamera</label>
                <select id="pilihKameraFoto" class="custom-select"></select>
             </div>
-            <video id="videoKameraFoto" autoplay playsinline style="width:100%;max-width:400px;background:#000;"></video>
+            <div class="kamera-bingkai">
+               <video id="videoKameraFoto" autoplay playsinline></video>
+               <!-- garis bantu: lingkaran = area yang tersimpan saat crop 1:1,
+                    garis tengah membantu meluruskan posisi wajah -->
+               <div class="kamera-panduan" aria-hidden="true">
+                  <div class="kamera-panduan__lingkaran"></div>
+                  <div class="kamera-panduan__garis kamera-panduan__garis--v"></div>
+                  <div class="kamera-panduan__garis kamera-panduan__garis--h"></div>
+                  <div class="kamera-panduan__bahu"></div>
+               </div>
+            </div>
+            <p class="text-muted small mt-2 mb-0">
+               Posisikan wajah di dalam lingkaran, mata kira-kira sejajar garis mendatar,
+               dan sisakan ruang di atas kepala.
+            </p>
          </div>
          <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
