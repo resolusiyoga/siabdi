@@ -90,6 +90,33 @@
       }
    }
 
+   /* Footer kedua modal ini bisa berisi 2-4 tombol sekaligus (Batal,
+      Ulangi Crop, Lanjut/Gunakan Foto Ini). Di layar sempit, justify-
+      content:flex-end bawaan tema memampatkan semuanya ke kanan dan
+      tombol paling kiri (Batal) terpotong tanpa cara untuk digulir ke
+      sana -- jadi ditumpuk vertikal & dilebarkan penuh, dengan Batal
+      selalu di posisi paling bawah supaya aksi utama lebih mudah
+      dijangkau ibu jari. */
+   @media (max-width: 575.98px) {
+      #modalEditFoto .modal-footer,
+      #modalKameraFoto .modal-footer {
+         flex-direction: column;
+         align-items: stretch;
+         gap: 8px;
+      }
+
+      #modalEditFoto .modal-footer .btn,
+      #modalKameraFoto .modal-footer .btn {
+         width: 100%;
+         margin: 0;
+      }
+
+      #modalEditFoto .modal-footer [data-dismiss="modal"],
+      #modalKameraFoto .modal-footer [data-dismiss="modal"] {
+         order: 1;
+      }
+   }
+
    /* ---- Garis bantu pada pratinjau kamera ---- */
    .kamera-bingkai {
       position: relative;
