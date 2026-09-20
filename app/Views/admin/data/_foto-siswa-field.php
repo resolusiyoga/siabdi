@@ -67,6 +67,7 @@
    .foto-siswa__aksi {
       flex: 1 1 220px;
       min-width: 220px;
+      max-width: 100%;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
@@ -83,26 +84,37 @@
    @media (max-width: 575.98px) {
       .foto-siswa {
          flex-direction: column;
-         align-items: center;
+         /* stretch (bukan center): supaya .foto-siswa__aksi otomatis
+            selebar penuh mengikuti mekanisme flex biasa, bukan lewat
+            width:100% yang bisa meleset kalau ada sisa lebar/box-model
+            tak terduga di elemen antara -- avatar sendiri yang perlu
+            tetap di tengah, diatur lewat align-self di bawah. */
+         align-items: stretch;
          text-align: center;
       }
 
+      .foto-siswa__avatar {
+         align-self: center;
+      }
+
       .foto-siswa__aksi {
-         width: 100%;
          /* "flex: 1 1 220px" di aturan dasar mengatur LEBAR (sumbu utama
             saat arahnya baris); begitu arahnya jadi kolom di sini, sumbu
             utama berubah jadi TINGGI, dan flex-basis 220px yang sama
             malah memaksa tinggi elemen ini minimal 220px -- itulah
             sumber jarak kosong besar sebelum teks "Format JPG/PNG..."
             di layar sempit. Direset ke auto supaya tingginya kembali
-            mengikuti isi (dua tombol saja). */
+            mengikuti isi (dua tombol saja); lebarnya kini mengikuti
+            align-items:stretch pada induknya, bukan width:100% sendiri. */
          flex: 0 1 auto;
+         min-width: 0;
          flex-direction: column;
          align-items: stretch;
       }
 
       .foto-siswa__aksi .btn {
          width: 100%;
+         max-width: 100%;
       }
    }
 
