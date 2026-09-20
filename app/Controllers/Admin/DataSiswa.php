@@ -216,6 +216,10 @@ class DataSiswa extends BaseController
          $this->request->getVar('nis')
       );
 
+      // tombol "Hapus Foto" ditandai lewat field ini; diabaikan kalau
+      // pengguna sekaligus mengunggah foto baru (foto baru yang menang)
+      $hapusFoto = (bool) $this->request->getVar('hapus_foto') && empty($foto['path']);
+
       // update
       $result = $this->siswaModel->updateSiswa(
          id: $idSiswa,
@@ -226,10 +230,15 @@ class DataSiswa extends BaseController
          noHp: $this->request->getVar('no_hp') ?: null,
          foto: $foto['path'] ?? null,
          nisn: $this->request->getVar('nisn') ?: null,
+         hapusFoto: $hapusFoto,
       );
 
-      // hapus foto lama setelah berhasil diganti (kecuali nama filenya sama persis)
-      if ($result && !empty($foto['path']) && !empty($siswaLama['foto']) && $foto['path'] !== $siswaLama['foto'] && file_exists(FCPATH . $siswaLama['foto'])) {
+      // hapus berkas foto lama dari disk: baik saat diganti foto baru
+      // (kecuali nama filenya sama persis) maupun saat dihapus tanpa pengganti
+      $fotoLamaPerluDihapus = $result && !empty($siswaLama['foto']) && file_exists(FCPATH . $siswaLama['foto'])
+         && ((!empty($foto['path']) && $foto['path'] !== $siswaLama['foto']) || $hapusFoto);
+
+      if ($fotoLamaPerluDihapus) {
          @unlink(FCPATH . $siswaLama['foto']);
       }
 

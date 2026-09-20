@@ -95,7 +95,7 @@ class SiswaModel extends Model
       ]);
    }
 
-   public function updateSiswa($id, $nis, $nama, $idKelas, $jenisKelamin, $noHp, $foto = null, $nisn = null)
+   public function updateSiswa($id, $nis, $nama, $idKelas, $jenisKelamin, $noHp, $foto = null, $nisn = null, $hapusFoto = false)
    {
       $data = [
          $this->primaryKey => $id,
@@ -107,10 +107,15 @@ class SiswaModel extends Model
          'no_hp' => $noHp,
       ];
 
-      // hanya ganti foto jika ada foto baru; foto lama dipertahankan jika tidak
+      // urutan penting: foto baru (kalau ada) selalu menang atas permintaan
+      // hapus -- pengguna bisa saja klik "Hapus Foto" lalu berubah pikiran
+      // dan mengunggah foto baru tanpa submit ulang.
       if ($foto !== null) {
          $data['foto'] = $foto;
+      } elseif ($hapusFoto) {
+         $data['foto'] = null;
       }
+      // selain itu ($foto === null && !$hapusFoto): foto lama dipertahankan
 
       return $this->save($data);
    }

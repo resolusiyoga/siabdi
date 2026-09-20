@@ -218,11 +218,20 @@
          <button type="button" class="btn btn-info" id="btnCameraFoto">
             <i class="material-icons mr-2">photo_camera</i>Ambil dari Kamera
          </button>
+         <!-- hanya berarti kalau ada foto tersimpan (edit); ditampilkan/
+              disembunyikan lewat JS mengikuti isi pratinjau saat ini -->
+         <button type="button" class="btn btn-outline-danger <?= $fotoUrl ? '' : 'd-none'; ?>" id="btnHapusFoto">
+            <i class="material-icons mr-2">delete</i>Hapus Foto
+         </button>
          <input type="file" id="fotoFileInput" accept="image/png, image/jpeg" class="d-none">
          <p class="text-muted small mt-2 mb-0">Format JPG/PNG. Foto dapat dipotong dan latar belakangnya diganti warna sebelum disimpan.</p>
       </div>
    </div>
    <input type="hidden" name="foto_data" id="fotoDataInput">
+   <!-- ditandai '1' saat tombol Hapus Foto diklik; dibaca controller saat
+        submit untuk menghapus berkas & mengosongkan kolom foto. Diabaikan
+        server bila foto_data juga terisi (foto baru menang). -->
+   <input type="hidden" name="hapus_foto" id="fotoHapusInput" value="0">
 </div>
 
 <!-- Modal: ambil foto dari kamera -->
@@ -667,10 +676,25 @@
       $('#btnGunakanFoto').on('click', function() {
          var hasilAkhir = $bgCanvas.toDataURL('image/jpeg', 0.9);
          document.getElementById('fotoDataInput').value = hasilAkhir;
+         document.getElementById('fotoHapusInput').value = '0'; // foto baru membatalkan niat hapus sebelumnya
          document.getElementById('fotoPreview').src = hasilAkhir;
          document.getElementById('fotoPreview').style.display = '';
          document.getElementById('fotoPreviewIcon').style.display = 'none';
+         $('#btnHapusFoto').removeClass('d-none');
          $('#modalEditFoto').modal('hide');
+      });
+
+      // --- Hapus foto ---
+      $('#btnHapusFoto').on('click', function() {
+         if (!confirm('Hapus foto siswa ini? Foto baru dapat diunggah lagi sebelum menyimpan perubahan.')) {
+            return;
+         }
+         document.getElementById('fotoDataInput').value = '';
+         document.getElementById('fotoHapusInput').value = '1';
+         document.getElementById('fotoPreview').src = '';
+         document.getElementById('fotoPreview').style.display = 'none';
+         document.getElementById('fotoPreviewIcon').style.display = '';
+         $(this).addClass('d-none');
       });
    })();
 </script>
