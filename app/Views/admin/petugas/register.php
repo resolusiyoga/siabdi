@@ -9,7 +9,7 @@
                         <h4 class="card-title">Register Petugas</h4>
                         <p class="card-category">Buat akun petugas</p>
                     </div>
-                    <div class="card-body mx-5 my-3">
+                    <div class="card-body mx-2 mx-md-5 my-3">
                         <?php $validation = $validation ?? \Config\Services::validation(); ?>
 
                         <form action="<?= base_url('admin/petugas/register'); ?>" method="post">

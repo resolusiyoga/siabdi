@@ -8,7 +8,7 @@
           <div class="card-header card-header-primary">
             <h4 class="card-title"><b>Form Edit Kelas</b></h4>
           </div>
-          <div class="card-body mx-5 my-3">
+          <div class="card-body mx-2 mx-md-5 my-3">
 
             <form action="<?= base_url('admin/kelas/editKelasPost'); ?>" method="post">
               <?= csrf_field() ?>

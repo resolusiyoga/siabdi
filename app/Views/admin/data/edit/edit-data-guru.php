@@ -9,7 +9,7 @@
                   <h4 class="card-title"><b>Form Edit Guru</b></h4>
 
                </div>
-               <div class="card-body mx-5 my-3">
+               <div class="card-body mx-2 mx-md-5 my-3">
 
                   <?php if (session()->getFlashdata('msg')) : ?>
                      <div class="pb-2">

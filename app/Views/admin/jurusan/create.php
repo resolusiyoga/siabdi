@@ -9,7 +9,7 @@
           <div class="card-header card-header-primary">
             <h4 class="card-title"><b>Form Tambah Lokal</b></h4>
           </div>
-          <div class="card-body mx-5 my-3">
+          <div class="card-body mx-2 mx-md-5 my-3">
 
             <form action="<?= base_url('admin/jurusan/tambahJurusanPost'); ?>" method="post">
               <?= csrf_field() ?>
