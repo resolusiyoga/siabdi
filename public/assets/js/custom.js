@@ -69,6 +69,9 @@ function fetchKelasJurusanData(type, target) {
 }
 
 //delete selected posts
+// Muat ulang tabelnya lewat getDataSiswa() (didefinisikan di halaman Data
+// Siswa) kalau tersedia, supaya filter kelas/lokal yang sedang aktif tidak
+// hilang; fallback ke reload penuh hanya kalau fungsi itu tidak ada.
 function deleteSelectedSiswa(message) {
   swal({
       text: message,
@@ -89,7 +92,12 @@ function deleteSelectedSiswa(message) {
               url: BaseConfig.baseURL + '/admin/siswa/deleteSelectedSiswa',
               data: setAjaxData(data),
               success: function (response) {
-                  location.reload();
+                  $('.btn-table-delete').hide();
+                  if (typeof getDataSiswa === 'function') {
+                      getDataSiswa(typeof kelas !== 'undefined' ? kelas : null, typeof jurusan !== 'undefined' ? jurusan : null);
+                  } else {
+                      location.reload();
+                  }
               }
           });
       }

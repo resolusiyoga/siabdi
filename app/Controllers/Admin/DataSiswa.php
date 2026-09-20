@@ -314,7 +314,16 @@ class DataSiswa extends BaseController
 
    public function delete($id)
    {
+      // Dipanggil baik lewat AJAX (tombol hapus per baris, tabel dimuat
+      // ulang lewat JS tanpa reload halaman) maupun submit form biasa
+      // (fallback progresif bila JS mati) -- responsnya disesuaikan.
       if (!isSuperadmin()) {
+         if ($this->request->isAJAX()) {
+            return $this->response->setStatusCode(403)->setJSON([
+               'sukses' => false,
+               'pesan'  => 'Aksi ini khusus untuk superadmin',
+            ]);
+         }
          session()->setFlashdata(['msg' => 'Aksi ini khusus untuk superadmin', 'error' => true]);
          return redirect()->to('/admin/siswa');
       }
@@ -322,11 +331,18 @@ class DataSiswa extends BaseController
       $result = $this->siswaModel->delete($id);
 
       if ($result) {
+         if ($this->request->isAJAX()) {
+            return $this->response->setJSON(['sukses' => true, 'pesan' => 'Data berhasil dihapus']);
+         }
          session()->setFlashdata([
             'msg' => 'Data berhasil dihapus',
             'error' => false
          ]);
          return redirect()->to('/admin/siswa');
+      }
+
+      if ($this->request->isAJAX()) {
+         return $this->response->setStatusCode(422)->setJSON(['sukses' => false, 'pesan' => 'Gagal menghapus data']);
       }
 
       session()->setFlashdata([
@@ -342,11 +358,16 @@ class DataSiswa extends BaseController
    public function deleteSelectedSiswa()
    {
       if (!isSuperadmin()) {
-         exit();
+         return $this->response->setStatusCode(403)->setJSON([
+            'sukses' => false,
+            'pesan'  => 'Aksi ini khusus untuk superadmin',
+         ]);
       }
 
       $siswaIds = inputPost('siswa_ids');
       $this->siswaModel->deleteMultiSelected($siswaIds);
+
+      return $this->response->setJSON(['sukses' => true, 'pesan' => 'Data terpilih berhasil dihapus']);
    }
 
    /*

@@ -54,9 +54,9 @@
                         <div class="col-md-4">
                            <div class="nav-tabs-wrapper">
                               <span class="nav-tabs-title">Kelas:</span>
-                              <ul class="nav nav-tabs" data-tabs="tabs">
+                              <ul class="nav nav-tabs" id="tabKelas" data-tabs="tabs">
                                  <li class="nav-item">
-                                    <a class="nav-link <?= empty($defaultKelas) ? 'active' : ''; ?>" onclick="kelas = null; trig()" href="#" data-toggle="tab">
+                                    <a class="nav-link <?= empty($defaultKelas) ? 'active' : ''; ?>" data-kelas="" onclick="pilihKelas(null)" href="#" data-toggle="tab">
                                        <i class="material-icons">check</i> Semua
                                        <div class="ripple-container"></div>
                                     </a>
@@ -66,7 +66,7 @@
                                  foreach ($kelas as $value) : ?>
                                     <?php if (!in_array($value['kelas'], $tempKelas)) : ?>
                                        <li class="nav-item">
-                                          <a class="nav-link <?= $defaultKelas === $value['kelas'] ? 'active' : ''; ?>" onclick="kelas = '<?= $value['kelas']; ?>'; trig()" href="#" data-toggle="tab">
+                                          <a class="nav-link <?= $defaultKelas === $value['kelas'] ? 'active' : ''; ?>" data-kelas="<?= esc($value['kelas'], 'attr'); ?>" onclick="pilihKelas('<?= esc($value['kelas'], 'js'); ?>')" href="#" data-toggle="tab">
                                              <i class="material-icons">school</i> <?= $value['kelas']; ?>
                                              <div class="ripple-container"></div>
                                           </a>
@@ -80,16 +80,16 @@
                         <div class="col-md-6">
                            <div class="nav-tabs-wrapper">
                               <span class="nav-tabs-title">Lokal:</span>
-                              <ul class="nav nav-tabs" data-tabs="tabs">
+                              <ul class="nav nav-tabs" id="tabJurusan" data-tabs="tabs">
                                  <li class="nav-item">
-                                    <a class="nav-link <?= empty($defaultJurusan) ? 'active' : ''; ?>" onclick="jurusan = null; trig()" href="#" data-toggle="tab">
+                                    <a class="nav-link <?= empty($defaultJurusan) ? 'active' : ''; ?>" data-jurusan="" onclick="pilihJurusan(null)" href="#" data-toggle="tab">
                                        <i class="material-icons">check</i> Semua
                                        <div class="ripple-container"></div>
                                     </a>
                                  </li>
                                  <?php foreach ($jurusan as $value) : ?>
                                     <li class="nav-item">
-                                       <a class="nav-link <?= $defaultJurusan === $value['jurusan'] ? 'active' : ''; ?>" onclick="jurusan = '<?= $value['jurusan']; ?>'; trig();" href="#" data-toggle="tab">
+                                       <a class="nav-link <?= $defaultJurusan === $value['jurusan'] ? 'active' : ''; ?>" data-jurusan="<?= esc($value['jurusan'], 'attr'); ?>" onclick="pilihJurusan('<?= esc($value['jurusan'], 'js'); ?>')" href="#" data-toggle="tab">
                                           <i class="material-icons">bookmark</i> <?= $value['jurusan']; ?>
                                           <div class="ripple-container"></div>
                                        </a>
@@ -110,9 +110,65 @@
    </div>
 </div>
 <script>
+   // ---- Filter kelas/lokal diingat di browser (sessionStorage) ----
+   // Tujuannya: Tambah/Edit/Hapus siswa tidak pernah "mereset" tampilan ke
+   // Semua kelas. Hapus per baris & massal sudah murni AJAX (tidak pindah
+   // halaman sama sekali); Tambah & Edit tetap di halaman terpisah karena
+   // formnya besar (unggah/crop/kamera foto), tapi begitu kembali ke sini
+   // -- termasuk lewat tombol back atau refresh manual -- filter terakhir
+   // otomatis dipakai lagi, bukan filter bawaan dari server.
+   var KUNCI_KELAS = 'siabdiSiswaFilterKelas';
+   var KUNCI_JURUSAN = 'siabdiSiswaFilterJurusan';
+
    var kelas = <?= !empty($defaultKelas) ? json_encode($defaultKelas) : 'null'; ?>;
    var jurusan = <?= !empty($defaultJurusan) ? json_encode($defaultJurusan) : 'null'; ?>;
 
+   // filter bawaan dari server (mis. wali kelas selalu dikunci ke kelasnya)
+   // tidak pernah ditimpa; sessionStorage hanya dipakai saat server tidak
+   // memaksa filter tertentu (superadmin).
+   try {
+      if (kelas === null && sessionStorage.getItem(KUNCI_KELAS) !== null) {
+         kelas = JSON.parse(sessionStorage.getItem(KUNCI_KELAS));
+      }
+      if (jurusan === null && sessionStorage.getItem(KUNCI_JURUSAN) !== null) {
+         jurusan = JSON.parse(sessionStorage.getItem(KUNCI_JURUSAN));
+      }
+   } catch (e) {
+      // localStorage/sessionStorage bisa dibatasi (mode privat dsb.); abaikan
+   }
+
+   function simpanFilter() {
+      try {
+         kelas === null ? sessionStorage.removeItem(KUNCI_KELAS) : sessionStorage.setItem(KUNCI_KELAS, JSON.stringify(kelas));
+         jurusan === null ? sessionStorage.removeItem(KUNCI_JURUSAN) : sessionStorage.setItem(KUNCI_JURUSAN, JSON.stringify(jurusan));
+      } catch (e) {}
+   }
+
+   // Tandai tab yang aktif sesuai variabel kelas/jurusan saat ini -- perlu
+   // dipanggil manual (bukan hanya mengandalkan klik) karena filter bisa
+   // datang dari sessionStorage tanpa ada klik sama sekali.
+   function tandaiTabAktif() {
+      $('#tabKelas .nav-link').removeClass('active');
+      $('#tabKelas .nav-link[data-kelas="' + (kelas || '') + '"]').addClass('active');
+      $('#tabJurusan .nav-link').removeClass('active');
+      $('#tabJurusan .nav-link[data-jurusan="' + (jurusan || '') + '"]').addClass('active');
+   }
+
+   function pilihKelas(v) {
+      kelas = v;
+      simpanFilter();
+      tandaiTabAktif();
+      trig();
+   }
+
+   function pilihJurusan(v) {
+      jurusan = v;
+      simpanFilter();
+      tandaiTabAktif();
+      trig();
+   }
+
+   tandaiTabAktif();
    getDataSiswa(kelas, jurusan);
 
    function trig() {
@@ -139,6 +195,34 @@
             console.log(thrown);
             $('#dataSiswa').html(thrown);
          }
+      });
+   }
+
+   // ---- Hapus satu siswa lewat AJAX: tabel dimuat ulang di tempat,
+   // filter kelas/lokal yang sedang aktif tidak hilang. ----
+   function hapusSiswa(id, nama) {
+      swal({
+         text: 'Hapus data siswa "' + nama + '"? Data yang sudah dihapus tidak bisa dikembalikan.',
+         icon: 'warning',
+         buttons: [BaseConfig.textCancel, BaseConfig.textOk],
+         dangerMode: true,
+      }).then(function(yakin) {
+         if (!yakin) return;
+
+         $.ajax({
+            type: 'POST',
+            url: "<?= base_url('admin/siswa/delete/') ?>" + id,
+            data: setAjaxData({ '_method': 'DELETE' }),
+            success: function(res) {
+               getDataSiswa(kelas, jurusan);
+               if (res && res.sukses === false) {
+                  swal(res.pesan || 'Gagal menghapus data', '', 'error');
+               }
+            },
+            error: function() {
+               swal('Gagal menghapus data', '', 'error');
+            }
+         });
       });
    }
 

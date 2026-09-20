@@ -36,13 +36,12 @@
                            <a title="Edit" href="<?= base_url('admin/siswa/edit/' . $value['id_siswa']); ?>" class="btn btn-primary p-2" id="<?= $value['nis']; ?>">
                               <i class="material-icons">edit</i>
                            </a>
-                           <form action="<?= base_url('admin/siswa/delete/' . $value['id_siswa']); ?>" method="post" class="d-inline">
-                              <?= csrf_field(); ?>
-                              <input type="hidden" name="_method" value="DELETE">
-                              <button title="Delete" onclick="return confirm('Konfirmasi untuk menghapus data');" type="submit" class="btn btn-danger p-2" id="<?= $value['nis']; ?>">
-                                 <i class="material-icons">delete_forever</i>
-                              </button>
-                           </form>
+                           <!-- hapus lewat AJAX (lihat hapusSiswa() di data-siswa.php) supaya tabel
+                                dimuat ulang tanpa reload halaman & filter kelas/lokal tidak hilang -->
+                           <button title="Delete" type="button" class="btn btn-danger p-2"
+                              onclick="hapusSiswa('<?= $value['id_siswa']; ?>', '<?= esc($value['nama_siswa'], 'js'); ?>')">
+                              <i class="material-icons">delete_forever</i>
+                           </button>
                         <?php endif; ?>
                         <a title="Download QR Code" href="<?= base_url('admin/qr/siswa/' . $value['id_siswa'] . '/download'); ?>" class="btn btn-success p-2">
                            <i class="material-icons">qr_code</i>
