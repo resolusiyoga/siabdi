@@ -1,5 +1,100 @@
 <?php $fotoUrl = !empty($fotoUrlSiswa) ? base_url($fotoUrlSiswa) : null; ?>
 <style>
+   /* ---- Blok "Foto Siswa": avatar + dua tombol aksi ---- */
+   .foto-siswa {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      gap: 20px;
+   }
+
+   .foto-siswa__avatar {
+      position: relative;
+      flex: 0 0 auto;
+   }
+
+   .foto-siswa__lingkaran {
+      width: 120px;
+      height: 120px;
+      border: 1px solid #e0e0e0;
+      border-radius: 50%;
+      background: #f5f5f5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+   }
+
+   .foto-siswa__lingkaran img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+   }
+
+   .foto-siswa__ikon-kosong {
+      font-size: 44px;
+   }
+
+   /* lencana hapus kecil di pojok avatar, pola umum foto profil --
+      lebih ringkas daripada tombol besar yang bersaing dengan dua
+      aksi utama (Upload/Kamera) */
+   .foto-siswa__hapus {
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      background: #f44336;
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, .35);
+   }
+
+   .foto-siswa__hapus:hover {
+      background: #d32f2f;
+   }
+
+   .foto-siswa__hapus i {
+      font-size: 17px;
+   }
+
+   .foto-siswa__aksi {
+      flex: 1 1 220px;
+      min-width: 220px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+   }
+
+   .foto-siswa__aksi p {
+      flex-basis: 100%;
+   }
+
+   @media (max-width: 575.98px) {
+      .foto-siswa {
+         flex-direction: column;
+         align-items: center;
+         text-align: center;
+      }
+
+      .foto-siswa__aksi {
+         width: 100%;
+         flex-direction: column;
+         align-items: stretch;
+      }
+
+      .foto-siswa__aksi .btn {
+         width: 100%;
+      }
+   }
+
    /* Panduan crop berbentuk lingkaran. Berkas yang disimpan tetap persegi;
       bagian luar lingkaran ditandai agar terlihat bagian mana yang tampil
       pada kartu siswa (elemen foto di kartu memakai sudut membulat). */
@@ -204,27 +299,31 @@
 </style>
 <div class="form-group mt-4">
    <label>Foto Siswa</label>
-   <div class="row align-items-center">
-      <div class="col-auto">
-         <div id="fotoPreviewWrapper" style="width:130px;height:130px;border:1px solid #ddd;border-radius:50%;background:#f5f5f5;display:flex;align-items:center;justify-content:center;overflow:hidden;">
-            <img id="fotoPreview" src="<?= $fotoUrl ?? ''; ?>" alt="Foto siswa" style="width:100%;height:100%;object-fit:cover;<?= $fotoUrl ? '' : 'display:none;'; ?>">
-            <i class="material-icons text-secondary" id="fotoPreviewIcon" style="font-size:48px;<?= $fotoUrl ? 'display:none;' : ''; ?>">person</i>
+   <div class="foto-siswa">
+      <!-- avatar + lencana hapus kecil di pojok, pola umum untuk foto
+           profil -- lebih ringkas daripada tombol "Hapus Foto" berukuran
+           penuh yang bersaing dengan dua aksi utama (Upload/Kamera) -->
+      <div class="foto-siswa__avatar">
+         <div id="fotoPreviewWrapper" class="foto-siswa__lingkaran">
+            <img id="fotoPreview" src="<?= $fotoUrl ?? ''; ?>" alt="Foto siswa" style="<?= $fotoUrl ? '' : 'display:none;'; ?>">
+            <i class="material-icons text-secondary foto-siswa__ikon-kosong" id="fotoPreviewIcon" style="<?= $fotoUrl ? 'display:none;' : ''; ?>">person</i>
          </div>
-      </div>
-      <div class="col">
-         <button type="button" class="btn btn-primary" id="btnUploadFoto">
-            <i class="material-icons mr-2">upload</i>Upload Foto
-         </button>
-         <button type="button" class="btn btn-info" id="btnCameraFoto">
-            <i class="material-icons mr-2">photo_camera</i>Ambil dari Kamera
-         </button>
          <!-- hanya berarti kalau ada foto tersimpan (edit); ditampilkan/
               disembunyikan lewat JS mengikuti isi pratinjau saat ini -->
-         <button type="button" class="btn btn-outline-danger <?= $fotoUrl ? '' : 'd-none'; ?>" id="btnHapusFoto">
-            <i class="material-icons mr-2">delete</i>Hapus Foto
+         <button type="button" class="foto-siswa__hapus <?= $fotoUrl ? '' : 'd-none'; ?>" id="btnHapusFoto" title="Hapus foto">
+            <i class="material-icons">close</i>
+         </button>
+      </div>
+
+      <div class="foto-siswa__aksi">
+         <button type="button" class="btn btn-primary btn-sm m-0" id="btnUploadFoto">
+            <i class="material-icons mr-1">upload</i>Upload Foto
+         </button>
+         <button type="button" class="btn btn-outline-info btn-sm m-0" id="btnCameraFoto">
+            <i class="material-icons mr-1">photo_camera</i>Ambil dari Kamera
          </button>
          <input type="file" id="fotoFileInput" accept="image/png, image/jpeg" class="d-none">
-         <p class="text-muted small mt-2 mb-0">Format JPG/PNG. Foto dapat dipotong dan latar belakangnya diganti warna sebelum disimpan.</p>
+         <p class="text-muted small mb-0 w-100">Format JPG/PNG. Foto dapat dipotong dan latar belakangnya diganti warna sebelum disimpan.</p>
       </div>
    </div>
    <input type="hidden" name="foto_data" id="fotoDataInput">
