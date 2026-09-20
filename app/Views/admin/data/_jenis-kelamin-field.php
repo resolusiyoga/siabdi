@@ -77,8 +77,8 @@ $jkPerempuan = in_array($jkNilai, ['2', 'Perempuan'], true);
       outline-offset: 2px;
    }
 </style>
-<!-- BUKAN .form-group: kelas itu diberi margin-top 8px lewat aturan tema Material (".form-group { margin: 8px 0 0 }"), sedangkan kolom Kelas di sebelahnya polos tanpa pembungkus sama sekali -- kalau dipakai di sini label & kontrolnya turun 8px dan tidak sejajar. -->
-<div>
+<!-- BUKAN .form-group: kelas itu diberi margin-top 8px lewat aturan tema Material (".form-group { margin: 8px 0 0 }"), sedangkan kolom Kelas di sebelahnya polos tanpa pembungkus sama sekali -- kalau dipakai di sini label & kontrolnya turun 8px dan tidak sejajar di layar lebar. mt-4 mt-md-0: saat kolom Kelas & Jenis Kelamin bertumpuk di layar sempit (di bawah breakpoint md) tetap ada jarak yang wajar; begitu berdampingan (md ke atas) jaraknya dilepas supaya sejajar. -->
+<div class="mt-4 mt-md-0">
    <label for="jk">Jenis Kelamin</label>
    <div class="jk-toggle form-control <?= $validation->getError('jk') ? 'is-invalid' : ''; ?>" id="jk">
       <label class="jk-toggle__opsi">
