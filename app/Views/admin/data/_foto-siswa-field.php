@@ -89,6 +89,14 @@
 
       .foto-siswa__aksi {
          width: 100%;
+         /* "flex: 1 1 220px" di aturan dasar mengatur LEBAR (sumbu utama
+            saat arahnya baris); begitu arahnya jadi kolom di sini, sumbu
+            utama berubah jadi TINGGI, dan flex-basis 220px yang sama
+            malah memaksa tinggi elemen ini minimal 220px -- itulah
+            sumber jarak kosong besar sebelum teks "Format JPG/PNG..."
+            di layar sempit. Direset ke auto supaya tingginya kembali
+            mengikuti isi (dua tombol saja). */
+         flex: 0 1 auto;
          flex-direction: column;
          align-items: stretch;
       }
