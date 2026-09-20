@@ -57,19 +57,68 @@
       }
    }
 
+   /* ---- Modal Ambil Foto dari Kamera: sama seperti modal Potong & Edit
+        Foto -- header dan footer (tombol Batal/Ambil Foto) selalu
+        terlihat, hanya isinya yang digulir bila perlu. Bingkai video juga
+        dibatasi tingginya (lihat .kamera-bingkai di bawah) supaya pada
+        video potret kamera HP, seluruh isi modal muat tanpa perlu
+        menggulir sama sekali di kebanyakan layar. ---- */
+   #modalKameraFoto .modal-dialog {
+      max-height: 100%;
+   }
+
+   #modalKameraFoto .modal-content {
+      max-height: calc(100vh - 1rem);
+      max-height: calc(100dvh - 1rem);
+   }
+
+   #modalKameraFoto .modal-body {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+   }
+
+   @media (max-width: 575.98px) {
+      #modalKameraFoto .modal-dialog {
+         margin: 0;
+         min-height: 100%;
+      }
+
+      #modalKameraFoto .modal-content {
+         max-height: 100vh;
+         max-height: 100dvh;
+         border-radius: 0;
+      }
+   }
+
    /* ---- Garis bantu pada pratinjau kamera ---- */
    .kamera-bingkai {
       position: relative;
       width: 100%;
       max-width: 400px;
+      /* Tinggi dibatasi & dipotong (bukan mengikuti rasio video apa
+         adanya): video potret dari kamera HP bisa jauh lebih tinggi
+         daripada lebar layar, sama seperti masalah pada langkah crop.
+         object-fit:cover di video hanya memotong TAMPILANnya -- jepretan
+         tetap diambil dari frame video penuh (videoWidth/videoHeight),
+         lihat #btnAmbilFoto. */
+      height: min(46vh, 420px);
       margin: 0 auto;
       background: #000;
+      overflow: hidden;
       line-height: 0;
    }
 
    .kamera-bingkai video {
       width: 100%;
+      height: 100%;
+      object-fit: cover;
       display: block;
+   }
+
+   @media (max-width: 575.98px) {
+      .kamera-bingkai {
+         height: 44vh;
+      }
    }
 
    .kamera-panduan {
