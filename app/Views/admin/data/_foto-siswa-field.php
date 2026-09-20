@@ -12,6 +12,51 @@
       outline-color: rgba(255, 255, 255, .85);
    }
 
+   /* ---- Modal Potong & Edit Foto: header/footer tetap terlihat,
+        hanya isi (modal-body) yang digulir. Tanpa ini, foto potret dari
+        kamera HP membuat kanvas Cropper.js sangat tinggi -- karena
+        Cropper.js menangkap sentuhan pada gambar untuk menggeser area
+        crop, layar jadi penuh oleh kanvas itu dan tombol "Lanjut" di
+        footer tidak lagi bisa dijangkau maupun digulir ke arahnya. ---- */
+   #modalEditFoto .modal-dialog {
+      max-height: 100%;
+   }
+
+   #modalEditFoto .modal-content {
+      max-height: calc(100vh - 1rem);
+      max-height: calc(100dvh - 1rem);
+   }
+
+   #modalEditFoto .modal-body {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+   }
+
+   /* Area gambar dibatasi tingginya & dipotong (overflow hidden) supaya
+      Cropper.js tidak membuat kanvas sebesar foto aslinya -- foto potret
+      dari kamera HP bisa jauh lebih tinggi daripada lebar layar. */
+   .crop-image-wrap {
+      height: min(48vh, 420px);
+      overflow: hidden;
+   }
+
+   @media (max-width: 575.98px) {
+      #modalEditFoto .modal-dialog {
+         margin: 0;
+         min-height: 100%;
+      }
+
+      #modalEditFoto .modal-content {
+         max-height: 100vh;
+         max-height: 100dvh;
+         border-radius: 0;
+      }
+
+      .crop-image-wrap {
+         height: 42vh;
+      }
+   }
+
    /* ---- Garis bantu pada pratinjau kamera ---- */
    .kamera-bingkai {
       position: relative;
@@ -189,7 +234,7 @@
                      </div>
                   </div>
                </div>
-               <div style="max-height:420px;">
+               <div class="crop-image-wrap">
                   <img id="cropFotoImage" style="max-width:100%;display:block;">
                </div>
             </div>
