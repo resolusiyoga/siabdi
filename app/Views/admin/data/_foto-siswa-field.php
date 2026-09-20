@@ -73,8 +73,11 @@
       gap: 10px;
    }
 
-   .foto-siswa__aksi p {
-      flex-basis: 100%;
+   /* teks bantuan sengaja di LUAR .foto-siswa__aksi (bukan flex item di
+      antara tombol) -- selalu selebar penuh & tidak tergantung sumbu
+      flex yang berganti arah (baris di layar lebar, kolom di mobile) */
+   .foto-siswa__ket {
+      margin-top: 10px;
    }
 
    @media (max-width: 575.98px) {
@@ -323,9 +326,9 @@
             <i class="material-icons mr-1">photo_camera</i>Ambil dari Kamera
          </button>
          <input type="file" id="fotoFileInput" accept="image/png, image/jpeg" class="d-none">
-         <p class="text-muted small mb-0 w-100">Format JPG/PNG. Foto dapat dipotong dan latar belakangnya diganti warna sebelum disimpan.</p>
       </div>
    </div>
+   <p class="text-muted small foto-siswa__ket">Format JPG/PNG. Foto dapat dipotong dan latar belakangnya diganti warna sebelum disimpan.</p>
    <input type="hidden" name="foto_data" id="fotoDataInput">
    <!-- ditandai '1' saat tombol Hapus Foto diklik; dibaca controller saat
         submit untuk menghapus berkas & mengosongkan kolom foto. Diabaikan

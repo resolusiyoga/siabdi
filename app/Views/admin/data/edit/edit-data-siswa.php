@@ -67,43 +67,8 @@
                            </div>
                         </div>
                         <div class="col-md-6">
-                           <label for="jk">Jenis Kelamin</label>
-                           <?php
-                           $jenisKelamin = (old('jk') ?? $oldInput['jk'] ?? $data['jenis_kelamin']);
-                           $l = $jenisKelamin == 'Laki-laki' || $jenisKelamin == '1' ? 'checked' : '';
-                           $p = $jenisKelamin == 'Perempuan' || $jenisKelamin == '2' ? 'checked' : '';
-                           ?>
-                           <div class="form-check form-control pt-0 mb-1 <?= $validation->getError('jk') ? 'is-invalid' : ''; ?>" id="jk">
-                              <div class="row">
-                                 <div class="col-auto">
-                                    <div class="row">
-                                       <div class="col-auto pr-1">
-                                          <input class="form-check" type="radio" name="jk" id="laki" value="1" <?= $l; ?>>
-                                       </div>
-                                       <div class="col">
-                                          <label class="form-check-label pl-0 pt-1" for="laki">
-                                             <h6 class="text-dark">Laki-laki</h6>
-                                          </label>
-                                       </div>
-                                    </div>
-                                 </div>
-                                 <div class="col">
-                                    <div class="row">
-                                       <div class="col-auto pr-1">
-                                          <input class="form-check" type="radio" name="jk" id="perempuan" value="2" <?= $p; ?>>
-                                       </div>
-                                       <div class="col">
-                                          <label class="form-check-label pl-0 pt-1" for="perempuan">
-                                             <h6 class="text-dark">Perempuan</h6>
-                                          </label>
-                                       </div>
-                                    </div>
-                                 </div>
-                              </div>
-                           </div>
-                           <div class="invalid-feedback">
-                              <?= $validation->getError('jk'); ?>
-                           </div>
+                           <?php $this->setVar('jkNilai', old('jk') ?? $oldInput['jk'] ?? $data['jenis_kelamin']); ?>
+                           <?= $this->include('admin/data/_jenis-kelamin-field') ?>
                         </div>
                      </div>
 
