@@ -77,7 +77,8 @@ $jkPerempuan = in_array($jkNilai, ['2', 'Perempuan'], true);
       outline-offset: 2px;
    }
 </style>
-<div class="form-group mt-4">
+<!-- tanpa mt-4: partial ini selalu dipasang berdampingan dengan kolom Kelas yang tidak punya margin atas sendiri; kalau diberi margin di sini labelnya turun sendiri dan tidak sejajar -->
+<div class="form-group">
    <label for="jk">Jenis Kelamin</label>
    <div class="jk-toggle form-control <?= $validation->getError('jk') ? 'is-invalid' : ''; ?>" id="jk">
       <label class="jk-toggle__opsi">
