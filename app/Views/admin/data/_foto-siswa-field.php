@@ -1,9 +1,22 @@
 <?php $fotoUrl = !empty($fotoUrlSiswa) ? base_url($fotoUrlSiswa) : null; ?>
+<style>
+   /* Panduan crop berbentuk lingkaran. Berkas yang disimpan tetap persegi;
+      bagian luar lingkaran ditandai agar terlihat bagian mana yang tampil
+      pada kartu siswa (elemen foto di kartu memakai sudut membulat). */
+   .crop-bulat .cropper-view-box,
+   .crop-bulat .cropper-face {
+      border-radius: 50%;
+   }
+
+   .crop-bulat .cropper-view-box {
+      outline-color: rgba(255, 255, 255, .85);
+   }
+</style>
 <div class="form-group mt-4">
    <label>Foto Siswa</label>
    <div class="row align-items-center">
       <div class="col-auto">
-         <div id="fotoPreviewWrapper" style="width:130px;height:130px;border:1px solid #ddd;border-radius:6px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+         <div id="fotoPreviewWrapper" style="width:130px;height:130px;border:1px solid #ddd;border-radius:50%;background:#f5f5f5;display:flex;align-items:center;justify-content:center;overflow:hidden;">
             <img id="fotoPreview" src="<?= $fotoUrl ?? ''; ?>" alt="Foto siswa" style="width:100%;height:100%;object-fit:cover;<?= $fotoUrl ? '' : 'display:none;'; ?>">
             <i class="material-icons text-secondary" id="fotoPreviewIcon" style="font-size:48px;<?= $fotoUrl ? 'display:none;' : ''; ?>">person</i>
          </div>
@@ -60,15 +73,17 @@
          <div class="modal-body">
             <div id="langkahCrop">
                <p class="text-muted small">
-                  Geser dan tarik sudut kotak untuk mengubah ukuran area foto, lalu klik
-                  <b>Lanjut: Edit Background</b>. Ukuran kotak mengikuti rasio yang dipilih,
-                  jadi foto tidak akan gepeng.
+                  Geser dan tarik sudut area untuk mengubah ukurannya, lalu klik
+                  <b>Lanjut: Edit Background</b>. Ukurannya mengikuti rasio yang dipilih, jadi foto
+                  tidak akan gepeng. Panduan lingkaran menunjukkan bagian yang tampil pada kartu
+                  siswa; berkas yang disimpan tetap persegi.
                </p>
                <div class="row align-items-end mb-2">
                   <div class="col-sm-5">
                      <label class="small mb-1" for="rasioCropFoto">Rasio foto</label>
                      <select id="rasioCropFoto" class="custom-select custom-select-sm">
-                        <option value="0.75">Pas foto 3 : 4 (disarankan)</option>
+                        <option value="bulat" selected>Lingkaran 1 : 1 (disarankan)</option>
+                        <option value="0.75">Pas foto 3 : 4</option>
                         <option value="1">Kotak 1 : 1</option>
                         <option value="0.6667">Potret 2 : 3</option>
                         <option value="bebas">Bebas (rasio tidak dikunci)</option>
@@ -168,13 +183,23 @@
       function rasioTerpilih() {
          var nilai = document.getElementById('rasioCropFoto').value;
          // NaN = rasio bebas (Cropper membiarkan kotak diubah sesuka hati)
-         return nilai === 'bebas' ? NaN : parseFloat(nilai);
+         if (nilai === 'bebas') return NaN;
+         if (nilai === 'bulat') return 1;
+         return parseFloat(nilai);
+      }
+
+      // tampilkan panduan crop sebagai lingkaran bila rasio bulat dipilih
+      function terapkanBentukCrop() {
+         var bulat = document.getElementById('rasioCropFoto').value === 'bulat';
+         $('#langkahCrop').toggleClass('crop-bulat', bulat);
       }
 
       function inisialisasiCropper() {
          if (cropper) {
             cropper.destroy();
          }
+         terapkanBentukCrop();
+
          cropper = new Cropper($cropFotoImage, {
             aspectRatio: rasioTerpilih(),
             viewMode: 1,
@@ -307,6 +332,8 @@
          canvas.height = $videoKamera.videoHeight;
          canvas.getContext('2d').drawImage($videoKamera, 0, 0);
          $('#modalKameraFoto').modal('hide');
+         // hasil kamera dipakai untuk kartu, jadi mulai dari lingkaran 1:1
+         document.getElementById('rasioCropFoto').value = 'bulat';
          bukaModalCrop(canvas.toDataURL('image/jpeg', 0.92));
       });
 
@@ -350,6 +377,7 @@
       });
 
       document.getElementById('rasioCropFoto').addEventListener('change', function() {
+         terapkanBentukCrop();
          if (cropper) cropper.setAspectRatio(rasioTerpilih());
       });
 
