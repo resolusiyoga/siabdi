@@ -32,6 +32,9 @@
                         <button title="Lihat Foto" type="button" class="btn btn-info p-2 btn-lihat-foto-siswa" data-foto="<?= !empty($value['foto']) ? base_url($value['foto']) : ''; ?>" data-nama="<?= esc($value['nama_siswa']); ?>" data-edit-url="<?= isSuperadmin() ? base_url('admin/siswa/edit/' . $value['id_siswa']) : ''; ?>">
                            <i class="material-icons">photo</i>
                         </button>
+                        <button title="Lihat Kartu Siswa" type="button" class="btn btn-warning p-2 btn-lihat-kartu-siswa" data-id="<?= $value['id_siswa']; ?>" data-nama="<?= esc($value['nama_siswa']); ?>">
+                           <i class="material-icons">badge</i>
+                        </button>
                         <?php if (isSuperadmin()) : ?>
                            <a title="Edit" href="<?= base_url('admin/siswa/edit/' . $value['id_siswa']); ?>" class="btn btn-primary p-2" id="<?= $value['nis']; ?>">
                               <i class="material-icons">edit</i>
@@ -81,6 +84,32 @@
             <a href="#" id="modalLihatFotoSiswaGanti" class="btn btn-primary">
                <i class="material-icons mr-2">photo_camera</i>Ganti Foto
             </a>
+         </div>
+      </div>
+   </div>
+</div>
+
+<!-- Modal: pratinjau kartu siswa (depan & belakang), mengikuti desain
+     yang diatur di menu Kartu Siswa -->
+<div class="modal fade" id="modalLihatKartuSiswa" tabindex="-1" aria-hidden="true">
+   <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title" id="modalLihatKartuSiswaNama">Kartu Siswa</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+               <span aria-hidden="true">&times;</span>
+            </button>
+         </div>
+         <div class="modal-body text-center">
+            <div id="modalLihatKartuSiswaIsi" class="modal-lihat-kartu__isi">
+               <div id="modalLihatKartuSiswaMuat" class="spinner"></div>
+            </div>
+         </div>
+         <div class="modal-footer">
+            <a href="#" id="modalLihatKartuSiswaCetak" target="_blank" class="btn btn-primary">
+               <i class="material-icons mr-2">print</i>Cetak / Unduh
+            </a>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
          </div>
       </div>
    </div>

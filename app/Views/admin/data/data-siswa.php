@@ -1,5 +1,7 @@
 <?= $this->extend('templates/admin_page_layout') ?>
 <?= $this->section('content') ?>
+<!-- dipakai modal "Lihat Kartu Siswa" -->
+<link href="<?= assetUrl('assets/css/kartu.css'); ?>" rel="stylesheet" />
 <div class="content">
    <div class="container-fluid">
       <div class="row">
@@ -231,6 +233,38 @@
          console.log(e);
          $('input:checkbox').not(this).prop('checked', this.checked);
       });
+   });
+
+   // ---- Modal "Lihat Kartu Siswa" ----
+   // Didaftarkan di sini (bukan di list-data-siswa.php) supaya cukup terikat
+   // sekali: halaman ini sendiri tidak dimuat ulang lewat AJAX (hanya isi
+   // #dataSiswa yang berganti tiap filter/reload), dan delegasi lewat
+   // document tetap berfungsi walau DataTables membangun ulang baris tombol
+   // saat berpindah halaman (masalah yang sama seperti tombol Lihat Foto).
+   $(document).on('click', '.btn-lihat-kartu-siswa', function() {
+      var idSiswa = $(this).data('id');
+      var nama = $(this).data('nama');
+
+      $('#modalLihatKartuSiswaNama').text(nama ? ('Kartu Siswa – ' + nama) : 'Kartu Siswa');
+      $('#modalLihatKartuSiswaCetak').attr(
+         'href',
+         "<?= base_url('admin/kartu/cetak') ?>?id_siswa=" + encodeURIComponent(idSiswa) + "&sisi=keduanya"
+      );
+
+      var $isi = $('#modalLihatKartuSiswaIsi');
+      $isi.html('<div class="spinner"></div>');
+      $('#modalLihatKartuSiswa').modal('show');
+
+      $.get("<?= base_url('admin/kartu/preview-html/') ?>" + idSiswa)
+         .done(function(html) {
+            $isi.html(html);
+         })
+         .fail(function(xhr) {
+            var pesan = xhr.responseText && xhr.status !== 500
+               ? xhr.responseText
+               : 'Gagal memuat kartu siswa';
+            $isi.html('<p class="text-danger mb-0">' + pesan + '</p>');
+         });
    });
 </script>
 <?= $this->endSection() ?>

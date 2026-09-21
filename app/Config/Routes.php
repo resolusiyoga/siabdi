@@ -150,6 +150,7 @@ $routes->group('admin', function (RouteCollection $routes) {
       $routes->post('pratinjau', 'KartuSiswa::pratinjau');
       $routes->get('cetak', 'KartuSiswa::cetak');
       $routes->get('download', 'KartuSiswa::download');
+      $routes->get('preview-html/(:any)', 'KartuSiswa::previewHtml/$1');
    });
 
    // admin buat laporan

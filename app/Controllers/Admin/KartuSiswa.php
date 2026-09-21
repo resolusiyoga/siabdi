@@ -305,6 +305,61 @@ class KartuSiswa extends BaseController
    }
 
    /**
+    * Potongan HTML kartu (depan & belakang) satu siswa untuk ditampilkan
+    * dalam modal "Lihat Kartu" -- dipanggil lewat AJAX dari halaman Data
+    * Siswa, memakai tata letak & template yang sama seperti menu Kartu
+    * Siswa supaya hasilnya identik dengan yang dicetak/diunduh.
+    */
+   public function previewHtml($idSiswa = null)
+   {
+      if (!$this->bolehCetak()) {
+         return $this->response->setStatusCode(403)->setBody('Aksi ini tidak diizinkan');
+      }
+
+      $siswa = $this->siswaModel->getAllSiswaWithKelas();
+      $siswa = array_values(array_filter(
+         $siswa,
+         fn($s) => (string) $s['id_siswa'] === (string) $idSiswa
+      ));
+
+      if (empty($siswa)) {
+         return $this->response->setStatusCode(404)->setBody('Siswa tidak ditemukan');
+      }
+
+      $siswa = $siswa[0];
+
+      // wali kelas hanya boleh melihat kartu siswa kelasnya sendiri
+      if (currentUserRole() === 'wali_kelas') {
+         $kelasWali = currentUserKelas();
+         if (empty($kelasWali) || (string) $siswa['id_kelas'] !== (string) $kelasWali['id_kelas']) {
+            return $this->response->setStatusCode(403)->setBody('Siswa tersebut bukan siswa kelas anda');
+         }
+      }
+
+      $template = $this->kartuModel->getTemplateAktif();
+      $data = $this->dataKartu($siswa);
+      $labelSisi = ['depan' => 'Depan', 'belakang' => 'Belakang'];
+
+      $html = '';
+      foreach (KartuTemplateModel::SISI as $sisi) {
+         $kartu = view('admin/kartu/_render', [
+            'layout' => $template['layout'],
+            'sisi'   => $sisi,
+            'data'   => $data,
+            'bg'     => $template['svg_' . $sisi],
+            'elemen' => KartuTemplateModel::ELEMEN,
+         ]);
+
+         $html .= '<div class="modal-lihat-kartu__blok">'
+            . '<div class="modal-lihat-kartu__sisi">' . $kartu . '</div>'
+            . '<p class="modal-lihat-kartu__label">' . esc($labelSisi[$sisi]) . '</p>'
+            . '</div>';
+      }
+
+      return $this->response->setBody($html);
+   }
+
+   /**
     * Daftar siswa ringkas (tanpa foto/QR) untuk kolom pencarian editor.
     */
    private function daftarSiswaRingkas(): array
