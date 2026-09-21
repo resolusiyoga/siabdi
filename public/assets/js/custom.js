@@ -1,3 +1,21 @@
+// Token CSRF berganti otomatis di server tiap POST/PUT/DELETE/PATCH
+// berhasil (regenerate=true), tapi <meta name="X-CSRF-TOKEN"> hanya terisi
+// sekali saat halaman dimuat. Tanpa penyegaran ini, AJAX PERTAMA di suatu
+// halaman berhasil, tapi AJAX KEDUA dst di halaman yang sama selalu
+// ditolak (403) karena masih memakai token basi -- inilah sebabnya
+// beberapa aksi (mis. Simpan pada modal potong foto) terasa "tidak
+// tersimpan" tanpa pesan jelas saat dicoba lebih dari sekali. Server
+// menyisipkan token terbaru lewat header X-CSRF-Refresh (lihat
+// app/Filters/CsrfHashHeader.php); di sini cukup disalin ke meta tag
+// setiap respons AJAX selesai, otomatis berlaku untuk semua panggilan
+// AJAX di seluruh halaman tanpa perlu diubah satu per satu.
+$(document).ajaxComplete(function(event, xhr) {
+  var tokenBaru = xhr.getResponseHeader('X-CSRF-Refresh');
+  if (tokenBaru) {
+    $('meta[name="X-CSRF-TOKEN"]').attr('content', tokenBaru);
+  }
+});
+
 function setAjaxData(object = null) {
   var data = {};
   data[BaseConfig.csrfTokenName] = $('meta[name="X-CSRF-TOKEN"]').attr('content');

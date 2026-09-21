@@ -12,6 +12,7 @@ use CodeIgniter\Filters\InvalidChars;
 use CodeIgniter\Filters\PageCache;
 use CodeIgniter\Filters\PerformanceMetrics;
 use CodeIgniter\Filters\SecureHeaders;
+use App\Filters\CsrfHashHeader;
 use Myth\Auth\Filters\LoginFilter;
 use Myth\Auth\Filters\RoleFilter;
 use Myth\Auth\Filters\PermissionFilter;
@@ -37,6 +38,7 @@ class Filters extends BaseFilters
         'forcehttps'    => ForceHTTPS::class,
         'pagecache'     => PageCache::class,
         'performance'   => PerformanceMetrics::class,
+        'csrfrefresh'   => CsrfHashHeader::class,
 
         'login'         => LoginFilter::class,
         'role'          => RoleFilter::class,
@@ -88,6 +90,11 @@ class Filters extends BaseFilters
             // 'toolbar',
             // 'honeypot',
             'secureheaders',
+            // hash CSRF berganti tiap POST/PUT/DELETE/PATCH berhasil
+            // (regenerate=true di Config\Security); tanpa ini, meta tag
+            // X-CSRF-TOKEN di halaman jadi basi setelah AJAX pertama dan
+            // AJAX kedua dst di halaman yang sama selalu ditolak (403).
+            'csrfrefresh',
         ],
     ];
 
