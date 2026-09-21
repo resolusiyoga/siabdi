@@ -103,21 +103,34 @@
       $(this).closest('.modal').modal('hide');
    });
 
-   $('.btn-lihat-foto-siswa').on('click', function() {
-      var foto = $(this).data('foto');
-      var nama = $(this).data('nama');
-      var editUrl = $(this).data('edit-url');
+   // Delegasi lewat document (bukan $('.btn-lihat-foto-siswa').on('click', ...)
+   // langsung): DataTables membangun ulang <tr>/<td> dari cache internalnya
+   // setiap kali menggambar halaman baru (pindah ke page 2 dst, mengurutkan,
+   // atau mencari), sehingga tombol pada halaman selain yang pertama adalah
+   // elemen DOM baru yang tidak pernah kena ikatan event langsung -- hanya
+   // baris di halaman yang sedang tampil saat skrip ini berjalan yang
+   // kebetulan berhasil terikat. Delegasi tetap berfungsi karena listener-nya
+   // menempel di document, bukan di tombol yang bisa diganti-ganti itu.
+   // off() dulu: partial ini dimuat ulang tiap kali filter kelas/lokal
+   // berganti atau tabel disegarkan (lihat getDataSiswa() di
+   // data-siswa.php) -- tanpa off(), listener di document akan menumpuk
+   // satu per satu setiap reload dan modal terpicu berkali-kali.
+   $(document).off('click.lihatFotoSiswa', '.btn-lihat-foto-siswa')
+      .on('click.lihatFotoSiswa', '.btn-lihat-foto-siswa', function() {
+         var foto = $(this).data('foto');
+         var nama = $(this).data('nama');
+         var editUrl = $(this).data('edit-url');
 
-      $('#modalLihatFotoSiswaNama').text(nama || 'Foto Siswa');
-      $('#modalLihatFotoSiswaGanti').attr('href', editUrl).toggle(!!editUrl);
+         $('#modalLihatFotoSiswaNama').text(nama || 'Foto Siswa');
+         $('#modalLihatFotoSiswaGanti').attr('href', editUrl).toggle(!!editUrl);
 
-      if (foto) {
-         $('#modalLihatFotoSiswaImg').attr('src', foto).show();
-         $('#modalLihatFotoSiswaKosong').hide();
-      } else {
-         $('#modalLihatFotoSiswaImg').hide();
-         $('#modalLihatFotoSiswaKosong').show();
-      }
-      $('#modalLihatFotoSiswa').modal('show');
-   });
+         if (foto) {
+            $('#modalLihatFotoSiswaImg').attr('src', foto).show();
+            $('#modalLihatFotoSiswaKosong').hide();
+         } else {
+            $('#modalLihatFotoSiswaImg').hide();
+            $('#modalLihatFotoSiswaKosong').show();
+         }
+         $('#modalLihatFotoSiswa').modal('show');
+      });
 </script>
