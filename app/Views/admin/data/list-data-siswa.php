@@ -92,7 +92,7 @@
 <!-- Modal: pratinjau kartu siswa (depan & belakang), mengikuti desain
      yang diatur di menu Kartu Siswa -->
 <div class="modal fade" id="modalLihatKartuSiswa" tabindex="-1" aria-hidden="true">
-   <div class="modal-dialog modal-lg modal-dialog-centered">
+   <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
          <div class="modal-header">
             <h5 class="modal-title" id="modalLihatKartuSiswaNama">Kartu Siswa</h5>

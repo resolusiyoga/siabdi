@@ -338,23 +338,20 @@ class KartuSiswa extends BaseController
 
       $template = $this->kartuModel->getTemplateAktif();
       $data = $this->dataKartu($siswa);
-      $labelSisi = ['depan' => 'Depan', 'belakang' => 'Belakang'];
 
-      $html = '';
-      foreach (KartuTemplateModel::SISI as $sisi) {
-         $kartu = view('admin/kartu/_render', [
-            'layout' => $template['layout'],
-            'sisi'   => $sisi,
-            'data'   => $data,
-            'bg'     => $template['svg_' . $sisi],
-            'elemen' => KartuTemplateModel::ELEMEN,
-         ]);
+      // hanya sisi depan yang dipratinjau di modal ini -- sisi belakang
+      // tetap tersedia lewat tombol Cetak/Unduh di footer modal
+      $kartu = view('admin/kartu/_render', [
+         'layout' => $template['layout'],
+         'sisi'   => 'depan',
+         'data'   => $data,
+         'bg'     => $template['svg_depan'],
+         'elemen' => KartuTemplateModel::ELEMEN,
+      ]);
 
-         $html .= '<div class="modal-lihat-kartu__blok">'
-            . '<div class="modal-lihat-kartu__sisi">' . $kartu . '</div>'
-            . '<p class="modal-lihat-kartu__label">' . esc($labelSisi[$sisi]) . '</p>'
-            . '</div>';
-      }
+      $html = '<div class="modal-lihat-kartu__blok">'
+         . '<div class="modal-lihat-kartu__sisi">' . $kartu . '</div>'
+         . '</div>';
 
       return $this->response->setBody($html);
    }
