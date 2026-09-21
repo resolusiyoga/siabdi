@@ -1,4 +1,10 @@
-<?php $fotoUrl = !empty($fotoUrlSiswa) ? base_url($fotoUrlSiswa) : null; ?>
+<?php
+// assetUrl() (bukan base_url() polos): nama berkas foto siswa tetap sama
+// persis tiap kali diganti/dipotong ({nama}-{nis}.jpg), jadi tanpa penanda
+// waktu modifikasi di URL, browser mengira foto belum berubah dan terus
+// menampilkan versi lama dari cache walau berkas sudah diperbarui di server.
+$fotoUrl = !empty($fotoUrlSiswa) ? assetUrl($fotoUrlSiswa) : null;
+?>
 <style>
    /* ---- Blok "Foto Siswa": avatar + dua tombol aksi ---- */
    .foto-siswa {

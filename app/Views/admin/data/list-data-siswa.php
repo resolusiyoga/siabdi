@@ -94,7 +94,12 @@
                   <td><?= $value['no_hp'] !== null && $value['no_hp'] !== '' ? esc($value['no_hp']) : '-'; ?></td>
                   <td>
                      <div class="d-flex justify-content-center">
-                        <button title="Lihat Foto" type="button" class="btn btn-info p-2 btn-lihat-foto-siswa" data-id="<?= $value['id_siswa']; ?>" data-foto="<?= !empty($value['foto']) ? base_url($value['foto']) : ''; ?>" data-nama="<?= esc($value['nama_siswa']); ?>" data-edit-url="<?= isSuperadmin() ? base_url('admin/siswa/edit/' . $value['id_siswa']) : ''; ?>">
+                        <!-- assetUrl() (bukan base_url() polos): nama berkas foto siswa
+                             tetap sama persis tiap kali diganti/dipotong ({nama}-{nis}.jpg),
+                             jadi tanpa penanda waktu modifikasi di URL, browser mengira
+                             foto belum berubah dan terus menampilkan versi lama dari cache
+                             walau berkas & database sudah diperbarui di server. -->
+                        <button title="Lihat Foto" type="button" class="btn btn-info p-2 btn-lihat-foto-siswa" data-id="<?= $value['id_siswa']; ?>" data-foto="<?= !empty($value['foto']) ? assetUrl($value['foto']) : ''; ?>" data-nama="<?= esc($value['nama_siswa']); ?>" data-edit-url="<?= isSuperadmin() ? base_url('admin/siswa/edit/' . $value['id_siswa']) : ''; ?>">
                            <i class="material-icons">photo</i>
                         </button>
                         <button title="Lihat Kartu Siswa" type="button" class="btn btn-warning p-2 btn-lihat-kartu-siswa" data-id="<?= $value['id_siswa']; ?>" data-nama="<?= esc($value['nama_siswa']); ?>">
