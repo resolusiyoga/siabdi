@@ -321,6 +321,67 @@ class DataSiswa extends BaseController
       return $this->response->download($output, null, true);
    }
 
+   /**
+    * Potong (crop) ulang foto siswa yang sudah tersimpan, tanpa lewat
+    * form edit penuh -- dipanggil AJAX dari modal "Lihat Foto" pada
+    * Data Siswa. Hanya kolom foto yang disentuh, field lain tidak berubah.
+    */
+   public function potongFoto($id = null)
+   {
+      if (!isSuperadmin()) {
+         return $this->response->setStatusCode(403)->setJSON([
+            'sukses' => false,
+            'pesan'  => 'Aksi ini khusus untuk superadmin',
+         ]);
+      }
+
+      $siswa = $this->siswaModel->getSiswaById($id);
+      if (empty($siswa)) {
+         return $this->response->setStatusCode(404)->setJSON([
+            'sukses' => false,
+            'pesan'  => 'Siswa tidak ditemukan',
+         ]);
+      }
+
+      $uploadModel = new UploadModel();
+      $foto = $uploadModel->uploadFotoSiswaBase64(
+         $this->request->getVar('foto_data'),
+         $siswa['nama_siswa'],
+         $siswa['nis']
+      );
+
+      if (empty($foto['path'])) {
+         return $this->response->setStatusCode(400)->setJSON([
+            'sukses' => false,
+            'pesan'  => 'Foto hasil potong tidak valid',
+         ]);
+      }
+
+      $result = $this->siswaModel->save([
+         'id_siswa' => $siswa['id_siswa'],
+         'foto'     => $foto['path'],
+      ]);
+
+      if (!$result) {
+         return $this->response->setStatusCode(500)->setJSON([
+            'sukses' => false,
+            'pesan'  => 'Gagal menyimpan foto',
+         ]);
+      }
+
+      // buang berkas lama setelah berkas baru berhasil disimpan (kecuali
+      // nama filenya kebetulan sama persis)
+      if (!empty($siswa['foto']) && $foto['path'] !== $siswa['foto'] && file_exists(FCPATH . $siswa['foto'])) {
+         @unlink(FCPATH . $siswa['foto']);
+      }
+
+      return $this->response->setJSON([
+         'sukses' => true,
+         'pesan'  => 'Foto berhasil dipotong ulang',
+         'foto'   => base_url($foto['path']),
+      ]);
+   }
+
    public function delete($id)
    {
       // Dipanggil baik lewat AJAX (tombol hapus per baris, tabel dimuat

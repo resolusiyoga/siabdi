@@ -84,6 +84,8 @@ $routes->group('admin', function (RouteCollection $routes) {
    // admin edit data siswa
    $routes->get('siswa/edit/(:any)', 'Admin\DataSiswa::formEditSiswa/$1');
    $routes->post('siswa/edit', 'Admin\DataSiswa::updateSiswa');
+   // admin potong ulang foto siswa (tanpa lewat form edit penuh)
+   $routes->post('siswa/potong-foto/(:any)', 'Admin\DataSiswa::potongFoto/$1');
    // admin hapus data siswa
    $routes->delete('siswa/delete/(:any)', 'Admin\DataSiswa::delete/$1');
    $routes->get('siswa/bulk', 'Admin\DataSiswa::bulkPostSiswa');
