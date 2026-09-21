@@ -128,7 +128,11 @@
    </script>
 <?php endif; ?>
 <script>
-   $('#modalLihatFotoSiswa').on('click', '[data-dismiss="modal"]', function() {
+   // Tutup/x diikat langsung ke modal('hide'), tidak mengandalkan
+   // auto-binding data-dismiss bawaan Bootstrap sepenuhnya (pola yang sama
+   // dipakai modal kamera/edit foto di _foto-siswa-field.php) -- tanpa ini
+   // tombol Tutup & x tidak merespons klik.
+   $('#modalLihatFotoSiswa, #modalLihatKartuSiswa').on('click', '[data-dismiss="modal"]', function() {
       $(this).closest('.modal').modal('hide');
    });
 
