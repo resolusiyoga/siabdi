@@ -15,10 +15,14 @@ $presensi = $presensi ?? [];
 $nama = '-';
 $meta = '';
 $jam  = [];
+$foto = null;   // hanya siswa yang punya foto
 
 switch ($type) {
    case TipeUser::Siswa:
       $nama = $data['nama_siswa'];
+      // assetUrl(): nama berkas foto tetap sama saat diganti, jadi perlu penanda
+      // waktu modifikasi supaya kiosk tidak menampilkan foto lama dari cache
+      $foto = (!empty($data['foto']) && is_file(FCPATH . $data['foto'])) ? assetUrl($data['foto']) : null;
       $meta = 'NIS ' . esc($data['nis']) . ' &middot; ' . esc(labelKelas($data['kelas'], $data['jurusan']));
       $jam  = [
          'Masuk'  => $presensi['jam_masuk'] ?? null,
@@ -42,8 +46,21 @@ switch ($type) {
 }
 ?>
 
-<p class="result__name"><?= esc($nama); ?></p>
-<p class="result__meta"><?= $meta; ?></p>
+<div class="person">
+   <?php if ($type === TipeUser::Siswa) : ?>
+      <div class="person__foto">
+         <?php if ($foto) : ?>
+            <img src="<?= esc($foto, 'attr'); ?>" alt="Foto <?= esc($nama, 'attr'); ?>">
+         <?php else : ?>
+            <i class="material-icons">person</i>
+         <?php endif; ?>
+      </div>
+   <?php endif; ?>
+   <div class="person__info">
+      <p class="result__name"><?= esc($nama); ?></p>
+      <p class="result__meta"><?= $meta; ?></p>
+   </div>
+</div>
 
 <div class="times">
    <?php foreach ($jam as $label => $value) : ?>

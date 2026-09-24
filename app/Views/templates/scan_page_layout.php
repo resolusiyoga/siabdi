@@ -378,6 +378,47 @@
          padding: 16px;
       }
 
+      /* foto siswa berbingkai lingkaran di samping nama */
+      .person {
+         display: flex;
+         align-items: center;
+         gap: 14px;
+         margin-bottom: 14px;
+      }
+
+      .person__foto {
+         flex: 0 0 auto;
+         width: 84px;
+         height: 84px;
+         border-radius: 50%;
+         overflow: hidden;
+         background: var(--border);
+         border: 3px solid var(--accent);
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         color: var(--muted);
+      }
+
+      .person__foto img {
+         width: 100%;
+         height: 100%;
+         object-fit: cover;
+         display: block;
+      }
+
+      .person__foto .material-icons {
+         font-size: 46px;
+      }
+
+      .person__info {
+         min-width: 0;
+      }
+
+      .person .result__meta {
+         margin-bottom: 0;
+      }
+
       .result__name {
          margin: 0 0 2px;
          font-size: 19px;
