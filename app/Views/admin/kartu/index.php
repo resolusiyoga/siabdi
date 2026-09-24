@@ -413,7 +413,22 @@
                                     </p>
                                     <p class="text-muted" style="font-size:12px;">
                                        <?= esc(basename($template['svg_' . $sisi])) ?>
-                                       &middot;
+                                       <?php
+                                       // rasio template vs kartu: selisih besar berarti gambar dipotong tipis
+                                       // di tepi (bukan digepengkan) saat dipasang ke kartu
+                                       $ukuranTpl = @getimagesize(FCPATH . $template['svg_' . $sisi]);
+                                       $rasioKartu = $lebarMm / $tinggiMm;
+                                       if ($ukuranTpl && $ukuranTpl[1] > 0) :
+                                          $rasioTpl = $ukuranTpl[0] / $ukuranTpl[1];
+                                          $selisih = abs($rasioTpl - $rasioKartu) / $rasioKartu * 100;
+                                       ?>
+                                          <br><?= $ukuranTpl[0] ?> x <?= $ukuranTpl[1] ?> px
+                                          <?php if ($selisih > 1) : ?>
+                                             <br><span class="text-warning">Rasio meleset <?= round($selisih, 1) ?>% dari kartu &mdash;
+                                             tepi atas/bawah dipotong tipis. Ekspor ulang 1276 x 2022 px agar pas.</span>
+                                          <?php endif; ?>
+                                       <?php endif; ?>
+                                       <br>
                                        <a class="text-danger" href="<?= base_url('admin/kartu/template/hapus/' . $sisi) ?>"
                                           onclick="return confirm('Hapus template sisi <?= $sisi ?>?')">hapus</a>
                                     </p>

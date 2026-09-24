@@ -90,18 +90,27 @@ class KartuRenderer
          return;
       }
 
-      // base template diregangkan tepat seukuran kartu, sama seperti versi cetak
+      // Sama dengan object-fit:cover di versi cetak/editor: skala template
+      // sampai menutup penuh kartu tanpa mengubah proporsinya, lalu potong
+      // bagian tengahnya. Meregangkan ke rasio kartu membuat gambar penyet
+      // bila rasio template tidak persis sama.
+      $sw = imagesx($sumber);
+      $sh = imagesy($sumber);
+      $skala = max($this->lebarPx / $sw, $this->tinggiPx / $sh);
+      $potongW = (int) round($this->lebarPx / $skala);
+      $potongH = (int) round($this->tinggiPx / $skala);
+
       imagecopyresampled(
          $kartu,
          $sumber,
          0,
          0,
-         0,
-         0,
+         (int) round(($sw - $potongW) / 2),
+         (int) round(($sh - $potongH) / 2),
          $this->lebarPx,
          $this->tinggiPx,
-         imagesx($sumber),
-         imagesy($sumber)
+         $potongW,
+         $potongH
       );
       imagedestroy($sumber);
    }

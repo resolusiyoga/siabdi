@@ -33,7 +33,7 @@ class KartuSvgRenderer
       $latar = $this->dataUriBerkas($bg);
       if ($latar !== null) {
          $isi .= sprintf(
-            '<image x="0" y="0" width="%s" height="%s" preserveAspectRatio="none" href="%s"/>',
+            '<image x="0" y="0" width="%s" height="%s" preserveAspectRatio="xMidYMid slice" href="%s"/>',
             $lebar,
             $tinggi,
             $latar
