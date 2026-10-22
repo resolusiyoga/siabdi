@@ -731,6 +731,16 @@
          bicarakan('Contoh suara pengumuman Live Monitor');
       });
 
+      // nama siswa tersimpan HURUF KAPITAL SEMUA di database -- beberapa
+      // mesin TTS membaca teks begitu sebagai akronim (dieja per huruf),
+      // jadi untuk DIUCAPKAN saja diubah ke Kapital Di Awal Kata. Tampilan
+      // di kartu tidak diubah, cuma teks yang dikirim ke speechSynthesis.
+      function kapitalkanKata(teks) {
+         return String(teks).toLowerCase().replace(/(^|\s)\S/g, function(c) {
+            return c.toUpperCase();
+         });
+      }
+
       function bicarakan(teks) {
          if (!('speechSynthesis' in window)) return;
          window.speechSynthesis.cancel();
@@ -783,7 +793,7 @@
                $panggung.html(renderKartu(terbaru));
 
                if (suaraAktif && !pertamaKali) {
-                  bicarakan(terbaru.nama + ' berhasil absen ' + (frasaJenis[terbaru.jenis] || terbaru.jenis));
+                  bicarakan(kapitalkanKata(terbaru.nama) + ' berhasil absen ' + (frasaJenis[terbaru.jenis] || terbaru.jenis));
                }
                pertamaKali = false;
             }
