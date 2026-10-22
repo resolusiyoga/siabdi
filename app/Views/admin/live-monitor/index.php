@@ -630,7 +630,7 @@
       function htmlDefault() {
          return '' +
             '<div class="panggung-default">' +
-            '  <img class="panggung-default__logo" src="<?= base_url('assets/img/logo-madinah.png') ?>" alt="MAD1NAH">' +
+            '  <img class="panggung-default__logo" src="<?= base_url('assets/img/logo-madinah-small.png') ?>" alt="MAD1NAH">' +
             '  <p class="panggung-default__sub">Menunggu siswa berikutnya absen&hellip;</p>' +
             '</div>';
       }
