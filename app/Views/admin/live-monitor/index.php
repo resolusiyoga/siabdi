@@ -85,11 +85,9 @@
       }
 
       .kepala__logo {
-         width: 48px;
          height: 48px;
-         border-radius: 50%;
-         object-fit: cover;
-         background: #fff;
+         width: auto;
+         object-fit: contain;
       }
 
       .kepala__sekolah {
@@ -414,6 +412,41 @@
          opacity: .6;
       }
 
+      /* layar default saat tampilan dikosongkan manual (tombol reset) --
+         bukan "belum ada data", tapi sengaja dikosongkan admin supaya
+         kartu siswa sebelumnya tidak terus terpampang */
+      .panggung-default {
+         text-align: center;
+         color: var(--hijau-700);
+      }
+
+      .panggung-default__judul {
+         margin: 0;
+         font-size: 72px;
+         font-weight: 800;
+         letter-spacing: .04em;
+      }
+
+      .panggung-default__sub {
+         margin: 10px 0 0;
+         color: var(--muted);
+         font-size: 16px;
+      }
+
+      .tombol-reset {
+         display: flex;
+         align-items: center;
+         gap: 6px;
+         background: var(--surface);
+         border: 2px solid var(--border);
+         border-radius: 999px;
+         padding: 8px 16px;
+         font-size: 14px;
+         font-weight: 700;
+         color: var(--text);
+         cursor: pointer;
+      }
+
       @media (max-width: 480px) {
          body {
             overflow-x: hidden;
@@ -527,6 +560,10 @@
          <div class="chip">🕒 Ashar <b id="hitungAshar">0</b></div>
          <div class="chip"><i class="material-icons" style="font-size:18px;">logout</i> Pulang <b id="hitungPulang">0</b></div>
 
+         <button type="button" class="tombol-reset" id="tombolReset" title="Kosongkan tampilan kartu siswa">
+            <i class="material-icons" style="font-size:18px;">restart_alt</i> Reset tampilan
+         </button>
+
          <?php if (empty($idKelasWali)) : ?>
             <select id="filterKelas">
                <option value="">Semua kelas</option>
@@ -587,10 +624,27 @@
             '</div>';
       }
 
+      function htmlDefault() {
+         return '' +
+            '<div class="panggung-default">' +
+            '  <p class="panggung-default__judul">MAD1NAH</p>' +
+            '  <p class="panggung-default__sub">Menunggu siswa berikutnya absen&hellip;</p>' +
+            '</div>';
+      }
+
       // hanya digambar ulang kalau kejadian TERBARU benar-benar berganti --
       // supaya kartu tidak berkedip/mengulang animasi setiap polling kalau
       // belum ada siswa baru yang absen
       var idKejadianTerakhir = null;
+
+      // tombol reset manual: mengosongkan kartu yang sedang tampil kembali
+      // ke layar default "MAD1NAH" -- idKejadianTerakhir SENGAJA tidak
+      // diubah, supaya polling berikutnya yang masih kejadian lama tidak
+      // langsung menimpa balik layar default ini (hanya kejadian BARU yang
+      // akan menggambar ulang kartu)
+      $('#tombolReset').on('click', function() {
+         $('#panggungAbsen').html(htmlDefault());
+      });
 
       // frasa yang diucapkan untuk tiap jenis absen
       var frasaJenis = {
