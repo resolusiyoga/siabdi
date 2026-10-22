@@ -139,6 +139,79 @@
          color: var(--muted);
       }
 
+      /* tombol pengaturan suara (gear) + panel pilihan bahasa/dubber --
+         dibuat relative supaya panelnya bisa ditempel tepat di bawahnya */
+      .pengaturan-suara {
+         position: relative;
+      }
+
+      .tombol-pengaturan {
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         width: 38px;
+         height: 38px;
+         background: var(--surface);
+         border: 2px solid var(--border);
+         border-radius: 50%;
+         color: var(--hijau-700);
+         cursor: pointer;
+      }
+
+      .panel-pengaturan {
+         display: none;
+         position: absolute;
+         top: calc(100% + 8px);
+         right: 0;
+         z-index: 20;
+         width: 280px;
+         background: var(--bg);
+         border: 2px solid var(--border);
+         border-radius: 16px;
+         padding: 16px;
+         box-shadow: 0 8px 24px rgba(7, 50, 31, .18);
+         text-align: left;
+      }
+
+      .panel-pengaturan--terbuka {
+         display: block;
+      }
+
+      .panel-pengaturan label {
+         display: block;
+         font-size: 12px;
+         font-weight: 700;
+         color: var(--muted);
+         margin-bottom: 4px;
+      }
+
+      .panel-pengaturan select {
+         width: 100%;
+         background: var(--surface);
+         color: var(--text);
+         border: 2px solid var(--border);
+         border-radius: 10px;
+         padding: 8px 10px;
+         font-size: 13px;
+         margin-bottom: 12px;
+      }
+
+      .panel-pengaturan select:last-of-type {
+         margin-bottom: 8px;
+      }
+
+      .panel-pengaturan__coba {
+         width: 100%;
+         background: var(--hijau-500);
+         color: #04241d;
+         border: none;
+         border-radius: 10px;
+         padding: 8px 10px;
+         font-size: 13px;
+         font-weight: 700;
+         cursor: pointer;
+      }
+
       .kepala__jam {
          font-size: 30px;
          font-weight: 700;
@@ -357,6 +430,12 @@
             margin-left: 0;
          }
 
+         .panel-pengaturan {
+            right: auto;
+            left: 0;
+            width: 240px;
+         }
+
          .kepala__jam {
             font-size: 24px;
          }
@@ -409,6 +488,21 @@
             <i class="material-icons">volume_up</i>
             <span id="labelSuara">Suara aktif</span>
          </button>
+
+         <div class="pengaturan-suara">
+            <button type="button" class="tombol-pengaturan" id="tombolPengaturan" title="Atur bahasa & suara dubber">
+               <i class="material-icons">settings</i>
+            </button>
+            <div class="panel-pengaturan" id="panelPengaturan">
+               <label for="pilihBahasa">Bahasa pengumuman</label>
+               <select id="pilihBahasa"></select>
+
+               <label for="pilihSuara">Suara dubber</label>
+               <select id="pilihSuara"></select>
+
+               <button type="button" class="panel-pengaturan__coba" id="tombolCobaSuara">Coba suara</button>
+            </div>
+         </div>
 
          <div class="kepala__waktu">
             <div class="kepala__jam" id="jamSekarang">--:--:--</div>
@@ -534,11 +628,122 @@
          }
       });
 
+      // ---------- Pengaturan bahasa & suara dubber ----------
+      // Daftar suara (speechSynthesis.getVoices()) baru siap setelah event
+      // "voiceschanged" di banyak browser -- tidak selalu langsung tersedia
+      // begitu halaman dimuat.
+      var KUNCI_BAHASA = 'liveMonitorBahasa';
+      var KUNCI_DUBBER = 'liveMonitorDubber';
+      var bahasaDipilih = 'id-ID'; // default: Bahasa Indonesia
+      var namaSuaraDipilih = ''; // '' = biarkan browser pilih otomatis
+      try {
+         var simpananBahasa = localStorage.getItem(KUNCI_BAHASA);
+         if (simpananBahasa) bahasaDipilih = simpananBahasa;
+         namaSuaraDipilih = localStorage.getItem(KUNCI_DUBBER) || '';
+      } catch (e) {
+         // abaikan kalau localStorage tidak tersedia
+      }
+
+      var $pilihBahasa = $('#pilihBahasa');
+      var $pilihSuara = $('#pilihSuara');
+      var daftarSuara = [];
+
+      function muatDaftarSuara() {
+         if (!('speechSynthesis' in window)) return;
+         daftarSuara = window.speechSynthesis.getVoices();
+         if (!daftarSuara.length) return;
+
+         var bahasaTersedia = [];
+         daftarSuara.forEach(function(v) {
+            if (bahasaTersedia.indexOf(v.lang) === -1) bahasaTersedia.push(v.lang);
+         });
+         // bahasa yang tersimpan/dipakai sebelumnya tapi sudah tidak ada di
+         // daftar suara browser ini tetap ditampilkan, supaya pilihan tidak
+         // "hilang" tiba-tiba kalau sebelumnya dipilih dari perangkat lain
+         if (bahasaTersedia.indexOf(bahasaDipilih) === -1) bahasaTersedia.unshift(bahasaDipilih);
+         bahasaTersedia.sort();
+
+         $pilihBahasa.empty();
+         bahasaTersedia.forEach(function(lang) {
+            $pilihBahasa.append($('<option>').val(lang).text(lang));
+         });
+         $pilihBahasa.val(bahasaDipilih);
+
+         isiDaftarSuaraUntukBahasa();
+      }
+
+      function isiDaftarSuaraUntukBahasa() {
+         var suaraCocok = daftarSuara.filter(function(v) {
+            return v.lang === bahasaDipilih;
+         });
+
+         $pilihSuara.empty();
+         $pilihSuara.append($('<option>').val('').text('Otomatis (bawaan browser)'));
+         suaraCocok.forEach(function(v) {
+            $pilihSuara.append($('<option>').val(v.name).text(v.name + (v.localService ? '' : ' (online)')));
+         });
+
+         // kalau suara yang tersimpan tidak termasuk suara untuk bahasa ini,
+         // jatuh ke "Otomatis" daripada diam-diam memakai suara bahasa lain
+         var cocok = suaraCocok.some(function(v) {
+            return v.name === namaSuaraDipilih;
+         });
+         $pilihSuara.val(cocok ? namaSuaraDipilih : '');
+      }
+
+      if ('speechSynthesis' in window) {
+         muatDaftarSuara();
+         window.speechSynthesis.onvoiceschanged = muatDaftarSuara;
+      }
+
+      $pilihBahasa.on('change', function() {
+         bahasaDipilih = $(this).val();
+         namaSuaraDipilih = '';
+         try {
+            localStorage.setItem(KUNCI_BAHASA, bahasaDipilih);
+            localStorage.removeItem(KUNCI_DUBBER);
+         } catch (e) {}
+         isiDaftarSuaraUntukBahasa();
+      });
+
+      $pilihSuara.on('change', function() {
+         namaSuaraDipilih = $(this).val();
+         try {
+            localStorage.setItem(KUNCI_DUBBER, namaSuaraDipilih);
+         } catch (e) {}
+      });
+
+      var $tombolPengaturan = $('#tombolPengaturan');
+      var $panelPengaturan = $('#panelPengaturan');
+
+      $tombolPengaturan.on('click', function(e) {
+         e.stopPropagation();
+         $panelPengaturan.toggleClass('panel-pengaturan--terbuka');
+      });
+
+      $(document).on('click', function(e) {
+         if (!$(e.target).closest('.pengaturan-suara').length) {
+            $panelPengaturan.removeClass('panel-pengaturan--terbuka');
+         }
+      });
+
+      $('#tombolCobaSuara').on('click', function() {
+         bicarakan('Contoh suara pengumuman Live Monitor');
+      });
+
       function bicarakan(teks) {
          if (!('speechSynthesis' in window)) return;
          window.speechSynthesis.cancel();
          var ucapan = new SpeechSynthesisUtterance(teks);
-         ucapan.lang = 'id-ID';
+         ucapan.lang = bahasaDipilih;
+
+         if (namaSuaraDipilih) {
+            var suaraTerpilih = daftarSuara.find(function(v) {
+               return v.name === namaSuaraDipilih;
+            });
+            if (suaraTerpilih) ucapan.voice = suaraTerpilih;
+         }
+
          window.speechSynthesis.speak(ucapan);
       }
 
