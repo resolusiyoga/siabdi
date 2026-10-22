@@ -129,6 +129,38 @@ class PresensiSiswaModel extends Model implements PresensiInterface
          ->findAll();
    }
 
+   /**
+    * Semua baris presensi hari ini yang sudah punya minimal satu jam
+    * terisi (masuk/dzuhur/ashar/pulang), lengkap dengan data siswa --
+    * dipakai Live Monitor untuk disusun jadi satu daftar kejadian
+    * (tiap jam yang terisi = satu baris "siapa absen apa jam berapa").
+    */
+   public function getPresensiHariIni(string $tanggal, $idKelas = null)
+   {
+      $builder = $this->select(
+         'tb_presensi_siswa.id_presensi, tb_presensi_siswa.jam_masuk, tb_presensi_siswa.jam_dzuhur, '
+            . 'tb_presensi_siswa.jam_ashar, tb_presensi_siswa.jam_keluar, '
+            . 'tb_siswa.id_siswa, tb_siswa.nama_siswa, tb_siswa.nis, tb_siswa.nisn, tb_siswa.foto, '
+            . 'tb_kelas.id_kelas, tb_kelas.kelas, tb_jurusan.jurusan'
+      )
+         ->join('tb_siswa', 'tb_siswa.id_siswa = tb_presensi_siswa.id_siswa')
+         ->join('tb_kelas', 'tb_kelas.id_kelas = tb_siswa.id_kelas', 'left')
+         ->join('tb_jurusan', 'tb_jurusan.id = tb_kelas.id_jurusan', 'left')
+         ->where('tb_presensi_siswa.tanggal', $tanggal)
+         ->groupStart()
+         ->where('tb_presensi_siswa.jam_masuk IS NOT NULL', null, false)
+         ->orWhere('tb_presensi_siswa.jam_dzuhur IS NOT NULL', null, false)
+         ->orWhere('tb_presensi_siswa.jam_ashar IS NOT NULL', null, false)
+         ->orWhere('tb_presensi_siswa.jam_keluar IS NOT NULL', null, false)
+         ->groupEnd();
+
+      if (!empty($idKelas)) {
+         $builder = $builder->where('tb_kelas.id_kelas', $idKelas);
+      }
+
+      return $builder->findAll();
+   }
+
    public function getPresensiByKehadiran(string $idKehadiran, $tanggal)
    {
       $this->join(

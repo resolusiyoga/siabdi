@@ -2,6 +2,7 @@
 $context = $ctx ?? 'dashboard';
 switch ($context) {
    case 'absen-siswa':
+   case 'live-monitor':
    case 'siswa':
    case 'kelas':
       $sidebarColor = 'purple';
@@ -45,6 +46,14 @@ switch ($context) {
             <a class="nav-link" href="<?= base_url('admin/absen-siswa'); ?>">
                <i class="material-icons">checklist</i>
                <p>Absensi Siswa</p>
+            </a>
+         </li>
+         <li class="nav-item <?= $context == 'live-monitor' ? 'active' : ''; ?>">
+            <!-- dibuka di tab baru: layar ini dimaksudkan dibiarkan terbuka
+                 (mis. di TV lobi) sementara admin tetap bekerja di tab utama -->
+            <a class="nav-link" href="<?= base_url('admin/live-monitor'); ?>" target="_blank">
+               <i class="material-icons">live_tv</i>
+               <p>Live Monitor</p>
             </a>
          </li>
          <!-- <li class="nav-item <?= $context == 'absen-guru' ? 'active' : ''; ?>">
