@@ -105,8 +105,38 @@
       }
 
       .kepala__waktu {
-         margin-left: auto;
          text-align: right;
+      }
+
+      /* tombol toggle suara: didorong ke kanan (bersama jam), judul tetap
+         di kiri -- dipisah dari .kepala__waktu sendiri supaya keduanya
+         rapi berdampingan, bukan jam yang mendorong sendirian */
+      .tombol-suara {
+         margin-left: auto;
+         display: flex;
+         align-items: center;
+         gap: 6px;
+         background: var(--surface);
+         border: 2px solid var(--border);
+         border-radius: 999px;
+         padding: 8px 16px;
+         font-size: 13px;
+         font-weight: 700;
+         color: var(--text);
+         cursor: pointer;
+      }
+
+      .tombol-suara .material-icons {
+         font-size: 20px;
+         color: var(--hijau-700);
+      }
+
+      .tombol-suara--mati {
+         color: var(--muted);
+      }
+
+      .tombol-suara--mati .material-icons {
+         color: var(--muted);
       }
 
       .kepala__jam {
@@ -323,6 +353,10 @@
             text-align: left;
          }
 
+         .tombol-suara {
+            margin-left: 0;
+         }
+
          .kepala__jam {
             font-size: 24px;
          }
@@ -371,6 +405,11 @@
                <p class="kepala__sub"><span class="live"><span class="live__titik"></span>LIVE</span> &middot; Monitor Absensi Siswa</p>
             </div>
          </div>
+         <button type="button" class="tombol-suara" id="tombolSuara" title="Aktifkan/nonaktifkan suara pengumuman">
+            <i class="material-icons">volume_up</i>
+            <span id="labelSuara">Suara aktif</span>
+         </button>
+
          <div class="kepala__waktu">
             <div class="kepala__jam" id="jamSekarang">--:--:--</div>
             <div class="kepala__tanggal" id="tanggalSekarang"></div>
@@ -448,6 +487,61 @@
       // belum ada siswa baru yang absen
       var idKejadianTerakhir = null;
 
+      // frasa yang diucapkan untuk tiap jenis absen
+      var frasaJenis = {
+         'Masuk': 'masuk',
+         'Dzuhur': 'shalat dhuhur',
+         'Ashar': 'shalat ashar',
+         'Pulang': 'pulang'
+      };
+
+      var KUNCI_SUARA = 'liveMonitorSuara';
+      var suaraAktif = true;
+      try {
+         var simpanan = localStorage.getItem(KUNCI_SUARA);
+         if (simpanan !== null) suaraAktif = simpanan === '1';
+      } catch (e) {
+         // localStorage bisa diblokir (mis. mode privat) -- biarkan default aktif
+      }
+
+      // kejadian yang sudah ada saat halaman pertama dibuka tidak perlu
+      // diucapkan -- hanya kejadian baru setelah itu yang diumumkan
+      var pertamaKali = true;
+
+      var $tombolSuara = $('#tombolSuara');
+      var $labelSuara = $('#labelSuara');
+
+      function terapkanTampilanSuara() {
+         $tombolSuara.toggleClass('tombol-suara--mati', !suaraAktif);
+         $tombolSuara.find('.material-icons').text(suaraAktif ? 'volume_up' : 'volume_off');
+         $labelSuara.text(suaraAktif ? 'Suara aktif' : 'Suara nonaktif');
+      }
+      terapkanTampilanSuara();
+
+      $tombolSuara.on('click', function() {
+         suaraAktif = !suaraAktif;
+         try {
+            localStorage.setItem(KUNCI_SUARA, suaraAktif ? '1' : '0');
+         } catch (e) {
+            // abaikan kalau localStorage tidak tersedia
+         }
+         terapkanTampilanSuara();
+
+         // klik tombol juga berfungsi sebagai gesture pengguna yang
+         // dibutuhkan sebagian browser sebelum izin memutar suara
+         if (suaraAktif && 'speechSynthesis' in window) {
+            bicarakan('Suara pengumuman diaktifkan');
+         }
+      });
+
+      function bicarakan(teks) {
+         if (!('speechSynthesis' in window)) return;
+         window.speechSynthesis.cancel();
+         var ucapan = new SpeechSynthesisUtterance(teks);
+         ucapan.lang = 'id-ID';
+         window.speechSynthesis.speak(ucapan);
+      }
+
       function muatData() {
          var idKelas = idKelasWali || (document.getElementById('filterKelas') ? document.getElementById('filterKelas').value : '');
 
@@ -477,10 +571,16 @@
 
                if (!terbaru) {
                   $panggung.html('<div class="kosong"><i class="material-icons">hourglass_empty</i>Belum ada siswa yang absen hari ini</div>');
+                  pertamaKali = false;
                   return;
                }
 
                $panggung.html(renderKartu(terbaru));
+
+               if (suaraAktif && !pertamaKali) {
+                  bicarakan(terbaru.nama + ' berhasil absen ' + (frasaJenis[terbaru.jenis] || terbaru.jenis));
+               }
+               pertamaKali = false;
             }
          });
       }
