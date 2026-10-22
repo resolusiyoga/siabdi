@@ -420,11 +420,14 @@
          color: var(--hijau-700);
       }
 
-      .panggung-default__judul {
-         margin: 0;
-         font-size: 72px;
-         font-weight: 800;
-         letter-spacing: .04em;
+      .panggung-default__logo {
+         /* lebar mengikuti ukuran layar (vw) dengan batas bawah/atas
+            (clamp) supaya tetap proporsional baik di layar kecil
+            maupun proyektor besar, tanpa membesar tak terkendali */
+         width: clamp(180px, 32vw, 420px);
+         height: auto;
+         margin: 0 auto;
+         display: block;
       }
 
       .panggung-default__sub {
@@ -627,7 +630,7 @@
       function htmlDefault() {
          return '' +
             '<div class="panggung-default">' +
-            '  <p class="panggung-default__judul">MAD1NAH</p>' +
+            '  <img class="panggung-default__logo" src="<?= base_url('assets/img/logo-madinah.png') ?>" alt="MAD1NAH">' +
             '  <p class="panggung-default__sub">Menunggu siswa berikutnya absen&hellip;</p>' +
             '</div>';
       }
