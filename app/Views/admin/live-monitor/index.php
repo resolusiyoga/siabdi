@@ -853,7 +853,10 @@
                var $panggung = $('#panggungAbsen');
 
                if (!terbaru) {
-                  $panggung.html('<div class="kosong"><i class="material-icons">hourglass_empty</i>Belum ada siswa yang absen hari ini</div>');
+                  // belum ada siswa yang absen hari ini (mis. pagi sebelum
+                  // gerbang dibuka) -- tampilkan layar default logo yang
+                  // sama dengan tombol reset, bukan pesan teks terpisah
+                  $panggung.html(htmlDefault());
                   pertamaKali = false;
                   return;
                }
