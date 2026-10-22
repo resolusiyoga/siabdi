@@ -864,7 +864,7 @@
                $panggung.html(renderKartu(terbaru));
 
                if (suaraAktif && !pertamaKali) {
-                  bicarakan(kapitalkanKata(terbaru.nama) + ' berhasil absen ' + (frasaJenis[terbaru.jenis] || terbaru.jenis));
+                  bicarakan(kapitalkanKata(terbaru.nama) + ' sudah absen ' + (frasaJenis[terbaru.jenis] || terbaru.jenis));
                }
                pertamaKali = false;
             }
