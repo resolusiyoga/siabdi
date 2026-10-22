@@ -280,11 +280,22 @@
 
       .ringkas select {
          margin-left: auto;
-         background: var(--surface);
+         /* ikon panah bawaan browser (appearance: auto) nempel pas di tepi
+            kanan select tanpa jarak ke tepi tombol -- appearance: none lalu
+            pasang ikon sendiri lewat background-image supaya posisinya
+            (background-position) bisa diatur jaraknya ke tepi kanan */
+         appearance: none;
+         -webkit-appearance: none;
+         -moz-appearance: none;
+         background-color: var(--surface);
+         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233c5d4e' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+         background-repeat: no-repeat;
+         background-position: right 14px center;
+         background-size: 16px;
          color: var(--text);
          border: 2px solid var(--border);
          border-radius: 999px;
-         padding: 8px 16px;
+         padding: 8px 40px 8px 16px;
          font-size: 14px;
       }
 
