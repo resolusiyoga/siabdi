@@ -284,7 +284,9 @@
          color: var(--text);
          border: 2px solid var(--border);
          border-radius: 999px;
-         padding: 8px 16px;
+         /* padding kanan dilebihkan dari kiri: beri ruang untuk ikon
+            chevron bawaan browser supaya tidak mepet ke pinggir tombol */
+         padding: 8px 32px 8px 16px;
          font-size: 14px;
       }
 
