@@ -5,7 +5,7 @@
    <meta charset="UTF-8">
    <meta http-equiv="X-UA-Compatible" content="IE=edge">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <meta name="theme-color" content="#1c655a">
+   <meta name="theme-color" content="#ffffff">
    <title><?= esc($title); ?></title>
 
    <link href="<?= assetUrl('assets/fonts/fonts.css'); ?>" rel="stylesheet" />
@@ -26,18 +26,28 @@
          box-sizing: border-box;
       }
 
+      /*
+       * Palet TERANG (bukan gelap): layar ini dimaksudkan tampil lewat
+       * proyektor di luar ruangan, siang hari. Proyektor kehilangan
+       * banyak kecerahan & kontras terhadap cahaya matahari -- latar
+       * gelap jadi abu-abu pudar dan nyaris tidak terbaca dari jarak.
+       * Latar putih + warna pekat + teks nyaris hitam memberi kontras
+       * maksimum yang masih tersisa setelah "tercuci" sinar luar.
+       */
       :root {
-         --hijau-900: #112f28;
-         --hijau-700: #1c655a;
-         --hijau-500: #1c9a7f;
-         --bg: #0e1f1b;
-         --surface: #15322c;
-         --surface-2: #1b3d35;
-         --text: #f1f7f4;
-         --muted: #9fc3b8;
-         --border: #26493f;
-         --kuning: #f4c531;
-         --merah: #ef5b5b;
+         --hijau-900: #07321f;
+         --hijau-700: #0a6b3f;
+         --hijau-500: #15a34a;
+         --bg: #ffffff;
+         /* sedikit berbeda dari --bg (bukan putih murni juga) supaya kartu
+            & chip tetap terlihat batasnya sendiri meski garis tipis mudah
+            hilang lewat proyektor */
+         --surface: #f3faf5;
+         --surface-2: #e0f3e6;
+         --text: #07241a;
+         --muted: #3c5d4e;
+         --border: #bfe6cc;
+         --merah: #dc2626;
       }
 
       html,
@@ -155,7 +165,7 @@
          align-items: center;
          gap: 8px;
          background: var(--surface);
-         border: 1px solid var(--border);
+         border: 2px solid var(--border);
          border-radius: 999px;
          padding: 8px 16px;
          font-size: 14px;
@@ -169,7 +179,7 @@
          margin-left: auto;
          background: var(--surface);
          color: var(--text);
-         border: 1px solid var(--border);
+         border: 2px solid var(--border);
          border-radius: 999px;
          padding: 8px 16px;
          font-size: 14px;
@@ -185,9 +195,11 @@
 
       .kartu-absen {
          width: 100%;
-         max-width: 440px;
+         max-width: 460px;
          background: var(--surface);
-         border: 1px solid var(--border);
+         /* garis 3px, bukan 1px: tipis gampang hilang kena silau matahari
+            saat ditampilkan lewat proyektor luar ruangan */
+         border: 3px solid var(--hijau-500);
          border-radius: 24px;
          padding: 40px 32px;
          text-align: center;
@@ -213,6 +225,10 @@
          align-items: center;
          justify-content: center;
          color: var(--muted);
+      }
+
+      .kartu-absen--telat {
+         border-color: var(--merah);
       }
 
       .kartu-absen--telat .kartu-absen__foto {
@@ -435,11 +451,14 @@
       function muatData() {
          var idKelas = idKelasWali || (document.getElementById('filterKelas') ? document.getElementById('filterKelas').value : '');
 
-         $.ajax({
+         return $.ajax({
             url: "<?= base_url('admin/live-monitor/data') ?>",
             type: 'GET',
             data: { id_kelas: idKelas },
             dataType: 'json',
+            complete: function() {
+               requestBerjalan = null;
+            },
             success: function(res) {
                if (!res || !res.sukses) return;
 
@@ -467,9 +486,16 @@
       }
 
       muatData();
-      // 3 detik: cukup terasa "langsung" begitu siswa discan, tanpa
-      // membebani server (hanya 1 query ringan per permintaan)
-      setInterval(muatData, 3000);
+      // 1 detik: sekecil mungkin tanpa membuka permintaan baru sebelum
+      // yang sebelumnya selesai (query-nya ringan -- 1 tabel presensi hari
+      // ini + join id, aman dipanggil sesering ini untuk satu layar).
+      // Request lama dibatalkan dulu bila sempat menumpuk (mis. koneksi
+      // proyektor/wifi outdoor sempat lambat), supaya tidak makin tertinggal.
+      var requestBerjalan = null;
+      setInterval(function() {
+         if (requestBerjalan) requestBerjalan.abort();
+         requestBerjalan = muatData();
+      }, 1000);
 
       var $filterKelas = $('#filterKelas');
       if ($filterKelas.length) {
