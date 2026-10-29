@@ -73,6 +73,7 @@
             <?php endif; ?>
             <th><b>No</b></th>
             <th><b>NIS</b></th>
+            <th><b>NISN</b></th>
             <th><b>Nama Siswa</b></th>
             <th><b>Jenis Kelamin</b></th>
             <th><b>Kelas</b></th>
@@ -88,6 +89,7 @@
                   <?php endif; ?>
                   <td><?= $i; ?></td>
                   <td><?= $value['nis']; ?></td>
+                  <td><?= !empty($value['nisn']) ? esc($value['nisn']) : '-'; ?></td>
                   <td><b><?= $value['nama_siswa']; ?></b></td>
                   <td><?= $value['jenis_kelamin']; ?></td>
                   <td><?= labelKelas($value['kelas'] ?? null, $value['jurusan'] ?? null); ?></td>
@@ -251,7 +253,7 @@
          destroy: true,
          columnDefs: [{
             orderable: false,
-            targets: <?= isSuperadmin() ? '[0, 1, 7]' : '[0, 6]' ?>
+            targets: <?= isSuperadmin() ? '[0, 1, 8]' : '[0, 7]' ?>
          }],
          language: <?= json_encode(datatable_lang_id()) ?>
       });
