@@ -48,7 +48,7 @@ class DataPetugas extends BaseController
          ]
       ],
       'role' => [
-         'rules' => 'required|in_list[superadmin,guru,wali_kelas,pegawai,siswa,orangtua]',
+         'rules' => 'required|in_list[superadmin,guru,wali_kelas,pegawai,kepala_madrasah,siswa,orangtua]',
          'errors' => [
             'required' => 'Peran wajib diisi',
             'in_list' => 'Peran tidak valid'

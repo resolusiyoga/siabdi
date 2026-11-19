@@ -39,7 +39,7 @@ class PetugasModel extends Model
       return $this->where([$this->primaryKey => $id])->first();
    }
 
-   public const ROLES = ['superadmin', 'guru', 'wali_kelas', 'pegawai', 'siswa', 'orangtua'];
+   public const ROLES = ['superadmin', 'guru', 'wali_kelas', 'pegawai', 'kepala_madrasah', 'siswa', 'orangtua'];
 
    public function savePetugas($idPetugas, $email, $username, $passwordHash, $role, $idKelas = null, $nama = null, $nuptk = null)
    {

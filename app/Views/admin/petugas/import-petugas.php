@@ -77,7 +77,7 @@
                                     kembali di sini. Mengunggah template kosong apa adanya tidak
                                     akan mengimpor apa pun.<br><br>
                                     Kolom <b>role</b> diisi salah satu:
-                                    superadmin, guru, wali_kelas, pegawai, siswa, atau orangtua.
+                                    superadmin, guru, wali_kelas, pegawai, kepala_madrasah, siswa, atau orangtua.
                                     Kolom <b>id_kelas</b> hanya wajib diisi kalau role-nya wali_kelas.
                                 </p>
                             </div>

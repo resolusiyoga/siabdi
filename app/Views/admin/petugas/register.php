@@ -73,6 +73,7 @@
                                     <option value="guru" <?= $selectedRole == 'guru' ? 'selected' : ''; ?>>Guru</option>
                                     <option value="wali_kelas" <?= $selectedRole == 'wali_kelas' ? 'selected' : ''; ?>>Wali Kelas</option>
                                     <option value="pegawai" <?= $selectedRole == 'pegawai' ? 'selected' : ''; ?>>Pegawai</option>
+                                    <option value="kepala_madrasah" <?= $selectedRole == 'kepala_madrasah' ? 'selected' : ''; ?>>Kepala Madrasah</option>
                                     <option value="siswa" <?= $selectedRole == 'siswa' ? 'selected' : ''; ?>>Siswa</option>
                                     <option value="orangtua" <?= $selectedRole == 'orangtua' ? 'selected' : ''; ?>>Orang Tua</option>
                                 </select>

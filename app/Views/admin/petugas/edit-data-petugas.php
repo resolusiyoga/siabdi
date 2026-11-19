@@ -85,6 +85,9 @@
                         <option value="pegawai" <?= $selectedRole == 'pegawai' ? 'selected' : ''; ?>>
                            Pegawai
                         </option>
+                        <option value="kepala_madrasah" <?= $selectedRole == 'kepala_madrasah' ? 'selected' : ''; ?>>
+                           Kepala Madrasah
+                        </option>
                         <option value="siswa" <?= $selectedRole == 'siswa' ? 'selected' : ''; ?>>
                            Siswa
                         </option>

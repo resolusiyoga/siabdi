@@ -88,6 +88,7 @@ function roleLabel($role): string
       'guru' => 'Guru',
       'wali_kelas' => 'Wali Kelas',
       'pegawai' => 'Pegawai',
+      'kepala_madrasah' => 'Kepala Madrasah',
       'siswa' => 'Siswa',
       'orangtua' => 'Orang Tua',
    ];
