@@ -29,14 +29,6 @@
                      <input type="hidden" name="id" value="<?= $data['id']; ?>">
 
                      <div class="form-group mt-4">
-                        <label for="username">Username</label>
-                        <input type="text" id="username" class="form-control <?= $validation->getError('username') ? 'is-invalid' : ''; ?>" name="username" placeholder="username123" value="<?= old('username') ?? $oldInput['username'] ?? $data['username'] ?>">
-                        <div class="invalid-feedback">
-                           <?= $validation->getError('username'); ?>
-                        </div>
-                     </div>
-
-                     <div class="form-group mt-4">
                         <label for="nama">Nama Lengkap</label>
                         <input type="text" id="nama" class="form-control <?= $validation->getError('nama') ? 'is-invalid' : ''; ?>" name="nama" placeholder="Nama lengkap" value="<?= old('nama') ?? $oldInput['nama'] ?? $data['nama'] ?? '' ?>">
                         <div class="invalid-feedback">
@@ -45,8 +37,25 @@
                      </div>
 
                      <div class="form-group mt-4">
-                        <label for="email">Email</label>
-                        <input type="email" id="email" class="form-control <?= $validation->getError('email') ? 'is-invalid' : ''; ?>" name="email" placeholder="email@example.com" value="<?= old('email') ?? $oldInput['email'] ?? $data['email'] ?>">
+                        <label for="nuptk">NUPTK</label>
+                        <input type="text" id="nuptk" class="form-control <?= $validation->getError('nuptk') ? 'is-invalid' : ''; ?>" name="nuptk" placeholder="Nomor Unik Pendidik dan Tenaga Kependidikan" value="<?= old('nuptk') ?? $oldInput['nuptk'] ?? $data['nuptk'] ?? '' ?>">
+                        <div class="invalid-feedback">
+                           <?= $validation->getError('nuptk'); ?>
+                        </div>
+                     </div>
+
+                     <div class="form-group mt-4">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" class="form-control <?= $validation->getError('username') ? 'is-invalid' : ''; ?>" name="username" placeholder="username123" value="<?= old('username') ?? $oldInput['username'] ?? $data['username'] ?? '' ?>">
+                        <div class="invalid-feedback">
+                           <?= $validation->getError('username'); ?>
+                        </div>
+                        <small class="form-text text-muted">Isi username atau NUPTK supaya petugas ini bisa login.</small>
+                     </div>
+
+                     <div class="form-group mt-4">
+                        <label for="email">Email <span class="text-muted">(opsional)</span></label>
+                        <input type="email" id="email" class="form-control <?= $validation->getError('email') ? 'is-invalid' : ''; ?>" name="email" placeholder="email@example.com" value="<?= old('email') ?? $oldInput['email'] ?? $data['email'] ?? '' ?>">
                         <div class="invalid-feedback">
                            <?= $validation->getError('email'); ?>
                         </div>
@@ -57,14 +66,6 @@
                         <input type="password" id="password" class="form-control <?= $validation->getError('password') ? 'is-invalid' : ''; ?>" name="password">
                         <div class="invalid-feedback">
                            <?= $validation->getError('password'); ?>
-                        </div>
-                     </div>
-
-                     <div class="form-group mt-4">
-                        <label for="nuptk">NUPTK</label>
-                        <input type="text" id="nuptk" class="form-control <?= $validation->getError('nuptk') ? 'is-invalid' : ''; ?>" name="nuptk" placeholder="Nomor Unik Pendidik dan Tenaga Kependidikan" value="<?= old('nuptk') ?? $oldInput['nuptk'] ?? $data['nuptk'] ?? '' ?>">
-                        <div class="invalid-feedback">
-                           <?= $validation->getError('nuptk'); ?>
                         </div>
                      </div>
 

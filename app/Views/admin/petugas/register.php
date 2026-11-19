@@ -24,10 +24,10 @@
                             </div>
 
                             <div class="form-group mt-4">
-                                <label for="email">Email</label>
-                                <input type="email" id="email" class="form-control <?= $validation->getError('email') ? 'is-invalid' : ''; ?>" name="email" placeholder="example@email.com" value="<?= old('email') ?? $oldInput['email'] ?? ''; ?>">
+                                <label for="nuptk">NUPTK</label>
+                                <input type="text" id="nuptk" class="form-control <?= $validation->getError('nuptk') ? 'is-invalid' : ''; ?>" name="nuptk" placeholder="Nomor Unik Pendidik dan Tenaga Kependidikan" value="<?= old('nuptk') ?? $oldInput['nuptk'] ?? ''; ?>">
                                 <div class="invalid-feedback">
-                                    <?= $validation->getError('email'); ?>
+                                    <?= $validation->getError('nuptk'); ?>
                                 </div>
                             </div>
 
@@ -36,6 +36,15 @@
                                 <input type="text" id="username" class="form-control <?= $validation->getError('username') ? 'is-invalid' : ''; ?>" name="username" placeholder="yourusername" value="<?= old('username') ?? $oldInput['username'] ?? ''; ?>">
                                 <div class="invalid-feedback">
                                     <?= $validation->getError('username'); ?>
+                                </div>
+                                <small class="form-text text-muted">Isi username atau NUPTK supaya petugas ini bisa login.</small>
+                            </div>
+
+                            <div class="form-group mt-4">
+                                <label for="email">Email <span class="text-muted">(opsional)</span></label>
+                                <input type="email" id="email" class="form-control <?= $validation->getError('email') ? 'is-invalid' : ''; ?>" name="email" placeholder="example@email.com" value="<?= old('email') ?? $oldInput['email'] ?? ''; ?>">
+                                <div class="invalid-feedback">
+                                    <?= $validation->getError('email'); ?>
                                 </div>
                             </div>
 
@@ -52,14 +61,6 @@
                                 <input type="password" id="pass_confirm" name="pass_confirm" class="form-control <?= $validation->getError('pass_confirm') ? 'is-invalid' : ''; ?>" autocomplete="off">
                                 <div class="invalid-feedback">
                                     <?= $validation->getError('pass_confirm'); ?>
-                                </div>
-                            </div>
-
-                            <div class="form-group mt-4">
-                                <label for="nuptk">NUPTK</label>
-                                <input type="text" id="nuptk" class="form-control <?= $validation->getError('nuptk') ? 'is-invalid' : ''; ?>" name="nuptk" placeholder="Nomor Unik Pendidik dan Tenaga Kependidikan" value="<?= old('nuptk') ?? $oldInput['nuptk'] ?? ''; ?>">
-                                <div class="invalid-feedback">
-                                    <?= $validation->getError('nuptk'); ?>
                                 </div>
                             </div>
 

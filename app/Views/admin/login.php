@@ -2,10 +2,12 @@
 
 <?= $this->section('content'); ?>
 <?php
-// Myth\Auth menerima email maupun username, jadi label mengikuti konfigurasi
+// Myth\Auth menerima email maupun username; NUPTK ditangani lewat
+// App\Filters\ResolveNuptkLogin sebelum request ini sampai ke AuthController,
+// jadi dari sisi tampilan cukup diberi tahu lewat label & placeholder saja
 $emailSaja       = $config->validFields === ['email'];
-$labelLogin      = $emailSaja ? 'Email' : 'Email atau Username';
-$placeholderLogin = $emailSaja ? 'Masukkan email' : 'Masukkan email atau username';
+$labelLogin      = $emailSaja ? 'Email' : 'Username atau NUPTK';
+$placeholderLogin = $emailSaja ? 'Masukkan email' : 'Masukkan username atau NUPTK';
 ?>
 <div class="card">
    <div class="card__head"><?= esc(generalSetting('scan_subtitle', 'Absensi QR Code')); ?></div>

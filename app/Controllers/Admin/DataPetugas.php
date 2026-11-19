@@ -17,17 +17,18 @@ class DataPetugas extends BaseController
    protected KelasModel $kelasModel;
 
    protected $petugasValidationRules = [
+      // email & username sekarang opsional -- petugas boleh hanya
+      // punya NUPTK sebagai identitas login (lihat identitasLoginKosong())
       'email' => [
-         'rules' => 'required',
+         'rules' => 'permit_empty|valid_email',
          'errors' => [
-            'required' => 'Email harus diisi.',
+            'valid_email' => 'Email tidak valid.',
             'is_unique' => 'Email ini telah terdaftar.'
          ]
       ],
       'username' => [
-         'rules' => 'required|min_length[6]',
+         'rules' => 'permit_empty|min_length[6]',
          'errors' => [
-            'required' => 'Username harus diisi',
             'is_unique' => 'Username ini telah terdaftar.'
          ]
       ],
@@ -58,6 +59,15 @@ class DataPetugas extends BaseController
    private function kelasKosongUntukWaliKelas(?string $role, $idKelas): bool
    {
       return $role === 'wali_kelas' && empty($idKelas);
+   }
+
+   // login hanya bisa lewat username atau NUPTK (lihat
+   // App\Filters\ResolveNuptkLogin) -- email tidak dipakai untuk login,
+   // jadi minimal salah satu dari keduanya wajib diisi supaya akun bisa
+   // dipakai masuk sama sekali.
+   private function identitasLoginKosong(?string $username, ?string $nuptk): bool
+   {
+      return empty($username) && empty($nuptk);
    }
 
 
@@ -119,18 +129,17 @@ class DataPetugas extends BaseController
       }
 
       $rules = [
+         // email & username opsional -- lihat identitasLoginKosong()
          'email' => [
-            'rules' => 'required|valid_email|is_unique[users.email]',
+            'rules' => 'permit_empty|valid_email|is_unique[users.email]',
             'errors' => [
-               'required' => 'Email harus diisi.',
                'valid_email' => 'Email tidak valid.',
                'is_unique' => 'Email ini telah terdaftar.'
             ]
          ],
          'username' => [
-            'rules' => 'required|min_length[6]|is_unique[users.username]',
+            'rules' => 'permit_empty|min_length[6]|is_unique[users.username]',
             'errors' => [
-               'required' => 'Username harus diisi',
                'is_unique' => 'Username ini telah terdaftar.'
             ]
          ],
@@ -153,9 +162,10 @@ class DataPetugas extends BaseController
             ]
          ],
          'nuptk' => [
-            'rules' => 'permit_empty|max_length[30]',
+            'rules' => 'permit_empty|max_length[30]|is_unique[users.nuptk]',
             'errors' => [
-               'max_length' => 'NUPTK maksimal 30 karakter'
+               'max_length' => 'NUPTK maksimal 30 karakter',
+               'is_unique' => 'NUPTK ini telah terdaftar.'
             ]
          ],
          'role' => [
@@ -168,8 +178,25 @@ class DataPetugas extends BaseController
 
       $role = $this->request->getVar('role');
       $idKelas = $this->request->getVar('id_kelas') ?: null;
+      $username = $this->request->getVar('username');
+      $nuptk = $this->request->getVar('nuptk');
+
+      // Myth\Auth (lihat App\Filters\ResolveNuptkLogin) selalu login lewat
+      // kolom username di baliknya -- kalau admin sengaja mengosongkan
+      // username dan hanya mengisi NUPTK, username diisi otomatis dari NUPTK
+      // supaya akun ini tetap bisa login. Dilakukan SEBELUM validasi supaya
+      // is_unique[users.username] ikut memeriksa nilai hasil fallback ini.
+      if (empty($username) && !empty($nuptk)) {
+         $username = $nuptk;
+         $this->request->setGlobal('post', array_merge($this->request->getPost(), ['username' => $username]));
+      }
 
       $valid = $this->validate($rules);
+
+      if ($valid && $this->identitasLoginKosong($username, $nuptk)) {
+         $this->validator->setError('username', 'Isi username atau NUPTK supaya petugas ini bisa login');
+         $valid = false;
+      }
 
       if ($valid && $this->kelasKosongUntukWaliKelas($role, $idKelas)) {
          $this->validator->setError('id_kelas', 'Kelas wajib dipilih untuk wali kelas');
@@ -187,10 +214,10 @@ class DataPetugas extends BaseController
          return view('admin/petugas/register', $data);
       }
 
-      $email = $this->request->getVar('email');
-      $username = $this->request->getVar('username');
+      $email = $this->request->getVar('email') ?: null;
+      $username = $username ?: null;
       $nama = $this->request->getVar('nama') ?: null;
-      $nuptk = $this->request->getVar('nuptk') ?: null;
+      $nuptk = $nuptk ?: null;
       $passwordHash = Password::hash($this->request->getVar('password'));
 
       $result = $this->petugasModel->createPetugas($email, $username, $passwordHash, $role, $idKelas, $nama, $nuptk);
@@ -242,12 +269,31 @@ class DataPetugas extends BaseController
 
       $petugasLama = $this->petugasModel->getPetugasById($idPetugas);
 
-      if ($petugasLama['username'] != $this->request->getVar('username')) {
-         $this->petugasValidationRules['username']['rules'] = 'required|is_unique[users.username]';
+      $username = $this->request->getVar('username');
+      $email = $this->request->getVar('email');
+      $nuptk = $this->request->getVar('nuptk');
+
+      // lihat catatan yang sama di submitRegisterPetugas(): Myth\Auth selalu
+      // login lewat kolom username di baliknya, jadi username dikosongkan
+      // tapi NUPTK diisi -> username diisi otomatis dari NUPTK
+      if (empty($username) && !empty($nuptk)) {
+         $username = $nuptk;
+         $this->request->setGlobal('post', array_merge($this->request->getPost(), ['username' => $username]));
       }
 
-      if ($petugasLama['email'] != $this->request->getVar('email')) {
-         $this->petugasValidationRules['email']['rules'] = 'required|is_unique[users.email]';
+      // is_unique hanya ditambahkan kalau nilainya memang berubah dari
+      // data lama -- supaya menyimpan ulang tanpa mengubah username/
+      // email/nuptk sendiri tidak dianggap "bentrok dengan diri sendiri"
+      if ((string) $petugasLama['username'] !== (string) $username) {
+         $this->petugasValidationRules['username']['rules'] = 'permit_empty|min_length[6]|is_unique[users.username]';
+      }
+
+      if ((string) $petugasLama['email'] !== (string) $email) {
+         $this->petugasValidationRules['email']['rules'] = 'permit_empty|valid_email|is_unique[users.email]';
+      }
+
+      if ((string) ($petugasLama['nuptk'] ?? '') !== (string) $nuptk) {
+         $this->petugasValidationRules['nuptk']['rules'] = 'permit_empty|max_length[30]|is_unique[users.nuptk]';
       }
 
       $role = $this->request->getVar('role');
@@ -255,6 +301,11 @@ class DataPetugas extends BaseController
 
       // validasi
       $valid = $this->validate($this->petugasValidationRules);
+
+      if ($valid && $this->identitasLoginKosong($username, $nuptk)) {
+         $this->validator->setError('username', 'Isi username atau NUPTK supaya petugas ini bisa login');
+         $valid = false;
+      }
 
       if ($valid && $this->kelasKosongUntukWaliKelas($role, $idKelas)) {
          $this->validator->setError('id_kelas', 'Kelas wajib dipilih untuk wali kelas');
@@ -275,10 +326,10 @@ class DataPetugas extends BaseController
 
       $password = $this->request->getVar('password') ?? false;
 
-      $email = $this->request->getVar('email');
-      $username = $this->request->getVar('username');
+      $email = $email ?: null;
+      $username = $username ?: null;
       $nama = $this->request->getVar('nama') ?: null;
-      $nuptk = $this->request->getVar('nuptk') ?: null;
+      $nuptk = $nuptk ?: null;
       $passwordHash = $password ? Password::hash($password) : $petugasLama['password_hash'];
 
       $result = $this->petugasModel->savePetugas($idPetugas, $email, $username, $passwordHash, $role, $idKelas, $nama, $nuptk);

@@ -133,14 +133,25 @@ class PetugasModel extends Model
       $i = 1;
       foreach ($array as $item) {
          if ($i == $index) {
-            $email = getCSVInputValue($item, 'email');
-            $username = getCSVInputValue($item, 'username');
+            $email = getCSVInputValue($item, 'email') ?: null;
+            $username = getCSVInputValue($item, 'username') ?: null;
+            $nuptk = getCSVInputValue($item, 'nuptk') ?: null;
             $password = getCSVInputValue($item, 'password');
+
+            // Myth\Auth selalu login lewat kolom username di baliknya --
+            // baris CSV yang hanya mengisi NUPTK tetap diberi username
+            // (disamakan dengan NUPTK) supaya bisa login (lihat juga
+            // App\Filters\ResolveNuptkLogin & DataPetugas::submitRegisterPetugas)
+            if (empty($username) && !empty($nuptk)) {
+               $username = $nuptk;
+            }
             $role = getCSVInputValue($item, 'role') ?: 'guru';
             $role = in_array($role, self::ROLES, true) ? $role : 'guru';
             $idKelas = $role === 'wali_kelas' ? (getCSVInputValue($item, 'id_kelas', 'int') ?: null) : null;
 
-            if (empty($email) || empty($username) || empty($password)) {
+            // email opsional, tapi login hanya lewat username/NUPTK --
+            // tanpa salah satunya akun ini tidak akan pernah bisa dipakai masuk
+            if (empty($password) || (empty($username) && empty($nuptk))) {
                return null;
             }
 
@@ -148,7 +159,7 @@ class PetugasModel extends Model
                'email' => $email,
                'username' => $username,
                'nama' => getCSVInputValue($item, 'nama') ?: null,
-               'nuptk' => getCSVInputValue($item, 'nuptk') ?: null,
+               'nuptk' => $nuptk,
                'password_hash' => \Myth\Auth\Password::hash($password),
                'is_superadmin' => $role === 'superadmin' ? '1' : '0',
                'role' => $role,

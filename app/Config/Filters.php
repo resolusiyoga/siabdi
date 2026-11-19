@@ -13,6 +13,7 @@ use CodeIgniter\Filters\PageCache;
 use CodeIgniter\Filters\PerformanceMetrics;
 use CodeIgniter\Filters\SecureHeaders;
 use App\Filters\CsrfHashHeader;
+use App\Filters\ResolveNuptkLogin;
 use Myth\Auth\Filters\LoginFilter;
 use Myth\Auth\Filters\RoleFilter;
 use Myth\Auth\Filters\PermissionFilter;
@@ -39,6 +40,7 @@ class Filters extends BaseFilters
         'pagecache'     => PageCache::class,
         'performance'   => PerformanceMetrics::class,
         'csrfrefresh'   => CsrfHashHeader::class,
+        'nuptklogin'    => ResolveNuptkLogin::class,
 
         'login'         => LoginFilter::class,
         'role'          => RoleFilter::class,
@@ -128,6 +130,12 @@ class Filters extends BaseFilters
                 'admin/',
                 'admin/*',
                 'register/',
+            ]
+        ],
+        // hanya di route POST /login, sebelum attemptLogin() bawaan Myth\Auth
+        'nuptklogin' => [
+            'before' => [
+                'login',
             ]
         ]
     ];
