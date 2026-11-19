@@ -72,6 +72,10 @@
                                 <!-- kolom id_kelas hanya dipakai kalau role=wali_kelas; untuk
                                      peran lain boleh dikosongkan di CSV -->
                                 <p class="text-muted small mt-3 mb-0">
+                                    Template yang diunduh hanya berisi baris header -- isi dulu
+                                    dengan baris data (satu baris per petugas) sebelum diunggah
+                                    kembali di sini. Mengunggah template kosong apa adanya tidak
+                                    akan mengimpor apa pun.<br><br>
                                     Kolom <b>role</b> diisi salah satu:
                                     superadmin, guru, wali_kelas, pegawai, siswa, atau orangtua.
                                     Kolom <b>id_kelas</b> hanya wajib diisi kalau role-nya wali_kelas.
@@ -153,10 +157,18 @@
                         if (numberOfItems > 0) {
                             addCSVItem(numberOfItems, txtFileName, 1);
                         } else {
+                            // CSV terbaca tapi tidak ada baris data (mis. yang
+                            // diunggah cuma baris header/template kosong)
                             $("#csv_upload_spinner").hide();
+                            alert("CSV tidak berisi baris data. Pastikan file yang diunggah sudah diisi (bukan cuma baris header template kosong).");
                         }
                     } else {
+                        // generateCSVObjectPost mengembalikan result=0 tanpa data
+                        // lebih lanjut -- paling sering karena baris data kosong,
+                        // atau sesi login sudah habis sehingga ditolak sebagai
+                        // bukan superadmin
                         $("#csv_upload_spinner").hide();
+                        alert("Gagal memproses CSV. Pastikan file berisi data (bukan cuma baris header), dan sesi login belum habis.");
                     }
                 } catch (e) {
                     alert("Invalid CSV file! Make sure there are no double quotes in your content. Double quotes can brake the CSV structure.");
