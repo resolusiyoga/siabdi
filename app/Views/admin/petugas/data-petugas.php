@@ -35,6 +35,14 @@
                                  </div>
                                  <div class="col-12 col-sm-auto nav nav-tabs">
                                     <div class="nav-item">
+                                       <a class="nav-link" id="importBtn" onclick="removeHover();" href="<?= base_url('admin/petugas/bulk'); ?>">
+                                          <i class="material-icons">add</i> Import CSV
+                                          <div class="ripple-container"></div>
+                                       </a>
+                                    </div>
+                                 </div>
+                                 <div class="col-12 col-sm-auto nav nav-tabs">
+                                    <div class="nav-item">
                                        <a class="nav-link" id="refreshBtn" onclick="getDataPetugas()" href="#" data-toggle="tab">
                                           <i class="material-icons">refresh</i> Refresh
                                           <div class="ripple-container"></div>

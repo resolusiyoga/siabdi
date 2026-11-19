@@ -5,7 +5,9 @@
          <thead class="text-info">
             <th><b>No</b></th>
             <th><b>Username</b></th>
+            <th><b>Nama</b></th>
             <th><b>Email</b></th>
+            <th><b>NUPTK</b></th>
             <th><b>Peran</b></th>
             <th><b>Kelas</b></th>
             <th><b>Aksi</b></th>
@@ -16,7 +18,9 @@
                <tr>
                   <td><?= $i; ?></td>
                   <td><?= $value['username']; ?></td>
+                  <td><?= !empty($value['nama']) ? esc($value['nama']) : '-'; ?></td>
                   <td><b><?= $value['email']; ?></b></td>
+                  <td><?= !empty($value['nuptk']) ? esc($value['nuptk']) : '-'; ?></td>
                   <td><?= roleLabel($value['role'] ?? 'guru'); ?></td>
                   <td>
                      <?php // kelas hanya relevan untuk wali kelas ?>
@@ -69,7 +73,7 @@
          destroy: true,
          columnDefs: [{
             orderable: false,
-            targets: [0, 5]
+            targets: [0, 7]
          }],
          language: <?= json_encode(datatable_lang_id()) ?>
       });
@@ -83,6 +87,7 @@ function roleLabel($role): string
       'superadmin' => 'Super Admin',
       'guru' => 'Guru',
       'wali_kelas' => 'Wali Kelas',
+      'pegawai' => 'Pegawai',
       'siswa' => 'Siswa',
       'orangtua' => 'Orang Tua',
    ];

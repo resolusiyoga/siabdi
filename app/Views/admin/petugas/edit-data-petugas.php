@@ -37,6 +37,14 @@
                      </div>
 
                      <div class="form-group mt-4">
+                        <label for="nama">Nama Lengkap</label>
+                        <input type="text" id="nama" class="form-control <?= $validation->getError('nama') ? 'is-invalid' : ''; ?>" name="nama" placeholder="Nama lengkap" value="<?= old('nama') ?? $oldInput['nama'] ?? $data['nama'] ?? '' ?>">
+                        <div class="invalid-feedback">
+                           <?= $validation->getError('nama'); ?>
+                        </div>
+                     </div>
+
+                     <div class="form-group mt-4">
                         <label for="email">Email</label>
                         <input type="email" id="email" class="form-control <?= $validation->getError('email') ? 'is-invalid' : ''; ?>" name="email" placeholder="email@example.com" value="<?= old('email') ?? $oldInput['email'] ?? $data['email'] ?>">
                         <div class="invalid-feedback">
@@ -52,6 +60,14 @@
                         </div>
                      </div>
 
+                     <div class="form-group mt-4">
+                        <label for="nuptk">NUPTK</label>
+                        <input type="text" id="nuptk" class="form-control <?= $validation->getError('nuptk') ? 'is-invalid' : ''; ?>" name="nuptk" placeholder="Nomor Unik Pendidik dan Tenaga Kependidikan" value="<?= old('nuptk') ?? $oldInput['nuptk'] ?? $data['nuptk'] ?? '' ?>">
+                        <div class="invalid-feedback">
+                           <?= $validation->getError('nuptk'); ?>
+                        </div>
+                     </div>
+
                      <label for="role">Peran</label>
                      <select class="custom-select <?= $validation->getError('role') ? 'is-invalid' : ''; ?>" id="role" name="role" onchange="toggleKelasField()">
                         <option value="">--Pilih peran--</option>
@@ -64,6 +80,9 @@
                         </option>
                         <option value="wali_kelas" <?= $selectedRole == 'wali_kelas' ? 'selected' : ''; ?>>
                            Wali Kelas
+                        </option>
+                        <option value="pegawai" <?= $selectedRole == 'pegawai' ? 'selected' : ''; ?>>
+                           Pegawai
                         </option>
                         <option value="siswa" <?= $selectedRole == 'siswa' ? 'selected' : ''; ?>>
                            Siswa

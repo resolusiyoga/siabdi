@@ -6,6 +6,7 @@ use App\Controllers\BaseController;
 
 use App\Models\PetugasModel;
 use App\Models\KelasModel;
+use App\Models\UploadModel;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use Myth\Auth\Password;
 
@@ -33,8 +34,20 @@ class DataPetugas extends BaseController
       'password' => [
          'rules' => 'permit_empty|min_length[6]',
       ],
+      'nama' => [
+         'rules' => 'permit_empty|max_length[150]',
+         'errors' => [
+            'max_length' => 'Nama maksimal 150 karakter'
+         ]
+      ],
+      'nuptk' => [
+         'rules' => 'permit_empty|max_length[30]',
+         'errors' => [
+            'max_length' => 'NUPTK maksimal 30 karakter'
+         ]
+      ],
       'role' => [
-         'rules' => 'required|in_list[superadmin,guru,wali_kelas,siswa,orangtua]',
+         'rules' => 'required|in_list[superadmin,guru,wali_kelas,pegawai,siswa,orangtua]',
          'errors' => [
             'required' => 'Peran wajib diisi',
             'in_list' => 'Peran tidak valid'
@@ -133,6 +146,18 @@ class DataPetugas extends BaseController
                'matches' => 'Konfirmasi password tidak sama'
             ]
          ],
+         'nama' => [
+            'rules' => 'permit_empty|max_length[150]',
+            'errors' => [
+               'max_length' => 'Nama maksimal 150 karakter'
+            ]
+         ],
+         'nuptk' => [
+            'rules' => 'permit_empty|max_length[30]',
+            'errors' => [
+               'max_length' => 'NUPTK maksimal 30 karakter'
+            ]
+         ],
          'role' => [
             'rules' => 'required|in_list[' . implode(',', PetugasModel::ROLES) . ']',
             'errors' => [
@@ -164,9 +189,11 @@ class DataPetugas extends BaseController
 
       $email = $this->request->getVar('email');
       $username = $this->request->getVar('username');
+      $nama = $this->request->getVar('nama') ?: null;
+      $nuptk = $this->request->getVar('nuptk') ?: null;
       $passwordHash = Password::hash($this->request->getVar('password'));
 
-      $result = $this->petugasModel->createPetugas($email, $username, $passwordHash, $role, $idKelas);
+      $result = $this->petugasModel->createPetugas($email, $username, $passwordHash, $role, $idKelas, $nama, $nuptk);
 
       if ($result) {
          session()->setFlashdata([
@@ -250,9 +277,11 @@ class DataPetugas extends BaseController
 
       $email = $this->request->getVar('email');
       $username = $this->request->getVar('username');
+      $nama = $this->request->getVar('nama') ?: null;
+      $nuptk = $this->request->getVar('nuptk') ?: null;
       $passwordHash = $password ? Password::hash($password) : $petugasLama['password_hash'];
 
-      $result = $this->petugasModel->savePetugas($idPetugas, $email, $username, $passwordHash, $role, $idKelas);
+      $result = $this->petugasModel->savePetugas($idPetugas, $email, $username, $passwordHash, $role, $idKelas, $nama, $nuptk);
 
       if ($result) {
          session()->setFlashdata([
@@ -290,5 +319,83 @@ class DataPetugas extends BaseController
          'error' => true
       ]);
       return redirect()->to('/admin/petugas');
+   }
+
+   /*
+    *-------------------------------------------------------------------------------------------------
+    * IMPORT PETUGAS (pola sama dengan import siswa: upload CSV -> serialize
+    * sementara ke uploads/tmp -> diimpor baris per baris lewat AJAX)
+    *-------------------------------------------------------------------------------------------------
+    */
+
+   public function bulkPostPetugas()
+   {
+      if (!isSuperadmin()) {
+         session()->setFlashdata(['msg' => 'Aksi ini khusus untuk superadmin', 'error' => true]);
+         return redirect()->to('/admin/petugas');
+      }
+
+      $data['title'] = 'Import Petugas';
+      $data['ctx'] = 'petugas';
+      $data['kelas'] = $this->kelasModel->getDataKelas();
+
+      return view('admin/petugas/import-petugas', $data);
+   }
+
+   public function generateCSVObjectPost()
+   {
+      if (!isSuperadmin()) {
+         echo json_encode(['result' => 0]);
+         exit();
+      }
+
+      $uploadModel = new UploadModel();
+      // bersihkan berkas txt sementara lama
+      $files = glob(FCPATH . 'uploads/tmp/*.txt');
+      if (!empty($files)) {
+         foreach ($files as $item) {
+            @unlink($item);
+         }
+      }
+      $file = $uploadModel->uploadCSVFile('file');
+      if (!empty($file) && !empty($file['path'])) {
+         $obj = $this->petugasModel->generateCSVObject($file['path']);
+         if (!empty($obj)) {
+            echo json_encode([
+               'result' => 1,
+               'numberOfItems' => $obj->numberOfItems,
+               'txtFileName' => $obj->txtFileName,
+            ]);
+            exit();
+         }
+      }
+      echo json_encode(['result' => 0]);
+   }
+
+   public function importCSVItemPost()
+   {
+      if (!isSuperadmin()) {
+         echo json_encode(['result' => 0]);
+         exit();
+      }
+
+      $txtFileName = inputPost('txtFileName');
+      $index = inputPost('index');
+      $petugas = $this->petugasModel->importCSVItem($txtFileName, $index);
+
+      if (!empty($petugas)) {
+         echo json_encode(['result' => 1, 'petugas' => $petugas, 'index' => $index]);
+      } else {
+         echo json_encode(['result' => 0, 'index' => $index]);
+      }
+   }
+
+   public function downloadCSVFilePost()
+   {
+      $submit = inputPost('submit');
+      $response = \Config\Services::response();
+      if ($submit == 'csv_petugas_template') {
+         return $response->download(FCPATH . 'assets/file/csv_petugas_template.csv', null);
+      }
    }
 }

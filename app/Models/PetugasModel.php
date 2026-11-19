@@ -11,6 +11,8 @@ class PetugasModel extends Model
       $this->allowedFields = [
          'email',
          'username',
+         'nama',
+         'nuptk',
          'password_hash',
          'is_superadmin',
          'role',
@@ -37,9 +39,9 @@ class PetugasModel extends Model
       return $this->where([$this->primaryKey => $id])->first();
    }
 
-   public const ROLES = ['superadmin', 'guru', 'wali_kelas', 'siswa', 'orangtua'];
+   public const ROLES = ['superadmin', 'guru', 'wali_kelas', 'pegawai', 'siswa', 'orangtua'];
 
-   public function savePetugas($idPetugas, $email, $username, $passwordHash, $role, $idKelas = null)
+   public function savePetugas($idPetugas, $email, $username, $passwordHash, $role, $idKelas = null, $nama = null, $nuptk = null)
    {
       $role = in_array($role, self::ROLES, true) ? $role : 'guru';
       $idKelas = $role === 'wali_kelas' ? $idKelas : null;
@@ -48,6 +50,8 @@ class PetugasModel extends Model
          $this->primaryKey => $idPetugas,
          'email' => $email,
          'username' => $username,
+         'nama' => $nama ?: null,
+         'nuptk' => $nuptk ?: null,
          'password_hash' => $passwordHash,
          'is_superadmin' => $role === 'superadmin' ? '1' : '0',
          'role' => $role,
@@ -55,7 +59,7 @@ class PetugasModel extends Model
       ]);
    }
 
-   public function createPetugas($email, $username, $passwordHash, $role, $idKelas = null)
+   public function createPetugas($email, $username, $passwordHash, $role, $idKelas = null, $nama = null, $nuptk = null)
    {
       $role = in_array($role, self::ROLES, true) ? $role : 'guru';
       $idKelas = $role === 'wali_kelas' ? $idKelas : null;
@@ -63,11 +67,110 @@ class PetugasModel extends Model
       return $this->save([
          'email' => $email,
          'username' => $username,
+         'nama' => $nama ?: null,
+         'nuptk' => $nuptk ?: null,
          'password_hash' => $passwordHash,
          'is_superadmin' => $role === 'superadmin' ? '1' : '0',
          'role' => $role,
          'id_kelas' => $idKelas,
          'active' => '1',
       ]);
+   }
+
+   /*
+    *-------------------------------------------------------------------------------------------------
+    * IMPORT PETUGAS (pola sama dengan SiswaModel::generateCSVObject/importCSVItem)
+    *-------------------------------------------------------------------------------------------------
+    */
+
+   public function generateCSVObject($filePath)
+   {
+      $array = [];
+      $fields = [];
+      $txtName = uniqid() . '.txt';
+      $i = 0;
+      $handle = fopen($filePath, 'r');
+      if ($handle) {
+         while (($row = fgetcsv($handle)) !== false) {
+            if (empty($fields)) {
+               $fields = $row;
+               continue;
+            }
+            foreach ($row as $k => $value) {
+               $array[$i][$fields[$k]] = $value;
+            }
+            $i++;
+         }
+         if (!feof($handle)) {
+            return false;
+         }
+         fclose($handle);
+         if (!empty($array)) {
+            $txtFile = fopen(FCPATH . 'uploads/tmp/' . $txtName, 'w');
+            fwrite($txtFile, serialize($array));
+            fclose($txtFile);
+            $obj = new \stdClass();
+            $obj->numberOfItems = countItems($array);
+            $obj->txtFileName = $txtName;
+            @unlink($filePath);
+            return $obj;
+         }
+      }
+      return false;
+   }
+
+   public function importCSVItem($txtFileName, $index)
+   {
+      $filePath = FCPATH . 'uploads/tmp/' . $txtFileName;
+      $file = fopen($filePath, 'r');
+      $content = fread($file, filesize($filePath));
+      $array = @unserialize($content);
+
+      if (empty($array)) {
+         return null;
+      }
+
+      $i = 1;
+      foreach ($array as $item) {
+         if ($i == $index) {
+            $email = getCSVInputValue($item, 'email');
+            $username = getCSVInputValue($item, 'username');
+            $password = getCSVInputValue($item, 'password');
+            $role = getCSVInputValue($item, 'role') ?: 'guru';
+            $role = in_array($role, self::ROLES, true) ? $role : 'guru';
+            $idKelas = $role === 'wali_kelas' ? (getCSVInputValue($item, 'id_kelas', 'int') ?: null) : null;
+
+            if (empty($email) || empty($username) || empty($password)) {
+               return null;
+            }
+
+            $data = [
+               'email' => $email,
+               'username' => $username,
+               'nama' => getCSVInputValue($item, 'nama') ?: null,
+               'nuptk' => getCSVInputValue($item, 'nuptk') ?: null,
+               'password_hash' => \Myth\Auth\Password::hash($password),
+               'is_superadmin' => $role === 'superadmin' ? '1' : '0',
+               'role' => $role,
+               'id_kelas' => $idKelas,
+               'active' => '1',
+            ];
+
+            try {
+               $this->insert($data);
+            } catch (\Throwable $e) {
+               // email/username bentrok dengan akun yang sudah ada dsb --
+               // baris ini dilewati, baris CSV berikutnya tetap diproses
+               return null;
+            }
+
+            $data['username'] = $username;
+
+            return $data;
+         }
+         $i++;
+      }
+
+      return null;
    }
 }

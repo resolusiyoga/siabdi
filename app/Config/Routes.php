@@ -175,6 +175,11 @@ $routes->group('admin', function (RouteCollection $routes) {
    $routes->post('petugas/edit', 'Admin\DataPetugas::updatePetugas');
    // superadmin hapus data petugas
    $routes->delete('petugas/delete/(:any)', 'Admin\DataPetugas::delete/$1');
+   // superadmin import CSV data petugas
+   $routes->get('petugas/bulk', 'Admin\DataPetugas::bulkPostPetugas');
+   $routes->post('petugas/generateCSVObjectPost', 'Admin\DataPetugas::generateCSVObjectPost');
+   $routes->post('petugas/importCSVItemPost', 'Admin\DataPetugas::importCSVItemPost');
+   $routes->post('petugas/downloadCSVFilePost', 'Admin\DataPetugas::downloadCSVFilePost');
 
    // Settings
    $routes->group('general-settings', ['namespace' => 'App\Controllers\Admin'], function ($routes) {

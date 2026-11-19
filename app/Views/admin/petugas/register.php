@@ -16,6 +16,14 @@
                             <?= csrf_field() ?>
 
                             <div class="form-group mt-4">
+                                <label for="nama">Nama Lengkap</label>
+                                <input type="text" id="nama" class="form-control <?= $validation->getError('nama') ? 'is-invalid' : ''; ?>" name="nama" placeholder="Nama lengkap" value="<?= old('nama') ?? $oldInput['nama'] ?? ''; ?>">
+                                <div class="invalid-feedback">
+                                    <?= $validation->getError('nama'); ?>
+                                </div>
+                            </div>
+
+                            <div class="form-group mt-4">
                                 <label for="email">Email</label>
                                 <input type="email" id="email" class="form-control <?= $validation->getError('email') ? 'is-invalid' : ''; ?>" name="email" placeholder="example@email.com" value="<?= old('email') ?? $oldInput['email'] ?? ''; ?>">
                                 <div class="invalid-feedback">
@@ -48,6 +56,14 @@
                             </div>
 
                             <div class="form-group mt-4">
+                                <label for="nuptk">NUPTK</label>
+                                <input type="text" id="nuptk" class="form-control <?= $validation->getError('nuptk') ? 'is-invalid' : ''; ?>" name="nuptk" placeholder="Nomor Unik Pendidik dan Tenaga Kependidikan" value="<?= old('nuptk') ?? $oldInput['nuptk'] ?? ''; ?>">
+                                <div class="invalid-feedback">
+                                    <?= $validation->getError('nuptk'); ?>
+                                </div>
+                            </div>
+
+                            <div class="form-group mt-4">
                                 <label for="role">Peran</label>
                                 <?php $selectedRole = old('role') ?? $oldInput['role'] ?? ''; ?>
                                 <select class="custom-select <?= $validation->getError('role') ? 'is-invalid' : ''; ?>" id="role" name="role" onchange="toggleKelasField()">
@@ -55,6 +71,7 @@
                                     <option value="superadmin" <?= $selectedRole == 'superadmin' ? 'selected' : ''; ?>>Super Admin</option>
                                     <option value="guru" <?= $selectedRole == 'guru' ? 'selected' : ''; ?>>Guru</option>
                                     <option value="wali_kelas" <?= $selectedRole == 'wali_kelas' ? 'selected' : ''; ?>>Wali Kelas</option>
+                                    <option value="pegawai" <?= $selectedRole == 'pegawai' ? 'selected' : ''; ?>>Pegawai</option>
                                     <option value="siswa" <?= $selectedRole == 'siswa' ? 'selected' : ''; ?>>Siswa</option>
                                     <option value="orangtua" <?= $selectedRole == 'orangtua' ? 'selected' : ''; ?>>Orang Tua</option>
                                 </select>
