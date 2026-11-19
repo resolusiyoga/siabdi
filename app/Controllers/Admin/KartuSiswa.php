@@ -633,6 +633,6 @@ class KartuSiswa extends BaseController
 
    private function bolehCetak(): bool
    {
-      return in_array(currentUserRole(), ['superadmin', 'wali_kelas'], true);
+      return isSuperadmin();
    }
 }

@@ -25,6 +25,10 @@ class GenerateQR extends BaseController
 
    public function index()
    {
+      if (!isSuperadmin()) {
+         return redirect()->to('admin');
+      }
+
       $siswa = $this->siswaModel->getAllSiswaWithKelas();
       $kelas = $this->kelasModel->getDataKelas();
       $guru = $this->guruModel->getAllGuru();
@@ -42,6 +46,10 @@ class GenerateQR extends BaseController
 
    public function getSiswaByKelas()
    {
+      if (!isSuperadmin()) {
+         return redirect()->to('admin');
+      }
+
       $idKelas = $this->request->getVar('idKelas');
 
       $siswa = $this->siswaModel->getSiswaByKelas($idKelas);

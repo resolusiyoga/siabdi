@@ -78,6 +78,10 @@ class QRGenerator extends BaseController
 
    public function generateQrSiswa()
    {
+      if (!isSuperadmin()) {
+         return redirect()->to('admin');
+      }
+
       $kelas = $this->getKelasJurusanSlug($this->request->getVar('id_kelas'));
       if (!$kelas) {
          return $this->response->setJSON(false);
@@ -100,6 +104,10 @@ class QRGenerator extends BaseController
 
    public function generateQrGuru()
    {
+      if (!isSuperadmin()) {
+         return redirect()->to('admin');
+      }
+
       $this->qrCode->setForegroundColor($this->foregroundColor2);
 
       $this->qrCodeFilePath .= 'qr-guru/';
@@ -140,6 +148,10 @@ class QRGenerator extends BaseController
 
    public function downloadQrSiswa($idSiswa = null)
    {
+      if (!isSuperadmin()) {
+         return redirect()->to('admin');
+      }
+
       $siswa = (new SiswaModel)->find($idSiswa);
       if (!$siswa) {
          session()->setFlashdata([
@@ -177,6 +189,10 @@ class QRGenerator extends BaseController
 
    public function downloadQrGuru($idGuru = null)
    {
+      if (!isSuperadmin()) {
+         return redirect()->to('admin');
+      }
+
       $guru = (new GuruModel)->find($idGuru);
       if (!$guru) {
          session()->setFlashdata([
@@ -214,6 +230,10 @@ class QRGenerator extends BaseController
 
    public function downloadAllQrSiswa()
    {
+      if (!isSuperadmin()) {
+         return redirect()->to('admin');
+      }
+
       $kelas = null;
       if ($idKelas = $this->request->getVar('id_kelas')) {
          $kelas = $this->getKelasJurusanSlug($idKelas);
@@ -253,6 +273,10 @@ class QRGenerator extends BaseController
 
    public function downloadAllQrGuru()
    {
+      if (!isSuperadmin()) {
+         return redirect()->to('admin');
+      }
+
       $this->qrCodeFilePath .= 'qr-guru/';
 
       if (!file_exists($this->qrCodeFilePath) || count(glob($this->qrCodeFilePath . '*')) === 0) {

@@ -80,18 +80,20 @@ switch ($context) {
                <p>Data Kelas</p>
             </a>
          </li>
-         <li class="nav-item <?= $context == 'qr' ? 'active' : ''; ?>">
-            <a class="nav-link" href="<?= base_url('admin/generate'); ?>">
-               <i class="material-icons">qr_code</i>
-               <p>Generate QR Code</p>
-            </a>
-         </li>
-         <li class="nav-item <?= $context == 'kartu' ? 'active' : ''; ?>">
-            <a class="nav-link" href="<?= base_url('admin/kartu'); ?>">
-               <i class="material-icons">badge</i>
-               <p>Kartu Siswa</p>
-            </a>
-         </li>
+         <?php if (isSuperadmin()) : ?>
+            <li class="nav-item <?= $context == 'qr' ? 'active' : ''; ?>">
+               <a class="nav-link" href="<?= base_url('admin/generate'); ?>">
+                  <i class="material-icons">qr_code</i>
+                  <p>Generate QR Code</p>
+               </a>
+            </li>
+            <li class="nav-item <?= $context == 'kartu' ? 'active' : ''; ?>">
+               <a class="nav-link" href="<?= base_url('admin/kartu'); ?>">
+                  <i class="material-icons">badge</i>
+                  <p>Kartu Siswa</p>
+               </a>
+            </li>
+         <?php endif; ?>
          <li class="nav-item <?= $context == 'laporan' ? 'active' : ''; ?>">
             <a class="nav-link" href="<?= base_url('admin/laporan'); ?>">
                <i class="material-icons">print</i>
