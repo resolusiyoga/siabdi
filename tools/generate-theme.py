@@ -1,7 +1,7 @@
 import re, sys
 
 """Membuat theme-green.css: menyalin deklarasi bermuatan warna dari
-material-dashboard.css lalu menukar warna tema ke palette hijau SI-ABDI.
+material-dashboard.css lalu menukar warna tema ke palette hijau MAD1NAH.
 
 Jalankan: python3 tools/generate-theme.py public/assets/css/theme-green.css
 """
@@ -113,7 +113,7 @@ for ctx, sel, decls in rules:
 
 header = (
     "/*!\n"
-    " * Tema warna SI-ABDI - palette hijau\n"
+    " * Tema warna MAD1NAH - palette hijau\n"
     " * Dihasilkan otomatis: python3 tools/generate-theme.py public/assets/css/theme-green.css\n * Jangan diedit manual - ubah pemetaan warna di script lalu jalankan ulang.\n"
     " * Hanya berisi deklarasi bermuatan warna, dimuat SETELAH file vendor.\n"
     " * primary #9c27b0 & biru #2196f3 -> #386C0B | info #00bcd4 -> #293F14\n * success #4caf50 -> #38A700\n"

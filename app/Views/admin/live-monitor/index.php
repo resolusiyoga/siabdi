@@ -527,7 +527,7 @@
          <div class="kepala__judul">
             <img class="kepala__logo" src="<?= getLogo(); ?>" alt="Logo sekolah">
             <div>
-               <p class="kepala__sekolah"><?= esc($generalSettings->school_name ?? 'SI-ABDI'); ?></p>
+               <p class="kepala__sekolah"><?= esc($generalSettings->school_name ?? 'MAD1NAH'); ?></p>
                <p class="kepala__sub"><span class="live"><span class="live__titik"></span>LIVE</span> &middot; Monitor Absensi Siswa</p>
             </div>
          </div>

@@ -31,7 +31,7 @@ switch ($context) {
    <div class="logo">
       <a class="simple-text logo-normal sidebar-brand" href="<?= base_url('admin/dashboard'); ?>">
          <img class="sidebar-brand__logo" src="<?= getLogo(); ?>" alt="Logo sekolah">
-         <span class="sidebar-brand__name"><?= esc($generalSettings->school_name ?? 'SI-ABDI'); ?></span>
+         <span class="sidebar-brand__name"><?= esc($generalSettings->school_name ?? 'MAD1NAH'); ?></span>
       </a>
    </div>
    <div class="sidebar-wrapper">

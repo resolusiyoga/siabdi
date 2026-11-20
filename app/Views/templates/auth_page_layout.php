@@ -7,7 +7,7 @@
    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
    <meta name="theme-color" content="#ddedca">
    <?= csrf_meta(); ?>
-   <title><?= $title ?? 'Masuk'; ?> &middot; <?= esc(generalSetting('school_name', 'SI-ABDI')); ?></title>
+   <title><?= $title ?? 'Masuk'; ?> &middot; <?= esc(generalSetting('school_name', 'MAD1NAH')); ?></title>
 
    <link href="<?= assetUrl('assets/fonts/fonts.css'); ?>" rel="stylesheet" />
    <link rel="apple-touch-icon" sizes="76x76" href="<?= base_url('assets/img/apple-icon.png'); ?>">
@@ -303,7 +303,7 @@
 
       <section class="panel">
          <img class="panel__logo" src="<?= getLogo(); ?>" alt="Logo sekolah">
-         <p class="panel__school"><?= esc(generalSetting('school_name', 'SI-ABDI')); ?></p>
+         <p class="panel__school"><?= esc(generalSetting('school_name', 'MAD1NAH')); ?></p>
          <?= $this->renderSection('content') ?>
       </section>
    </main>
