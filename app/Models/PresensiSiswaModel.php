@@ -166,19 +166,25 @@ class PresensiSiswaModel extends Model implements PresensiInterface
     * batas_absen_masuk), lengkap dengan data kelas -- dipakai kartu
     * "Terlambat" di dashboard & halaman detailnya.
     */
-   public function getTerlambatByTanggal(string $tanggal, string $batasAbsenMasuk, $idKelas = null)
+   public function getTerlambatByTanggal(string $tanggal, string $batasAbsenMasuk, $idKelas = null, ?string $akhir = null)
    {
       $builder = $this->select(
-         'tb_presensi_siswa.id_presensi, tb_presensi_siswa.jam_masuk, '
+         'tb_presensi_siswa.id_presensi, tb_presensi_siswa.jam_masuk, tb_presensi_siswa.tanggal, '
             . 'tb_siswa.id_siswa, tb_siswa.nama_siswa, tb_siswa.nis, tb_siswa.nisn, tb_siswa.foto, '
             . 'tb_kelas.id_kelas, tb_kelas.kelas, tb_jurusan.jurusan'
       )
          ->join('tb_siswa', 'tb_siswa.id_siswa = tb_presensi_siswa.id_siswa')
          ->join('tb_kelas', 'tb_kelas.id_kelas = tb_siswa.id_kelas', 'left')
          ->join('tb_jurusan', 'tb_jurusan.id = tb_kelas.id_jurusan', 'left')
-         ->where('tb_presensi_siswa.tanggal', $tanggal)
          ->where('tb_presensi_siswa.jam_masuk IS NOT NULL', null, false)
          ->where('tb_presensi_siswa.jam_masuk >', $batasAbsenMasuk);
+
+      if (!empty($akhir) && $akhir !== $tanggal) {
+         $builder = $builder->where('tb_presensi_siswa.tanggal >=', $tanggal)
+            ->where('tb_presensi_siswa.tanggal <=', $akhir);
+      } else {
+         $builder = $builder->where('tb_presensi_siswa.tanggal', $tanggal);
+      }
 
       if (!empty($idKelas)) {
          $builder = $builder->where('tb_kelas.id_kelas', $idKelas);
@@ -189,21 +195,28 @@ class PresensiSiswaModel extends Model implements PresensiInterface
    }
 
    /**
-    * N siswa dengan jam_masuk paling awal pada tanggal tertentu -- dipakai
-    * kartu "Datang Tercepat" di dashboard.
+    * N siswa dengan jam_masuk paling awal pada tanggal tertentu (atau
+    * rentang tanggal, kalau $akhir diisi) -- dipakai kartu "Datang
+    * Tercepat" di dashboard.
     */
-   public function getTercepatByTanggal(string $tanggal, int $limit = 10, $idKelas = null)
+   public function getTercepatByTanggal(string $tanggal, int $limit = 10, $idKelas = null, ?string $akhir = null)
    {
       $builder = $this->select(
-         'tb_presensi_siswa.jam_masuk, '
+         'tb_presensi_siswa.jam_masuk, tb_presensi_siswa.tanggal, '
             . 'tb_siswa.id_siswa, tb_siswa.nama_siswa, tb_siswa.nis, tb_siswa.foto, '
             . 'tb_kelas.id_kelas, tb_kelas.kelas, tb_jurusan.jurusan'
       )
          ->join('tb_siswa', 'tb_siswa.id_siswa = tb_presensi_siswa.id_siswa')
          ->join('tb_kelas', 'tb_kelas.id_kelas = tb_siswa.id_kelas', 'left')
          ->join('tb_jurusan', 'tb_jurusan.id = tb_kelas.id_jurusan', 'left')
-         ->where('tb_presensi_siswa.tanggal', $tanggal)
          ->where('tb_presensi_siswa.jam_masuk IS NOT NULL', null, false);
+
+      if (!empty($akhir) && $akhir !== $tanggal) {
+         $builder = $builder->where('tb_presensi_siswa.tanggal >=', $tanggal)
+            ->where('tb_presensi_siswa.tanggal <=', $akhir);
+      } else {
+         $builder = $builder->where('tb_presensi_siswa.tanggal', $tanggal);
+      }
 
       if (!empty($idKelas)) {
          $builder = $builder->where('tb_kelas.id_kelas', $idKelas);
@@ -214,8 +227,25 @@ class PresensiSiswaModel extends Model implements PresensiInterface
          ->findAll();
    }
 
-   public function getPresensiByKehadiran(string $idKehadiran, $tanggal)
+   public function getPresensiByKehadiran(string $idKehadiran, $tanggal, ?string $akhir = null)
    {
+      // rentang tanggal (dashboard): join biasa + where tanggal BETWEEN,
+      // siswa yang sama sekali tidak absen pada rentang itu tidak ikut
+      // terhitung (beda dari perilaku satu-tanggal di bawah).
+      if (!empty($akhir) && $akhir !== $tanggal) {
+         $builder = $this->join('tb_siswa', 'tb_presensi_siswa.id_siswa = tb_siswa.id_siswa')
+            ->where('tb_presensi_siswa.tanggal >=', $tanggal)
+            ->where('tb_presensi_siswa.tanggal <=', $akhir);
+
+         if ($idKehadiran == '4') {
+            $builder = $builder->where('tb_presensi_siswa.id_kehadiran NOT IN (1,2,3)', null, false);
+         } else {
+            $builder = $builder->where('tb_presensi_siswa.id_kehadiran', $idKehadiran);
+         }
+
+         return $builder->findAll();
+      }
+
       $this->join(
          'tb_siswa',
          "tb_presensi_siswa.id_siswa = tb_siswa.id_siswa AND tb_presensi_siswa.tanggal = '$tanggal'",

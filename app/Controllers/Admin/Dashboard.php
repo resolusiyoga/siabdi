@@ -68,8 +68,21 @@ class Dashboard extends BaseController
 
       $today = $now->toDateString();
 
+      // --- timeframe pilihan user (tanggal tunggal atau rentang) ---
+      $mode = $this->request->getVar('mode') === 'range' ? 'range' : 'single';
+      $tanggalPilihan = $this->validTanggal($this->request->getVar('tanggal')) ?? $today;
+      $mulaiPilihan = $this->validTanggal($this->request->getVar('mulai')) ?? $tanggalPilihan;
+      $akhirPilihan = $this->validTanggal($this->request->getVar('akhir')) ?? $tanggalPilihan;
+
+      if ($mode === 'range') {
+         $tanggalAwal = min($mulaiPilihan, $akhirPilihan);
+         $tanggalAkhir = max($mulaiPilihan, $akhirPilihan);
+      } else {
+         $tanggalAwal = $tanggalAkhir = $tanggalPilihan;
+      }
+
       $batasAbsenMasuk = $this->generalSettings->batas_absen_masuk ?? '07:20:00';
-      $siswaTerlambatSemua = $this->presensiSiswaModel->getTerlambatByTanggal($today, $batasAbsenMasuk);
+      $siswaTerlambatSemua = $this->presensiSiswaModel->getTerlambatByTanggal($tanggalAwal, $batasAbsenMasuk, null, $tanggalAkhir);
 
       $data = [
          'title' => 'Dashboard',
@@ -86,30 +99,67 @@ class Dashboard extends BaseController
          'grafikKehadiranSiswa' => $siswaKehadiranArray,
          'grafikkKehadiranGuru' => $guruKehadiranArray,
 
+         // --- kontrol timeframe ---
+         'hariIni' => $today,
+         'timeframeMode' => $mode,
+         'tanggalPilihan' => $tanggalPilihan,
+         'mulaiPilihan' => $mulaiPilihan,
+         'akhirPilihan' => $akhirPilihan,
+         'timeframeRentang' => $mode === 'range',
+         'labelPeriode' => $this->labelPeriode($mode, $tanggalAwal, $tanggalAkhir, $today),
+
          'jumlahKehadiranSiswa' => [
-            'hadir' => count($this->presensiSiswaModel->getPresensiByKehadiran('1', $today)),
-            'sakit' => count($this->presensiSiswaModel->getPresensiByKehadiran('2', $today)),
-            'izin' => count($this->presensiSiswaModel->getPresensiByKehadiran('3', $today)),
-            'alfa' => count($this->presensiSiswaModel->getPresensiByKehadiran('4', $today))
+            'hadir' => count($this->presensiSiswaModel->getPresensiByKehadiran('1', $tanggalAwal, $tanggalAkhir)),
+            'sakit' => count($this->presensiSiswaModel->getPresensiByKehadiran('2', $tanggalAwal, $tanggalAkhir)),
+            'izin' => count($this->presensiSiswaModel->getPresensiByKehadiran('3', $tanggalAwal, $tanggalAkhir)),
+            'alfa' => count($this->presensiSiswaModel->getPresensiByKehadiran('4', $tanggalAwal, $tanggalAkhir))
          ],
 
          'jumlahTerlambatSiswa' => count($siswaTerlambatSemua),
          'batasAbsenMasuk' => $batasAbsenMasuk,
 
-         'siswaTercepat' => $this->petakanFoto($this->presensiSiswaModel->getTercepatByTanggal($today, 10)),
+         'siswaTercepat' => $this->petakanFoto($this->presensiSiswaModel->getTercepatByTanggal($tanggalAwal, 10, null, $tanggalAkhir)),
          'siswaTerlambat' => $this->petakanFoto(array_slice($siswaTerlambatSemua, 0, 10)),
 
          'jumlahKehadiranGuru' => [
-            'hadir' => count($this->presensiGuruModel->getPresensiByKehadiran('1', $today)),
-            'sakit' => count($this->presensiGuruModel->getPresensiByKehadiran('2', $today)),
-            'izin' => count($this->presensiGuruModel->getPresensiByKehadiran('3', $today)),
-            'alfa' => count($this->presensiGuruModel->getPresensiByKehadiran('4', $today))
+            'hadir' => count($this->presensiGuruModel->getPresensiByKehadiran('1', $tanggalAwal, $tanggalAkhir)),
+            'sakit' => count($this->presensiGuruModel->getPresensiByKehadiran('2', $tanggalAwal, $tanggalAkhir)),
+            'izin' => count($this->presensiGuruModel->getPresensiByKehadiran('3', $tanggalAwal, $tanggalAkhir)),
+            'alfa' => count($this->presensiGuruModel->getPresensiByKehadiran('4', $tanggalAwal, $tanggalAkhir))
          ],
 
          'petugas' => $this->petugasModel->getAllPetugas(),
       ];
 
       return view('admin/dashboard', $data);
+   }
+
+   /**
+    * Validasi string tanggal dari GET (dipakai mentah di query SQL pada
+    * beberapa model lama) -- hanya format Y-m-d yang benar-benar tanggal
+    * kalender yang diloloskan, selain itu dianggap tidak diisi.
+    */
+   private function validTanggal(?string $value): ?string
+   {
+      if (empty($value) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {
+         return null;
+      }
+
+      [$tahun, $bulan, $hari] = array_map('intval', explode('-', $value));
+
+      return checkdate($bulan, $hari, $tahun) ? $value : null;
+   }
+
+   /**
+    * Label tanggal/rentang yang ditampilkan di toolbar & kartu dashboard.
+    */
+   private function labelPeriode(string $mode, string $awal, string $akhir, string $today): string
+   {
+      if ($mode === 'single') {
+         return $awal === $today ? 'Hari ini' : Time::parse($awal)->toLocalizedString('d MMMM Y');
+      }
+
+      return Time::parse($awal)->toLocalizedString('d MMM Y') . ' – ' . Time::parse($akhir)->toLocalizedString('d MMM Y');
    }
 
    /**

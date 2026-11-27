@@ -2,6 +2,48 @@
 <?= $this->section('content') ?>
 <div class="content">
     <div class="container-fluid">
+        <!-- TIMEFRAME: kontrol tanggal/rentang data yang ditampilkan -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body" style="display:flex !important; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:16px; padding:16px 24px;">
+                        <form id="formTimeframe" method="get" style="display:flex !important; flex-wrap:wrap; align-items:center; gap:10px; margin:0;">
+                            <input type="hidden" name="mode" id="inputMode" value="<?= esc($timeframeMode); ?>">
+
+                            <div class="btn-group" role="group" style="display:flex !important;">
+                                <button type="button" class="btn btn-sm <?= $timeframeMode === 'single' ? 'btn-success' : 'btn-outline-success'; ?>" onclick="pilihModeTimeframe('single')">Tanggal</button>
+                                <button type="button" class="btn btn-sm <?= $timeframeMode === 'range' ? 'btn-success' : 'btn-outline-success'; ?>" onclick="pilihModeTimeframe('range')">Rentang</button>
+                            </div>
+
+                            <div id="blokTanggalTunggal" style="display:<?= $timeframeMode === 'single' ? 'flex' : 'none'; ?> !important; align-items:center; gap:6px;">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="geserTanggal(-1)" title="Hari sebelumnya">
+                                    <i class="material-icons">chevron_left</i>
+                                </button>
+                                <input type="date" class="form-control form-control-sm" name="tanggal" id="inputTanggal"
+                                    value="<?= esc($tanggalPilihan); ?>" max="<?= esc($hariIni); ?>"
+                                    onchange="document.getElementById('formTimeframe').submit()">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="geserTanggal(1)" title="Hari berikutnya"
+                                    <?= $tanggalPilihan >= $hariIni ? 'disabled' : ''; ?>>
+                                    <i class="material-icons">chevron_right</i>
+                                </button>
+                                <?php if ($tanggalPilihan !== $hariIni) : ?>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="kembaliHariIni()">Hari ini</button>
+                                <?php endif; ?>
+                            </div>
+
+                            <div id="blokRentang" style="display:<?= $timeframeMode === 'range' ? 'flex' : 'none'; ?> !important; align-items:center; gap:6px;">
+                                <label class="mb-0 small text-muted">Dari</label>
+                                <input type="date" class="form-control form-control-sm" name="mulai" value="<?= esc($mulaiPilihan); ?>" max="<?= esc($hariIni); ?>">
+                                <label class="mb-0 small text-muted">Sampai</label>
+                                <input type="date" class="form-control form-control-sm" name="akhir" value="<?= esc($akhirPilihan); ?>" max="<?= esc($hariIni); ?>">
+                                <button type="submit" class="btn btn-sm btn-success">Terapkan</button>
+                            </div>
+                        </form>
+                        <h5 class="mb-0 text-muted"><b><?= esc($labelPeriode); ?></b></h5>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-- REKAP JUMLAH DATA -->
         <div class="row">
             <div class="col-lg-6 col-md-6 col-sm-6">
@@ -85,8 +127,8 @@
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header card-header-primary">
-                        <h4 class="card-title"><b>Absensi Siswa Hari Ini</b></h4>
-                        <p class="card-category"><?= $dateNow; ?></p>
+                        <h4 class="card-title"><b>Absensi Siswa</b></h4>
+                        <p class="card-category"><?= esc($labelPeriode); ?></p>
                     </div>
                     <div class="card-body">
                         <div class="row text-center">
@@ -151,8 +193,8 @@
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header card-header-success">
-                        <h4 class="card-title"><b>10 Siswa Datang Tercepat</b></h4>
-                        <p class="card-category"><?= $dateNow; ?></p>
+                        <h4 class="card-title"><b>Siswa Datang Tercepat</b></h4>
+                        <p class="card-category"><?= esc($labelPeriode); ?></p>
                     </div>
                     <div class="card-body p-0" style="height:360px; overflow-y:auto;">
                         <?php if (!empty($siswaTercepat)) : ?>
@@ -169,7 +211,12 @@
                                         <?php endif; ?>
                                         <div style="flex:1 1 auto; min-width:0;">
                                             <div style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><b><?= esc($s['nama_siswa']); ?></b></div>
-                                            <small class="text-muted"><?= labelKelas($s['kelas'] ?? null, $s['jurusan'] ?? null); ?></small>
+                                            <small class="text-muted">
+                                                <?= labelKelas($s['kelas'] ?? null, $s['jurusan'] ?? null); ?>
+                                                <?php if ($timeframeRentang && !empty($s['tanggal'])) : ?>
+                                                    &middot; <?= date('d/m', strtotime($s['tanggal'])); ?>
+                                                <?php endif; ?>
+                                            </small>
                                         </div>
                                         <div class="text-success" style="flex:0 0 110px; display:flex !important; align-items:center; justify-content:flex-end; gap:4px; white-space:nowrap; font-weight:700;">
                                             <i class="material-icons" style="font-size:16px;">schedule</i>
@@ -189,7 +236,7 @@
                     <div class="card-header card-header-danger" style="display:flex !important; align-items:flex-start; justify-content:space-between; gap:12px;">
                         <div>
                             <h4 class="card-title"><b>Siswa Terlambat</b></h4>
-                            <p class="card-category"><?= $dateNow; ?></p>
+                            <p class="card-category"><?= esc($labelPeriode); ?></p>
                         </div>
                         <a href="<?= base_url('admin/absen-siswa/terlambat'); ?>" class="btn btn-danger btn-sm" style="margin-top:2px; white-space:nowrap;">
                             Lihat Semua<?= $jumlahTerlambatSiswa > 10 ? " ({$jumlahTerlambatSiswa})" : ''; ?>
@@ -210,7 +257,12 @@
                                         <?php endif; ?>
                                         <div style="flex:1 1 auto; min-width:0;">
                                             <div style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><b><?= esc($s['nama_siswa']); ?></b></div>
-                                            <small class="text-muted"><?= labelKelas($s['kelas'] ?? null, $s['jurusan'] ?? null); ?></small>
+                                            <small class="text-muted">
+                                                <?= labelKelas($s['kelas'] ?? null, $s['jurusan'] ?? null); ?>
+                                                <?php if ($timeframeRentang && !empty($s['tanggal'])) : ?>
+                                                    &middot; <?= date('d/m', strtotime($s['tanggal'])); ?>
+                                                <?php endif; ?>
+                                            </small>
                                         </div>
                                         <div style="flex:0 0 130px; display:flex !important; flex-direction:column; align-items:flex-end; white-space:nowrap;">
                                             <div class="text-danger" style="display:flex !important; align-items:center; gap:4px; font-weight:700;">
@@ -272,6 +324,29 @@
     $(document).ready(function() {
         initDashboardPageCharts();
     });
+
+    function pilihModeTimeframe(mode) {
+        document.getElementById('inputMode').value = mode;
+        document.getElementById('blokTanggalTunggal').style.display = mode === 'single' ? 'flex' : 'none';
+        document.getElementById('blokRentang').style.display = mode === 'range' ? 'flex' : 'none';
+
+        if (mode === 'single') {
+            document.getElementById('formTimeframe').submit();
+        }
+    }
+
+    function geserTanggal(delta) {
+        var input = document.getElementById('inputTanggal');
+        var tanggal = new Date(input.value + 'T00:00:00');
+        tanggal.setDate(tanggal.getDate() + delta);
+        input.value = tanggal.toISOString().slice(0, 10);
+        document.getElementById('formTimeframe').submit();
+    }
+
+    function kembaliHariIni() {
+        document.getElementById('inputTanggal').value = '<?= esc($hariIni); ?>';
+        document.getElementById('formTimeframe').submit();
+    }
 
     function initDashboardPageCharts() {
 

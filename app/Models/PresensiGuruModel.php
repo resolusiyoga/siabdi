@@ -79,8 +79,24 @@ class PresensiGuruModel extends Model implements PresensiInterface
          ->findAll();
    }
 
-   public function getPresensiByKehadiran(string $idKehadiran, $tanggal)
+   public function getPresensiByKehadiran(string $idKehadiran, $tanggal, ?string $akhir = null)
    {
+      // rentang tanggal (dashboard): lihat catatan setara di
+      // PresensiSiswaModel::getPresensiByKehadiran().
+      if (!empty($akhir) && $akhir !== $tanggal) {
+         $builder = $this->join('tb_guru', 'tb_presensi_guru.id_guru = tb_guru.id_guru')
+            ->where('tb_presensi_guru.tanggal >=', $tanggal)
+            ->where('tb_presensi_guru.tanggal <=', $akhir);
+
+         if ($idKehadiran == '4') {
+            $builder = $builder->where('tb_presensi_guru.id_kehadiran NOT IN (1,2,3)', null, false);
+         } else {
+            $builder = $builder->where('tb_presensi_guru.id_kehadiran', $idKehadiran);
+         }
+
+         return $builder->findAll();
+      }
+
       $this->join(
          'tb_guru',
          "tb_presensi_guru.id_guru = tb_guru.id_guru AND tb_presensi_guru.tanggal = '$tanggal'",
