@@ -158,13 +158,8 @@
                                 <h3><?= $jumlahKehadiranSiswa['alfa']; ?></h3>
                             </div>
                             <div class="col" style="border-left:1px dashed #ddd;">
-                                <a href="<?= base_url('admin/absen-siswa/terlambat'); ?>" class="text-decoration-none">
-                                    <h4 class="text-danger"><b>Terlambat</b></h4>
-                                    <h3><?= $jumlahTerlambatSiswa; ?></h3>
-                                    <small class="text-muted" style="display:inline-flex !important; align-items:center; gap:2px;">
-                                        Lihat detail <i class="material-icons" style="font-size:14px;">chevron_right</i>
-                                    </small>
-                                </a>
+                                <h4 class="text-danger"><b>Terlambat</b></h4>
+                                <h3><?= $jumlahTerlambatSiswa; ?></h3>
                             </div>
                         </div>
                     </div>
