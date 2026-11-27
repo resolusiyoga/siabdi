@@ -120,6 +120,7 @@ $routes->group('admin', function (RouteCollection $routes) {
    $routes->post('absen-siswa', 'Admin\DataAbsenSiswa::ambilDataSiswa'); // ambil siswa berdasarkan kelas dan tanggal
    $routes->post('absen-siswa/kehadiran', 'Admin\DataAbsenSiswa::ambilKehadiran'); // ambil kehadiran siswa
    $routes->post('absen-siswa/edit', 'Admin\DataAbsenSiswa::ubahKehadiran'); // ubah kehadiran siswa
+   $routes->get('absen-siswa/terlambat', 'Admin\DataAbsenSiswa::terlambat'); // daftar siswa terlambat
 
    // live monitor: layar pemantau siapa saja yang sudah absen hari ini
    $routes->get('live-monitor', 'Admin\LiveMonitor::index');

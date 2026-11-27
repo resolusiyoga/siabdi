@@ -90,21 +90,28 @@
                     </div>
                     <div class="card-body">
                         <div class="row text-center">
-                            <div class="col-md-3">
+                            <div class="col">
                                 <h4 class="text-success"><b>Hadir</b></h4>
                                 <h3><?= $jumlahKehadiranSiswa['hadir']; ?></h3>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col">
                                 <h4 class="text-warning"><b>Sakit</b></h4>
                                 <h3><?= $jumlahKehadiranSiswa['sakit']; ?></h3>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col">
                                 <h4 class="text-info"><b>Izin</b></h4>
                                 <h3><?= $jumlahKehadiranSiswa['izin']; ?></h3>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col">
                                 <h4 class="text-danger"><b>Alfa</b></h4>
                                 <h3><?= $jumlahKehadiranSiswa['alfa']; ?></h3>
+                            </div>
+                            <div class="col">
+                                <a href="<?= base_url('admin/absen-siswa/terlambat'); ?>" class="text-decoration-none">
+                                    <h4 class="text-danger"><b>Terlambat</b></h4>
+                                    <h3><?= $jumlahTerlambatSiswa; ?></h3>
+                                    <small class="text-muted">Lihat detail</small>
+                                </a>
                             </div>
                         </div>
                     </div>

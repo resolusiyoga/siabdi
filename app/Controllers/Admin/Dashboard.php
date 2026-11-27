@@ -68,6 +68,8 @@ class Dashboard extends BaseController
 
       $today = $now->toDateString();
 
+      $batasAbsenMasuk = $this->generalSettings->batas_absen_masuk ?? '07:20:00';
+
       $data = [
          'title' => 'Dashboard',
          'ctx' => 'dashboard',
@@ -89,6 +91,8 @@ class Dashboard extends BaseController
             'izin' => count($this->presensiSiswaModel->getPresensiByKehadiran('3', $today)),
             'alfa' => count($this->presensiSiswaModel->getPresensiByKehadiran('4', $today))
          ],
+
+         'jumlahTerlambatSiswa' => count($this->presensiSiswaModel->getTerlambatByTanggal($today, $batasAbsenMasuk)),
 
          'jumlahKehadiranGuru' => [
             'hadir' => count($this->presensiGuruModel->getPresensiByKehadiran('1', $today)),

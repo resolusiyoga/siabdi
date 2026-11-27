@@ -80,6 +80,28 @@ class DataAbsenSiswa extends BaseController
       return view('admin/absen/list-absen-siswa', $data);
    }
 
+   public function terlambat()
+   {
+      $tanggal = $this->request->getVar('tanggal') ?: $this->currentDate;
+      $batasAbsenMasuk = $this->generalSettings->batas_absen_masuk ?? '07:20:00';
+
+      $kelasWali = currentUserRole() === 'wali_kelas' ? currentUserKelas() : null;
+      $idKelas = $kelasWali['id_kelas'] ?? ($this->request->getVar('id_kelas') ?: null);
+
+      $data = [
+         'title' => 'Siswa Terlambat',
+         'ctx' => 'absen-siswa',
+         'tanggal' => $tanggal,
+         'batasAbsenMasuk' => $batasAbsenMasuk,
+         'kelas' => $this->kelasModel->getDataKelas(),
+         'idKelas' => $idKelas,
+         'kelasWali' => $kelasWali,
+         'data' => $this->presensiSiswa->getTerlambatByTanggal($tanggal, $batasAbsenMasuk, $idKelas),
+      ];
+
+      return view('admin/absen/terlambat', $data);
+   }
+
    public function ambilKehadiran()
    {
       $idPresensi = $this->request->getVar('id_presensi');
