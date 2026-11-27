@@ -11,7 +11,18 @@
 
     #dashboardPage .card {
         margin-top: 0;
-        margin-bottom: 16px;
+        margin-bottom: 20px;
+    }
+
+    /* Tema aslinya menarik header berwarna (card-header-primary/success/
+       danger dkk, yang bukan tipe icon) naik -20px supaya "melayang" di
+       atas kartu. Setelah margin antar-card dipersempit, tarikan ini
+       jadi lebih besar dari sisa jarak yang ada sehingga kartu terlihat
+       menabrak kartu di atasnya. Matikan efek melayang itu supaya
+       jaraknya konsisten dengan kartu Jumlah Siswa/Kelas (tipe icon,
+       yang memang tidak kena efek ini). */
+    #dashboardPage .card [class*="card-header-"]:not(.card-header-icon):not(.card-header-text):not(.card-header-image) {
+        margin-top: 0;
     }
 
     #dashboardPage .card-header {
