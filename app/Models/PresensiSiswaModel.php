@@ -170,7 +170,7 @@ class PresensiSiswaModel extends Model implements PresensiInterface
    {
       $builder = $this->select(
          'tb_presensi_siswa.id_presensi, tb_presensi_siswa.jam_masuk, '
-            . 'tb_siswa.id_siswa, tb_siswa.nama_siswa, tb_siswa.nis, tb_siswa.nisn, '
+            . 'tb_siswa.id_siswa, tb_siswa.nama_siswa, tb_siswa.nis, tb_siswa.nisn, tb_siswa.foto, '
             . 'tb_kelas.id_kelas, tb_kelas.kelas, tb_jurusan.jurusan'
       )
          ->join('tb_siswa', 'tb_siswa.id_siswa = tb_presensi_siswa.id_siswa')
@@ -184,7 +184,8 @@ class PresensiSiswaModel extends Model implements PresensiInterface
          $builder = $builder->where('tb_kelas.id_kelas', $idKelas);
       }
 
-      return $builder->orderBy('tb_presensi_siswa.jam_masuk', 'asc')->findAll();
+      // paling terlambat (jam_masuk terbesar) tampil duluan
+      return $builder->orderBy('tb_presensi_siswa.jam_masuk', 'desc')->findAll();
    }
 
    /**

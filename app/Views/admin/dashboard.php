@@ -207,9 +207,12 @@
                                             <div style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><b><?= esc($s['nama_siswa']); ?></b></div>
                                             <small class="text-muted"><?= labelKelas($s['kelas'] ?? null, $s['jurusan'] ?? null); ?></small>
                                         </div>
-                                        <div class="text-danger" style="flex:0 0 110px; display:flex !important; align-items:center; justify-content:flex-end; gap:4px; white-space:nowrap; font-weight:700;">
-                                            <i class="material-icons" style="font-size:16px;">schedule</i>
-                                            <?= esc($s['jam_masuk']); ?>
+                                        <div style="flex:0 0 130px; display:flex !important; flex-direction:column; align-items:flex-end; white-space:nowrap;">
+                                            <div class="text-danger" style="display:flex !important; align-items:center; gap:4px; font-weight:700;">
+                                                <i class="material-icons" style="font-size:16px;">schedule</i>
+                                                <?= esc($s['jam_masuk']); ?>
+                                            </div>
+                                            <small class="text-muted">terlambat <?= formatDurasiTerlambat($s['jam_masuk'], $batasAbsenMasuk); ?></small>
                                         </div>
                                     </li>
                                 <?php endforeach; ?>

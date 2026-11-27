@@ -94,6 +94,7 @@ class Dashboard extends BaseController
          ],
 
          'jumlahTerlambatSiswa' => count($siswaTerlambatSemua),
+         'batasAbsenMasuk' => $batasAbsenMasuk,
 
          'siswaTercepat' => $this->petakanFoto($this->presensiSiswaModel->getTercepatByTanggal($today, 10)),
          'siswaTerlambat' => $this->petakanFoto(array_slice($siswaTerlambatSemua, 0, 10)),

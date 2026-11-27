@@ -382,6 +382,24 @@ if (!function_exists('countItems')) {
     }
 }
 
+//format durasi keterlambatan siswa (jam_masuk - batas) jadi teks ringkas
+if (!function_exists('formatDurasiTerlambat')) {
+    function formatDurasiTerlambat(string $jamMasuk, string $batasAbsenMasuk): string
+    {
+        $selisihDetik = strtotime($jamMasuk) - strtotime($batasAbsenMasuk);
+        $menit = $selisihDetik > 0 ? intdiv($selisihDetik, 60) : 0;
+
+        $jam = intdiv($menit, 60);
+        $sisaMenit = $menit % 60;
+
+        if ($jam > 0) {
+            return $sisaMenit > 0 ? "{$jam} jam {$sisaMenit} menit" : "{$jam} jam";
+        }
+
+        return "{$menit} menit";
+    }
+}
+
 //get csv value
 if (!function_exists('getCSVInputValue')) {
     function getCSVInputValue($array, $key, $dataType = 'string')

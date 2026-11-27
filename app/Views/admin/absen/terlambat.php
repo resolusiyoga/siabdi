@@ -59,17 +59,13 @@
                         <tbody>
                            <?php $no = 1; ?>
                            <?php foreach ($data as $value) : ?>
-                              <?php
-                              $selisih = strtotime($value['jam_masuk']) - strtotime($batasAbsenMasuk);
-                              $menit = $selisih > 0 ? intdiv($selisih, 60) : 0;
-                              ?>
                               <tr>
                                  <td><?= $no; ?></td>
                                  <td><?= esc($value['nis']); ?></td>
                                  <td><b><?= esc($value['nama_siswa']); ?></b></td>
                                  <td><?= labelKelas($value['kelas'] ?? null, $value['jurusan'] ?? null); ?></td>
                                  <td><b class="text-danger"><?= esc($value['jam_masuk']); ?></b></td>
-                                 <td><span class="badge badge-danger"><?= $menit; ?> menit</span></td>
+                                 <td><span class="badge badge-danger"><?= formatDurasiTerlambat($value['jam_masuk'], $batasAbsenMasuk); ?></span></td>
                               </tr>
                            <?php $no++;
                            endforeach; ?>
