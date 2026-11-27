@@ -337,9 +337,17 @@
 
     function geserTanggal(delta) {
         var input = document.getElementById('inputTanggal');
-        var tanggal = new Date(input.value + 'T00:00:00');
+        var bagian = input.value.split('-');
+        // tanggal dibentuk & diformat ulang di waktu lokal supaya tidak
+        // mundur satu hari akibat konversi ke UTC (toISOString)
+        var tanggal = new Date(parseInt(bagian[0], 10), parseInt(bagian[1], 10) - 1, parseInt(bagian[2], 10));
         tanggal.setDate(tanggal.getDate() + delta);
-        input.value = tanggal.toISOString().slice(0, 10);
+
+        var tahun = tanggal.getFullYear();
+        var bulan = String(tanggal.getMonth() + 1).padStart(2, '0');
+        var hari = String(tanggal.getDate()).padStart(2, '0');
+
+        input.value = tahun + '-' + bulan + '-' + hari;
         document.getElementById('formTimeframe').submit();
     }
 
