@@ -84,7 +84,8 @@ class Filters extends BaseFilters
     public array $globals = [
         'before' => [
             'honeypot',
-            'login'
+            // reader NFC memakai X-API-KEY, bukan sesi login
+            'login' => ['except' => ['api/reader/*']],
             // 'csrf',
             // 'invalidchars',
         ],

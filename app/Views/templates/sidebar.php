@@ -14,6 +14,7 @@ switch ($context) {
 
    case 'kartu':
    case 'qr':
+   case 'reader-nfc':
       $sidebarColor = 'danger';
       break;
 
@@ -91,6 +92,12 @@ switch ($context) {
                <a class="nav-link" href="<?= base_url('admin/kartu'); ?>">
                   <i class="material-icons">badge</i>
                   <p>Kartu Siswa</p>
+               </a>
+            </li>
+            <li class="nav-item <?= $context == 'reader-nfc' ? 'active' : ''; ?>">
+               <a class="nav-link" href="<?= base_url('admin/reader-nfc'); ?>">
+                  <i class="material-icons">nfc</i>
+                  <p>Reader NFC</p>
                </a>
             </li>
          <?php endif; ?>

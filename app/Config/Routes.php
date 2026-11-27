@@ -45,6 +45,13 @@ $routes->group('scan', function (RouteCollection $routes) {
    $routes->post('cek', 'Scan::cekKode');
 });
 
+// API reader kartu NFC Si-ABDI (ESP32). Autentikasi lewat header X-API-KEY
+// (READER_API_KEY di .env), dikecualikan dari filter login di Config\Filters.
+$routes->group('api/reader', ['namespace' => 'App\Controllers\Api'], function (RouteCollection $routes) {
+   $routes->get('siswa', 'Reader::siswa');
+   $routes->post('absen', 'Reader::absen');
+});
+
 
 
 // Admin
@@ -158,6 +165,15 @@ $routes->group('admin', function (RouteCollection $routes) {
       $routes->get('cetak', 'KartuSiswa::cetak');
       $routes->get('download', 'KartuSiswa::download');
       $routes->get('preview-html/(:any)', 'KartuSiswa::previewHtml/$1');
+   });
+
+   // Reader NFC: daftarkan kartu, jadwal absen otomatis, log tap (superadmin)
+   $routes->group('reader-nfc', ['namespace' => 'App\Controllers\Admin'], function ($routes) {
+      $routes->get('/', 'ReaderNfc::index');
+      $routes->post('daftar', 'ReaderNfc::daftar');
+      $routes->post('lepas', 'ReaderNfc::lepas');
+      $routes->post('abaikan', 'ReaderNfc::abaikan');
+      $routes->post('jadwal', 'ReaderNfc::jadwal');
    });
 
    // admin buat laporan
