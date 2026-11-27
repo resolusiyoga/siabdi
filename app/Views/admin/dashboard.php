@@ -2,48 +2,6 @@
 <?= $this->section('content') ?>
 <div class="content">
     <div class="container-fluid">
-        <!-- TIMEFRAME: kontrol tanggal/rentang data yang ditampilkan -->
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-body" style="display:flex !important; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:16px; padding:16px 24px;">
-                        <form id="formTimeframe" method="get" style="display:flex !important; flex-wrap:wrap; align-items:center; gap:10px; margin:0;">
-                            <input type="hidden" name="mode" id="inputMode" value="<?= esc($timeframeMode); ?>">
-
-                            <div class="btn-group" role="group" style="display:flex !important;">
-                                <button type="button" class="btn btn-sm <?= $timeframeMode === 'single' ? 'btn-success' : 'btn-outline-success'; ?>" onclick="pilihModeTimeframe('single')">Tanggal</button>
-                                <button type="button" class="btn btn-sm <?= $timeframeMode === 'range' ? 'btn-success' : 'btn-outline-success'; ?>" onclick="pilihModeTimeframe('range')">Rentang</button>
-                            </div>
-
-                            <div id="blokTanggalTunggal" style="display:<?= $timeframeMode === 'single' ? 'flex' : 'none'; ?> !important; align-items:center; gap:6px;">
-                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="geserTanggal(-1)" title="Hari sebelumnya">
-                                    <i class="material-icons">chevron_left</i>
-                                </button>
-                                <input type="date" class="form-control form-control-sm" name="tanggal" id="inputTanggal"
-                                    value="<?= esc($tanggalPilihan); ?>" max="<?= esc($hariIni); ?>"
-                                    onchange="document.getElementById('formTimeframe').submit()">
-                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="geserTanggal(1)" title="Hari berikutnya"
-                                    <?= $tanggalPilihan >= $hariIni ? 'disabled' : ''; ?>>
-                                    <i class="material-icons">chevron_right</i>
-                                </button>
-                                <?php if ($tanggalPilihan !== $hariIni) : ?>
-                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="kembaliHariIni()">Hari ini</button>
-                                <?php endif; ?>
-                            </div>
-
-                            <div id="blokRentang" style="display:<?= $timeframeMode === 'range' ? 'flex' : 'none'; ?> !important; align-items:center; gap:6px;">
-                                <label class="mb-0 small text-muted">Dari</label>
-                                <input type="date" class="form-control form-control-sm" name="mulai" value="<?= esc($mulaiPilihan); ?>" max="<?= esc($hariIni); ?>">
-                                <label class="mb-0 small text-muted">Sampai</label>
-                                <input type="date" class="form-control form-control-sm" name="akhir" value="<?= esc($akhirPilihan); ?>" max="<?= esc($hariIni); ?>">
-                                <button type="submit" class="btn btn-sm btn-success">Terapkan</button>
-                            </div>
-                        </form>
-                        <h5 class="mb-0 text-muted"><b><?= esc($labelPeriode); ?></b></h5>
-                    </div>
-                </div>
-            </div>
-        </div>
         <!-- REKAP JUMLAH DATA -->
         <div class="row">
             <div class="col-lg-6 col-md-6 col-sm-6">
@@ -122,6 +80,48 @@
                     </div>
                 </div>
             </div> -->
+        </div>
+        <!-- TIMEFRAME: kontrol tanggal/rentang data yang ditampilkan -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body" style="display:flex !important; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:16px; padding:16px 24px;">
+                        <form id="formTimeframe" method="get" style="display:flex !important; flex-wrap:wrap; align-items:center; gap:10px; margin:0;">
+                            <input type="hidden" name="mode" id="inputMode" value="<?= esc($timeframeMode); ?>">
+
+                            <div class="btn-group" role="group" style="display:flex !important;">
+                                <button type="button" class="btn btn-sm <?= $timeframeMode === 'single' ? 'btn-success' : 'btn-outline-success'; ?>" onclick="pilihModeTimeframe('single')">Tanggal</button>
+                                <button type="button" class="btn btn-sm <?= $timeframeMode === 'range' ? 'btn-success' : 'btn-outline-success'; ?>" onclick="pilihModeTimeframe('range')">Rentang</button>
+                            </div>
+
+                            <div id="blokTanggalTunggal" style="display:<?= $timeframeMode === 'single' ? 'flex' : 'none'; ?> !important; align-items:center; gap:6px;">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="geserTanggal(-1)" title="Hari sebelumnya">
+                                    <i class="material-icons">chevron_left</i>
+                                </button>
+                                <input type="date" class="form-control form-control-sm" name="tanggal" id="inputTanggal"
+                                    value="<?= esc($tanggalPilihan); ?>" max="<?= esc($hariIni); ?>"
+                                    onchange="document.getElementById('formTimeframe').submit()">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="geserTanggal(1)" title="Hari berikutnya"
+                                    <?= $tanggalPilihan >= $hariIni ? 'disabled' : ''; ?>>
+                                    <i class="material-icons">chevron_right</i>
+                                </button>
+                                <?php if ($tanggalPilihan !== $hariIni) : ?>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="kembaliHariIni()">Hari ini</button>
+                                <?php endif; ?>
+                            </div>
+
+                            <div id="blokRentang" style="display:<?= $timeframeMode === 'range' ? 'flex' : 'none'; ?> !important; align-items:center; gap:6px;">
+                                <label class="mb-0 small text-muted">Dari</label>
+                                <input type="date" class="form-control form-control-sm" name="mulai" value="<?= esc($mulaiPilihan); ?>" max="<?= esc($hariIni); ?>">
+                                <label class="mb-0 small text-muted">Sampai</label>
+                                <input type="date" class="form-control form-control-sm" name="akhir" value="<?= esc($akhirPilihan); ?>" max="<?= esc($hariIni); ?>">
+                                <button type="submit" class="btn btn-sm btn-success">Terapkan</button>
+                            </div>
+                        </form>
+                        <h5 class="mb-0 text-muted"><b><?= esc($labelPeriode); ?></b></h5>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="row">
             <div class="col-md-12">
