@@ -47,7 +47,7 @@
                     <div class="card-header card-header-info card-header-icon">
                         <div class="card-icon">
                             <a href="<?= base_url('admin/kelas'); ?>" class="text-white">
-                                <i class="material-icons">school</i>
+                                <i class="material-icons">domain</i>
                             </a>
                         </div>
                         <p class="card-category">Jumlah kelas</p>
