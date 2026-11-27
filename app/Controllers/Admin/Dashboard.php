@@ -94,6 +94,11 @@ class Dashboard extends BaseController
 
          'jumlahTerlambatSiswa' => count($this->presensiSiswaModel->getTerlambatByTanggal($today, $batasAbsenMasuk)),
 
+         'siswaTercepat' => array_map(function ($s) {
+            $s['foto'] = (!empty($s['foto']) && is_file(FCPATH . $s['foto'])) ? assetUrl($s['foto']) : null;
+            return $s;
+         }, $this->presensiSiswaModel->getTercepatByTanggal($today, 10)),
+
          'jumlahKehadiranGuru' => [
             'hadir' => count($this->presensiGuruModel->getPresensiByKehadiran('1', $today)),
             'sakit' => count($this->presensiGuruModel->getPresensiByKehadiran('2', $today)),

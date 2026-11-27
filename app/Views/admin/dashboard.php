@@ -146,6 +146,42 @@
                 </div>
             </div> -->
         </div>
+        <!-- 10 SISWA DATANG TERCEPAT -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header card-header-success">
+                        <h4 class="card-title"><b>10 Siswa Datang Tercepat</b></h4>
+                        <p class="card-category"><?= $dateNow; ?></p>
+                    </div>
+                    <div class="card-body">
+                        <?php if (!empty($siswaTercepat)) : ?>
+                            <ul class="list-group">
+                                <?php foreach ($siswaTercepat as $i => $s) : ?>
+                                    <li class="list-group-item d-flex align-items-center">
+                                        <b class="mr-3" style="width:24px;"><?= $i + 1; ?></b>
+                                        <?php if (!empty($s['foto'])) : ?>
+                                            <img src="<?= esc($s['foto']); ?>" alt="" class="rounded-circle mr-3" style="width:48px;height:48px;object-fit:cover;">
+                                        <?php else : ?>
+                                            <span class="rounded-circle bg-light d-flex align-items-center justify-content-center mr-3" style="width:48px;height:48px;">
+                                                <i class="material-icons text-muted">person</i>
+                                            </span>
+                                        <?php endif; ?>
+                                        <div class="flex-grow-1">
+                                            <b><?= esc($s['nama_siswa']); ?></b><br>
+                                            <small class="text-muted"><?= labelKelas($s['kelas'] ?? null, $s['jurusan'] ?? null); ?></small>
+                                        </div>
+                                        <b class="text-success"><?= esc($s['jam_masuk']); ?></b>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        <?php else : ?>
+                            <h4 class="text-center text-muted py-3">Belum ada siswa yang absen masuk hari ini</h4>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-- GRAFIK CHART -->
         <div class="row">
             <div class="col-md-12">

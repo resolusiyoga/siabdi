@@ -187,6 +187,32 @@ class PresensiSiswaModel extends Model implements PresensiInterface
       return $builder->orderBy('tb_presensi_siswa.jam_masuk', 'asc')->findAll();
    }
 
+   /**
+    * N siswa dengan jam_masuk paling awal pada tanggal tertentu -- dipakai
+    * kartu "Datang Tercepat" di dashboard.
+    */
+   public function getTercepatByTanggal(string $tanggal, int $limit = 10, $idKelas = null)
+   {
+      $builder = $this->select(
+         'tb_presensi_siswa.jam_masuk, '
+            . 'tb_siswa.id_siswa, tb_siswa.nama_siswa, tb_siswa.nis, tb_siswa.foto, '
+            . 'tb_kelas.id_kelas, tb_kelas.kelas, tb_jurusan.jurusan'
+      )
+         ->join('tb_siswa', 'tb_siswa.id_siswa = tb_presensi_siswa.id_siswa')
+         ->join('tb_kelas', 'tb_kelas.id_kelas = tb_siswa.id_kelas', 'left')
+         ->join('tb_jurusan', 'tb_jurusan.id = tb_kelas.id_jurusan', 'left')
+         ->where('tb_presensi_siswa.tanggal', $tanggal)
+         ->where('tb_presensi_siswa.jam_masuk IS NOT NULL', null, false);
+
+      if (!empty($idKelas)) {
+         $builder = $builder->where('tb_kelas.id_kelas', $idKelas);
+      }
+
+      return $builder->orderBy('tb_presensi_siswa.jam_masuk', 'asc')
+         ->limit($limit)
+         ->findAll();
+   }
+
    public function getPresensiByKehadiran(string $idKehadiran, $tanggal)
    {
       $this->join(
