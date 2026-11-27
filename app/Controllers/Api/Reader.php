@@ -114,27 +114,39 @@ class Reader extends BaseController
     /**
      * Laporan kondisi reader (heartbeat tiap ±60 detik).
      * Body teks "kunci=nilai" per baris: versi, mode, ip, rssi, antrian,
-     * flash, siswa, pn532, jam_valid, uptime. Kunci lain diabaikan.
+     * flash, siswa, pn532, jam_valid, uptime, rtc, sumber_jam, rtc_epoch
+     * (jam RTC, epoch UTC). Kunci lain diabaikan.
      */
     public function status()
     {
         if ($tolak = $this->cekKunci()) return $tolak;
 
         $angka = ['rssi', 'antrian', 'flash', 'siswa', 'pn532', 'jam_valid', 'uptime'];
-        $teks  = ['versi' => 10, 'mode' => 10, 'ip' => 45];
+        $teks  = ['versi' => 10, 'mode' => 10, 'ip' => 45, 'rtc' => 10, 'sumber_jam' => 6];
         $laporan = [];
+        $rtcEpoch = 0;
 
         foreach (preg_split('/\r?\n/', trim((string) $this->request->getBody())) as $baris) {
             [$k, $v] = array_pad(explode('=', $baris, 2), 2, '');
             $k = strtolower(trim($k));
             $v = trim($v);
-            if (in_array($k, $angka, true)) {
+            if ($k === 'rtc_epoch') {
+                $rtcEpoch = (int) $v;
+            } elseif (in_array($k, $angka, true)) {
                 $laporan[$k] = (int) $v;
             } elseif (isset($teks[$k])) {
                 $laporan[$k] = substr(preg_replace('/[^A-Za-z0-9.:_\-]/', '', $v), 0, $teks[$k]);
             }
         }
         if (isset($laporan['flash'])) $laporan['flash'] = max(0, min(100, $laporan['flash']));
+
+        if (!empty($laporan)) {
+            // selalu ditulis, agar info RTC lama tidak tertinggal bila reader tidak mengirimnya
+            $laporan += ['rtc' => '', 'sumber_jam' => ''];
+            $rtcSah = $rtcEpoch > 0 && $rtcEpoch < 4102444800; // sebelum tahun 2100
+            $laporan['rtc_waktu'] = $rtcSah ? date('Y-m-d H:i:s', $rtcEpoch) : null;
+            $laporan['rtc_selisih'] = $rtcSah ? max(-2147483647, min(2147483647, $rtcEpoch - time())) : null;
+        }
 
         ReaderNfc::catatReader($this->perangkat(), $laporan);
         return $this->teks('OK');

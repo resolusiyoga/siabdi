@@ -61,7 +61,8 @@ class ReaderNfc
 
     /**
      * Catat bahwa reader menghubungi server. $laporan (dari api/reader/status)
-     * berisi versi, mode, ip, rssi, antrian, flash, siswa, pn532, jam_valid, uptime.
+     * berisi versi, mode, ip, rssi, antrian, flash, siswa, pn532, jam_valid, uptime,
+     * rtc, sumber_jam, rtc_waktu, rtc_selisih.
      */
     public static function catatReader(string $perangkat, array $laporan = []): void
     {
@@ -70,6 +71,8 @@ class ReaderNfc
         $sekarang = Time::now('Asia/Jakarta')->toDateTimeString();
         $data = ['perangkat' => $perangkat, 'terakhir' => $sekarang];
         if (!empty($laporan)) {
+            // kolom yang migrasinya belum dijalankan dilewati agar API tetap jalan
+            $laporan = array_intersect_key($laporan, array_flip(db_connect()->getFieldNames('tb_nfc_reader')));
             $data = array_merge($data, $laporan, ['laporan' => $sekarang]);
         }
 

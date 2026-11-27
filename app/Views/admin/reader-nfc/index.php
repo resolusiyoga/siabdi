@@ -659,6 +659,37 @@ $tglJam = fn($t) => $t ? date('d/m H:i', strtotime($t)) : '-';
       return 'sinyal ' + (rssi >= -60 ? 'kuat' : rssi >= -72 ? 'sedang' : 'lemah') + ' (' + rssi + ' dBm)';
    }
 
+   const RTC_LABEL = { ok: 'Normal', belum_set: 'Belum diset', tidak_ada: 'Tidak terdeteksi', nonaktif: 'Nonaktif' };
+   const SUMBER_JAM = { ntp: 'Internet (NTP)', rtc: 'RTC', manual: 'Diset manual', belum: 'Belum diset' };
+   const BATAS_SELISIH_RTC = 60; // detik
+
+   function teksDurasi(detik) {
+      if (detik < 60) return detik + ' detik';
+      if (detik < 3600) return Math.floor(detik / 60) + ' menit';
+      if (detik < 86400) return Math.floor(detik / 3600) + ' jam';
+      return Math.floor(detik / 86400) + ' hari';
+   }
+
+   // "2026-11-28 06:45:12" -> "28/11/2026 06:45:12"
+   function teksWaktu(w) {
+      const m = String(w).match(/^(\d{4})-(\d{2})-(\d{2}) (.+)$/);
+      return m ? m[3] + '/' + m[2] + '/' + m[1] + ' ' + m[4] : w;
+   }
+
+   function barisRtc(r) {
+      if (!r.laporan) return '';
+      if (r.rtc === undefined) return 'RTC: tampil setelah migrasi AddRtcNfcReader dijalankan';
+      if (!r.rtc) return 'RTC: firmware belum mengirim info (perbarui ke V1.15+)';
+      const bagian = ['RTC: <b>' + escHtml(RTC_LABEL[r.rtc] || r.rtc) + '</b>'];
+      if (r.rtc_waktu) bagian.push(escHtml(teksWaktu(r.rtc_waktu)));
+      if (r.rtc_selisih !== null) {
+         const s = +r.rtc_selisih;
+         bagian.push(Math.abs(s) <= 2 ? 'cocok dengan server'
+            : (s > 0 ? 'lebih cepat ' : 'terlambat ') + teksDurasi(Math.abs(s)));
+      }
+      return bagian.join(' · ') + (r.sumber_jam ? '<br>Sumber jam: ' + escHtml(SUMBER_JAM[r.sumber_jam] || r.sumber_jam) : '');
+   }
+
    function tampilkanReader(list) {
       if (list !== dataReader.list) { dataReader.list = list; dataReader.dimuat = Date.now(); }
       const tambahan = Math.floor((Date.now() - dataReader.dimuat) / 1000);
@@ -681,6 +712,9 @@ $tglJam = fn($t) => $t ? date('d/m H:i', strtotime($t)) : '-';
          const catatan = [];
          if (r.laporan && +r.pn532 === 0) catatan.push('<span class="nfc-badge bad">PN532 tidak terdeteksi</span>');
          if (r.laporan && +r.jam_valid === 0) catatan.push('<span class="nfc-badge warn">Jam belum diset</span>');
+         if (r.laporan && r.rtc === 'tidak_ada') catatan.push('<span class="nfc-badge bad">RTC tidak terdeteksi</span>');
+         if (r.laporan && r.rtc === 'belum_set') catatan.push('<span class="nfc-badge warn">RTC belum diset, cek baterai</span>');
+         if (r.laporan && r.rtc === 'ok' && Math.abs(+r.rtc_selisih) > BATAS_SELISIH_RTC) catatan.push('<span class="nfc-badge warn">Jam RTC meleset</span>');
          if (r.laporan && +r.antrian > 0) catatan.push('<span class="nfc-badge warn">' + (+r.antrian) + ' data belum terkirim</span>');
          if (r.laporan && +r.flash >= 80) catatan.push('<span class="nfc-badge bad">Flash ' + (+r.flash) + '%</span>');
          return '<div class="nfc-reader' + (on ? '' : ' offline') + '">' +
@@ -689,6 +723,7 @@ $tglJam = fn($t) => $t ? date('d/m H:i', strtotime($t)) : '-';
             '<span class="nfc-kecil lalu">' + teksLalu(lalu) + '</span></div>' +
             (baris1 ? '<div class="nfc-kecil">' + baris1 + '</div>' : '') +
             '<div class="nfc-kecil">' + baris2 + '</div>' +
+            (r.laporan ? '<div class="nfc-kecil">' + barisRtc(r) + '</div>' : '') +
             (catatan.length ? '<div class="nfc-reader-peringatan">' + catatan.join('') + '</div>' : '') +
             '</div>';
       }).join(''));
