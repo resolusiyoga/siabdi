@@ -146,38 +146,82 @@
                 </div>
             </div> -->
         </div>
-        <!-- 10 SISWA DATANG TERCEPAT -->
+        <!-- 10 SISWA DATANG TERCEPAT & TERLAMBAT -->
         <div class="row">
-            <div class="col-md-12">
+            <div class="col-md-6">
                 <div class="card">
                     <div class="card-header card-header-success">
                         <h4 class="card-title"><b>10 Siswa Datang Tercepat</b></h4>
                         <p class="card-category"><?= $dateNow; ?></p>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body p-0">
                         <?php if (!empty($siswaTercepat)) : ?>
-                            <ul class="list-group">
+                            <ul class="list-group list-group-flush">
                                 <?php foreach ($siswaTercepat as $i => $s) : ?>
                                     <li class="list-group-item d-flex align-items-center">
-                                        <b class="mr-3" style="width:24px;"><?= $i + 1; ?></b>
+                                        <b class="text-muted mr-3" style="width:20px;flex-shrink:0;"><?= $i + 1; ?></b>
                                         <?php if (!empty($s['foto'])) : ?>
-                                            <img src="<?= esc($s['foto']); ?>" alt="" class="rounded-circle mr-3" style="width:48px;height:48px;object-fit:cover;">
+                                            <img src="<?= esc($s['foto']); ?>" alt="" class="rounded-circle mr-3" style="width:44px;height:44px;object-fit:cover;flex-shrink:0;">
                                         <?php else : ?>
-                                            <span class="rounded-circle bg-light d-flex align-items-center justify-content-center mr-3" style="width:48px;height:48px;">
+                                            <span class="rounded-circle bg-light d-flex align-items-center justify-content-center mr-3" style="width:44px;height:44px;flex-shrink:0;">
                                                 <i class="material-icons text-muted">person</i>
                                             </span>
                                         <?php endif; ?>
-                                        <div class="flex-grow-1">
-                                            <b><?= esc($s['nama_siswa']); ?></b><br>
+                                        <div class="flex-grow-1" style="min-width:0;">
+                                            <div class="text-truncate"><b><?= esc($s['nama_siswa']); ?></b></div>
                                             <small class="text-muted"><?= labelKelas($s['kelas'] ?? null, $s['jurusan'] ?? null); ?></small>
                                         </div>
-                                        <b class="text-success"><?= esc($s['jam_masuk']); ?></b>
+                                        <span class="text-success d-flex align-items-center ml-2" style="flex-shrink:0;white-space:nowrap;">
+                                            <i class="material-icons mr-1" style="font-size:16px;">schedule</i>
+                                            <b><?= esc($s['jam_masuk']); ?></b>
+                                        </span>
                                     </li>
                                 <?php endforeach; ?>
                             </ul>
                         <?php else : ?>
-                            <h4 class="text-center text-muted py-3">Belum ada siswa yang absen masuk hari ini</h4>
+                            <h4 class="text-center text-muted py-5">Belum ada siswa yang absen masuk hari ini</h4>
                         <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header card-header-danger">
+                        <h4 class="card-title"><b>Siswa Terlambat</b></h4>
+                        <p class="card-category"><?= $dateNow; ?></p>
+                    </div>
+                    <div class="card-body p-0">
+                        <?php if (!empty($siswaTerlambat)) : ?>
+                            <ul class="list-group list-group-flush">
+                                <?php foreach ($siswaTerlambat as $i => $s) : ?>
+                                    <li class="list-group-item d-flex align-items-center">
+                                        <b class="text-muted mr-3" style="width:20px;flex-shrink:0;"><?= $i + 1; ?></b>
+                                        <?php if (!empty($s['foto'])) : ?>
+                                            <img src="<?= esc($s['foto']); ?>" alt="" class="rounded-circle mr-3" style="width:44px;height:44px;object-fit:cover;flex-shrink:0;">
+                                        <?php else : ?>
+                                            <span class="rounded-circle bg-light d-flex align-items-center justify-content-center mr-3" style="width:44px;height:44px;flex-shrink:0;">
+                                                <i class="material-icons text-muted">person</i>
+                                            </span>
+                                        <?php endif; ?>
+                                        <div class="flex-grow-1" style="min-width:0;">
+                                            <div class="text-truncate"><b><?= esc($s['nama_siswa']); ?></b></div>
+                                            <small class="text-muted"><?= labelKelas($s['kelas'] ?? null, $s['jurusan'] ?? null); ?></small>
+                                        </div>
+                                        <span class="text-danger d-flex align-items-center ml-2" style="flex-shrink:0;white-space:nowrap;">
+                                            <i class="material-icons mr-1" style="font-size:16px;">schedule</i>
+                                            <b><?= esc($s['jam_masuk']); ?></b>
+                                        </span>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        <?php else : ?>
+                            <h4 class="text-center text-success py-5">Tidak ada siswa yang terlambat hari ini</h4>
+                        <?php endif; ?>
+                    </div>
+                    <div class="card-footer text-center">
+                        <a href="<?= base_url('admin/absen-siswa/terlambat'); ?>" class="btn btn-danger btn-sm">
+                            Lihat Semua<?= $jumlahTerlambatSiswa > 10 ? " ({$jumlahTerlambatSiswa})" : ''; ?>
+                        </a>
                     </div>
                 </div>
             </div>

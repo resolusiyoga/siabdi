@@ -69,6 +69,7 @@ class Dashboard extends BaseController
       $today = $now->toDateString();
 
       $batasAbsenMasuk = $this->generalSettings->batas_absen_masuk ?? '07:20:00';
+      $siswaTerlambatSemua = $this->presensiSiswaModel->getTerlambatByTanggal($today, $batasAbsenMasuk);
 
       $data = [
          'title' => 'Dashboard',
@@ -92,12 +93,10 @@ class Dashboard extends BaseController
             'alfa' => count($this->presensiSiswaModel->getPresensiByKehadiran('4', $today))
          ],
 
-         'jumlahTerlambatSiswa' => count($this->presensiSiswaModel->getTerlambatByTanggal($today, $batasAbsenMasuk)),
+         'jumlahTerlambatSiswa' => count($siswaTerlambatSemua),
 
-         'siswaTercepat' => array_map(function ($s) {
-            $s['foto'] = (!empty($s['foto']) && is_file(FCPATH . $s['foto'])) ? assetUrl($s['foto']) : null;
-            return $s;
-         }, $this->presensiSiswaModel->getTercepatByTanggal($today, 10)),
+         'siswaTercepat' => $this->petakanFoto($this->presensiSiswaModel->getTercepatByTanggal($today, 10)),
+         'siswaTerlambat' => $this->petakanFoto(array_slice($siswaTerlambatSemua, 0, 10)),
 
          'jumlahKehadiranGuru' => [
             'hadir' => count($this->presensiGuruModel->getPresensiByKehadiran('1', $today)),
@@ -110,5 +109,17 @@ class Dashboard extends BaseController
       ];
 
       return view('admin/dashboard', $data);
+   }
+
+   /**
+    * Ganti path foto siswa jadi URL asset kalau berkasnya ada, selain itu
+    * null supaya tampilan pakai ikon placeholder.
+    */
+   private function petakanFoto(array $daftarSiswa): array
+   {
+      return array_map(function ($s) {
+         $s['foto'] = (!empty($s['foto']) && is_file(FCPATH . $s['foto'])) ? assetUrl($s['foto']) : null;
+         return $s;
+      }, $daftarSiswa);
    }
 }
