@@ -2,168 +2,302 @@
 <?= $this->section('content') ?>
 <?php
 $labelHasil = [
-   'berhasil'         => ['Berhasil', 'success'],
+   'berhasil'         => ['Berhasil', 'ok'],
    'sudah_absen'      => ['Sudah absen', 'info'],
-   'sudah_ada_status' => ['Sudah ada status (izin/sakit/dll)', 'info'],
-   'belum_masuk'      => ['Belum absen masuk', 'warning'],
-   'di_luar_jadwal'   => ['Di luar jadwal', 'warning'],
-   'tidak_terdaftar'  => ['Kartu belum terdaftar', 'danger'],
-   'diproses'         => ['Diproses', 'secondary'],
+   'sudah_ada_status' => ['Sudah ada status', 'info'],
+   'belum_masuk'      => ['Belum absen masuk', 'warn'],
+   'di_luar_jadwal'   => ['Di luar jadwal', 'warn'],
+   'tidak_terdaftar'  => ['Belum terdaftar', 'bad'],
+   'diproses'         => ['Diproses', 'info'],
 ];
 $labelJenis = ['masuk' => 'Masuk', 'dzuhur' => 'Dzuhur', 'ashar' => 'Ashar', 'pulang' => 'Pulang'];
 $namaKelas = fn($r) => trim(($r['kelas'] ?? '') . ' ' . ($r['jurusan'] ?? '')) ?: '-';
 $jam = fn($t) => substr($t, 0, 5);
+$tglJam = fn($t) => $t ? date('d/m H:i', strtotime($t)) : '-';
 ?>
 <style>
-   .nfc-uid { font-family: monospace; font-size: .95em; }
-   .nfc-table td, .nfc-table th { vertical-align: middle; }
-   .nfc-scroll { max-height: 460px; overflow-y: auto; }
-   .nfc-usb { border: 1px dashed #c8d3cc; border-radius: 8px; padding: 10px 12px; }
-   .nfc-usb .material-icons { font-size: 18px; vertical-align: middle; }
-   #uidDaftar.nfc-baru { animation: nfcKedip 1s ease-out; }
-   @keyframes nfcKedip { from { background: #fff3c4; } to { background: transparent; } }
+   .nfc { --hijau: #386C0B; --hijau-tua: #293F14; --hijau-muda: #eef6e7; --garis: #e3e8df; --abu: #6b7468; }
+   .nfc .card { margin-top: 30px; }
+   .nfc .card-header h4 { margin: 0; }
+   .nfc .card-header .card-category { margin: 4px 0 0; }
+   .nfc-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .5px; }
+   .nfc-label { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: .6px; color: var(--abu); margin-bottom: 8px; display: block; }
+   .nfc-langkah { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%;
+      background: var(--hijau); color: #fff; font-size: 12px; font-weight: 500; margin-right: 6px; }
+   .nfc-ikon { font-size: 18px; vertical-align: middle; }
+
+   /* Kotak UID */
+   .nfc-uid-box { border: 2px dashed #c9d6bf; border-radius: 12px; padding: 18px 12px; text-align: center; background: #fafcf8; transition: all .2s; }
+   .nfc-uid-box.ada { border-style: solid; border-color: var(--hijau); background: var(--hijau-muda); }
+   .nfc-uid-box.dipakai { border-style: solid; border-color: #e0a800; background: #fff8e1; }
+   .nfc-uid-box .material-icons { font-size: 40px; color: #b7c4ad; }
+   .nfc-uid-box.ada .material-icons { color: var(--hijau); }
+   .nfc-uid-box.dipakai .material-icons { color: #e0a800; }
+   .nfc-uid-nilai { font-size: 22px; font-weight: 500; color: var(--hijau-tua); margin: 4px 0; word-break: break-all; }
+   .nfc-uid-ket { font-size: 13px; color: var(--abu); }
+   .nfc-uid-ket.peringatan { color: #8a6100; }
+   .nfc-uid-manual { font-size: 12px; margin-top: 8px; }
+   .nfc-uid-manual input { width: 100%; border: 1px solid var(--garis); border-radius: 6px; padding: 6px 8px; font-size: 13px; outline: none; }
+   .nfc-uid-manual input:focus { border-color: var(--hijau); }
+
+   /* USB */
+   .nfc-usb { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+   .nfc-usb .btn { margin: 0; }
+   .nfc-titik { width: 10px; height: 10px; border-radius: 50%; background: #c4c4c4; display: inline-block; flex: none; }
+   .nfc-titik.siap { background: #38A700; box-shadow: 0 0 0 4px rgba(56, 167, 0, .18); }
+   .nfc-titik.proses { background: #f0ad4e; }
+   .nfc-titik.error { background: #e53935; }
+   .nfc-usb-status { font-size: 13px; color: var(--abu); }
+   .nfc-catatan { margin-top: 10px; font-size: 13px; }
+
+   /* Daftar siswa */
+   .nfc-cari { position: relative; }
+   .nfc-cari .material-icons { position: absolute; left: 10px; top: 9px; color: #9aa596; font-size: 20px; }
+   .nfc-cari input { width: 100%; border: 1px solid var(--garis); border-radius: 8px; padding: 9px 10px 9px 38px; font-size: 14px; outline: none; }
+   .nfc-cari input:focus { border-color: var(--hijau); box-shadow: 0 0 0 3px rgba(56, 108, 11, .12); }
+   .nfc-daftar { border: 1px solid var(--garis); border-radius: 8px; margin-top: 8px; height: 300px; overflow-y: auto; }
+   .nfc-grup { position: sticky; top: 0; background: #f4f7f1; font-size: 12px; font-weight: 500; color: var(--hijau-tua); padding: 5px 12px; border-bottom: 1px solid var(--garis); z-index: 1; }
+   .nfc-siswa { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #f1f3ef; font-size: 14px; }
+   .nfc-siswa:hover { background: #f6faf2; }
+   .nfc-siswa.dipilih { background: var(--hijau); color: #fff; }
+   .nfc-siswa.dipilih small { color: #e3f0d6; }
+   .nfc-siswa small { color: var(--abu); flex: none; }
+   .nfc-kosong { padding: 18px; text-align: center; color: var(--abu); font-size: 13px; }
+
+   .nfc-ringkas { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: space-between;
+      background: #f6f8f4; border-radius: 10px; padding: 10px 12px; margin-top: 16px; }
+   .nfc-ringkas-teks { font-size: 14px; color: var(--abu); }
+   .nfc-ringkas-teks b { color: var(--hijau-tua); }
+   .nfc-ringkas .btn { margin: 0; }
+
+   /* Tabel */
+   .nfc-tabel { width: 100%; font-size: 14px; border-collapse: collapse; }
+   .nfc-tabel th { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: .5px; color: var(--abu);
+      border-bottom: 1px solid var(--garis); padding: 8px; position: sticky; top: 0; background: #fff; z-index: 1; }
+   .nfc-tabel td { padding: 9px 8px; border-bottom: 1px solid #f1f3ef; vertical-align: middle; }
+   .nfc-tabel tr:last-child td { border-bottom: 0; }
+   .nfc-gulir { max-height: 380px; overflow-y: auto; }
+   .nfc-badge { display: inline-block; font-size: 12px; padding: 2px 8px; border-radius: 10px; font-weight: 500; white-space: nowrap; }
+   .nfc-badge.ok { background: #e3f4d8; color: #2c5a08; }
+   .nfc-badge.info { background: #e8eef7; color: #2f4b73; }
+   .nfc-badge.warn { background: #fff1d6; color: #7a5200; }
+   .nfc-badge.bad { background: #fde4e4; color: #9b1c1c; }
+   .nfc-aksi { white-space: nowrap; }
+   .nfc-aksi .btn { margin: 0 0 0 4px; padding: 5px 10px; font-size: 12px; }
+   .nfc-filter { width: 100%; border: 1px solid var(--garis); border-radius: 8px; padding: 8px 10px; font-size: 14px; margin-bottom: 8px; outline: none; }
+   .nfc-filter:focus { border-color: var(--hijau); }
+
+   /* Status & jadwal */
+   .nfc-stat { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+   .nfc-api { display: flex; gap: 6px; align-items: center; background: #f6f8f4; border-radius: 8px; padding: 8px 10px; font-size: 13px; word-break: break-all; }
+   .nfc-api .btn { margin: 0; padding: 4px 8px; flex: none; }
+   .nfc-jadwal { width: 100%; }
+   .nfc-jadwal td { padding: 6px 3px; vertical-align: middle; }
+   .nfc-jadwal td:first-child { font-weight: 500; color: var(--hijau-tua); width: 70px; }
+   .nfc-jadwal .sd { color: var(--abu); font-size: 12px; text-align: center; width: 40px; }
+   .nfc-jadwal input[type=time] { border: 1px solid var(--garis); border-radius: 6px; padding: 5px 6px; width: 100%; font-size: 14px; outline: none; }
+   .nfc-jadwal input[type=time]:focus { border-color: var(--hijau); }
+   .nfc-kecil { font-size: 12px; color: var(--abu); line-height: 1.5; }
 </style>
-<div class="content">
+
+<div class="content nfc">
    <div class="container-fluid">
       <?= view('admin/_messages'); ?>
 
       <?php if (!$apiAktif) : ?>
          <div class="alert alert-warning">
             <b>API reader belum aktif.</b> Tambahkan <code>READER_API_KEY = &lt;kunci acak&gt;</code> di file <code>.env</code> server,
-            lalu isi kunci yang sama di menu Pengaturan web reader.
+            lalu isi kunci yang sama di Pengaturan web reader.
          </div>
       <?php endif; ?>
 
       <div class="row">
-         <!-- Kartu baru + form daftar -->
-         <div class="col-12 col-xl-7">
+         <!-- ================= Daftarkan kartu ================= -->
+         <div class="col-12 col-xl-8">
             <div class="card">
-               <div class="card-header card-header-danger">
-                  <h4 class="card-title"><b>Kartu NFC baru</b></h4>
-                  <p class="card-category">Kartu yang di-tap di reader tapi belum terdaftar ke siswa</p>
+               <div class="card-header card-header-primary">
+                  <h4 class="card-title"><b>Daftarkan kartu NFC</b></h4>
+                  <p class="card-category">Hubungkan reader lewat USB, tap kartu, pilih siswa, lalu simpan.</p>
                </div>
                <div class="card-body">
-                  <div class="nfc-usb mb-3">
-                     <button type="button" class="btn btn-sm btn-primary" id="btnUsb">
-                        <i class="material-icons">usb</i> <span id="btnUsbTeks">Hubungkan reader USB</span>
-                     </button>
-                     <span id="usbStatus" class="ml-2 text-muted">Daftar kartu langsung: colokkan reader ke laptop ini lewat USB, lalu tap kartu.</span>
-                     <div id="usbInfo" class="mt-2"></div>
-                  </div>
-
-                  <form action="<?= base_url('admin/reader-nfc/daftar'); ?>" method="post" id="formDaftar" class="mb-3">
+                  <form action="<?= base_url('admin/reader-nfc/daftar'); ?>" method="post" id="formDaftar">
                      <?= csrf_field() ?>
+                     <input type="hidden" name="uid" id="uidDaftar">
+                     <input type="hidden" name="id_siswa" id="idSiswa">
+
                      <div class="row">
-                        <div class="col-md-4">
-                           <div class="form-group">
-                              <label>UID kartu</label>
-                              <input type="text" name="uid" id="uidDaftar" class="form-control nfc-uid" placeholder="Klik kartu di bawah" required>
+                        <!-- Langkah 1: kartu -->
+                        <div class="col-md-5">
+                           <span class="nfc-label"><span class="nfc-langkah">1</span>Kartu</span>
+
+                           <div class="nfc-usb">
+                              <button type="button" class="btn btn-primary btn-sm" id="btnUsb">
+                                 <i class="material-icons nfc-ikon">usb</i> <span id="btnUsbTeks">Hubungkan reader USB</span>
+                              </button>
+                              <span class="nfc-titik" id="usbTitik"></span>
+                              <span class="nfc-usb-status" id="usbStatus">Belum terhubung</span>
                            </div>
+
+                           <div class="nfc-uid-box" id="uidBox">
+                              <i class="material-icons">contactless</i>
+                              <div class="nfc-uid-nilai nfc-mono" id="uidTampil">— — — —</div>
+                              <div class="nfc-uid-ket" id="uidKet">Tempelkan kartu ke reader, atau pilih dari "Kartu baru" di bawah.</div>
+                           </div>
+                           <div class="nfc-uid-manual">
+                              <a href="javascript:void(0)" id="lnkManual">Ketik UID manual</a>
+                              <div id="boxManual" style="display:none" class="mt-1">
+                                 <input type="text" id="uidManual" class="nfc-mono" placeholder="mis. DE AD BE EF" autocomplete="off">
+                              </div>
+                           </div>
+                           <div id="usbInfo"></div>
                         </div>
-                        <div class="col-md-8">
-                           <div class="form-group">
-                              <label>Siswa (belum punya kartu: <?= count($siswaTanpaKartu); ?>)</label>
-                              <input type="text" id="cariSiswa" class="form-control mb-1" placeholder="Cari nama / NIS / kelas...">
-                              <select name="id_siswa" id="pilihSiswa" class="form-control" size="6" required>
-                                 <?php $grup = null; ?>
-                                 <?php foreach ($siswaTanpaKartu as $s) : ?>
-                                    <?php $k = $namaKelas($s); ?>
-                                    <?php if ($k !== $grup) : ?>
-                                       <?php if ($grup !== null) echo '</optgroup>'; ?>
-                                       <optgroup label="<?= esc($k); ?>">
-                                       <?php $grup = $k; ?>
-                                    <?php endif; ?>
-                                    <option value="<?= $s['id_siswa']; ?>" data-cari="<?= esc(strtolower($s['nama_siswa'] . ' ' . $s['nis'] . ' ' . $k)); ?>">
-                                       <?= esc($s['nama_siswa']); ?> (<?= esc($s['nis']); ?>)
-                                    </option>
-                                 <?php endforeach; ?>
-                                 <?php if ($grup !== null) echo '</optgroup>'; ?>
-                              </select>
+
+                        <!-- Langkah 2: siswa -->
+                        <div class="col-md-7 mt-4 mt-md-0">
+                           <span class="nfc-label"><span class="nfc-langkah">2</span>Siswa
+                              <span style="text-transform:none;letter-spacing:0">(<?= count($siswaTanpaKartu); ?> belum punya kartu)</span></span>
+                           <div class="nfc-cari">
+                              <i class="material-icons">search</i>
+                              <input type="text" id="cariSiswa" placeholder="Cari nama, NIS, atau kelas..." autocomplete="off">
+                           </div>
+                           <div class="nfc-daftar" id="daftarSiswa">
+                              <?php if (empty($siswaTanpaKartu)) : ?>
+                                 <div class="nfc-kosong">Semua siswa sudah punya kartu.</div>
+                              <?php endif; ?>
+                              <?php $grup = null; ?>
+                              <?php foreach ($siswaTanpaKartu as $s) : ?>
+                                 <?php $k = $namaKelas($s); ?>
+                                 <?php if ($k !== $grup) : $grup = $k; ?>
+                                    <div class="nfc-grup" data-grup="<?= esc($k); ?>"><?= esc($k); ?></div>
+                                 <?php endif; ?>
+                                 <div class="nfc-siswa" data-id="<?= $s['id_siswa']; ?>" data-nama="<?= esc($s['nama_siswa']); ?>"
+                                    data-kelas="<?= esc($k); ?>" data-cari="<?= esc(strtolower($s['nama_siswa'] . ' ' . $s['nis'] . ' ' . $k)); ?>">
+                                    <span><?= esc($s['nama_siswa']); ?></span>
+                                    <small><?= esc($s['nis']); ?></small>
+                                 </div>
+                              <?php endforeach; ?>
+                              <div class="nfc-kosong" id="siswaTidakAda" style="display:none">Tidak ada siswa yang cocok.</div>
                            </div>
                         </div>
                      </div>
-                     <button type="submit" class="btn btn-danger">Daftarkan kartu</button>
-                  </form>
 
-                  <div class="nfc-scroll">
-                     <table class="table table-hover nfc-table">
-                        <thead class="text-danger">
-                           <tr><th>UID</th><th>Tap terakhir</th><th>Reader</th><th>Tap</th><th></th></tr>
-                        </thead>
-                        <tbody>
-                           <?php if (empty($kartuBaru)) : ?>
-                              <tr><td colspan="5" class="text-center text-muted">Tidak ada kartu baru. Tap kartu baru di reader, setelah reader online kartu muncul di sini.</td></tr>
-                           <?php endif; ?>
-                           <?php foreach ($kartuBaru as $k) : ?>
-                              <tr>
-                                 <td><a href="javascript:void(0)" class="nfc-uid pilih-uid" data-uid="<?= esc($k['uid']); ?>"><?= esc($k['uid']); ?></a></td>
-                                 <td><?= esc($k['terakhir']); ?></td>
-                                 <td><?= esc($k['perangkat']); ?></td>
-                                 <td><?= (int) $k['jumlah']; ?></td>
-                                 <td class="text-right">
-                                    <button type="button" class="btn btn-sm btn-danger pilih-uid" data-uid="<?= esc($k['uid']); ?>">Pilih</button>
-                                    <form action="<?= base_url('admin/reader-nfc/abaikan'); ?>" method="post" class="d-inline">
-                                       <?= csrf_field() ?>
-                                       <input type="hidden" name="uid" value="<?= esc($k['uid']); ?>">
-                                       <button type="submit" class="btn btn-sm btn-secondary">Abaikan</button>
-                                    </form>
-                                 </td>
-                              </tr>
-                           <?php endforeach; ?>
-                        </tbody>
-                     </table>
-                  </div>
+                     <div class="nfc-ringkas">
+                        <span class="nfc-ringkas-teks" id="ringkasan">Tap kartu dan pilih siswa untuk mendaftarkan.</span>
+                        <button type="submit" class="btn btn-primary" id="btnDaftar" disabled>
+                           <i class="material-icons nfc-ikon">how_to_reg</i> Daftarkan kartu
+                        </button>
+                     </div>
+                  </form>
+               </div>
+            </div>
+
+            <!-- ================= Kartu baru ================= -->
+            <div class="card">
+               <div class="card-header card-header-primary">
+                  <h4 class="card-title"><b>Kartu baru</b> <small>(<?= count($kartuBaru); ?>)</small></h4>
+                  <p class="card-category">Kartu yang di-tap di reader absensi tapi belum terdaftar. Klik "Pilih" untuk mendaftarkannya.</p>
+               </div>
+               <div class="card-body">
+                  <?php if (empty($kartuBaru)) : ?>
+                     <div class="nfc-kosong">Belum ada kartu baru.</div>
+                  <?php else : ?>
+                     <div class="nfc-gulir">
+                        <table class="nfc-tabel">
+                           <thead><tr><th>UID</th><th>Tap terakhir</th><th>Reader</th><th>Tap</th><th></th></tr></thead>
+                           <tbody>
+                              <?php foreach ($kartuBaru as $k) : ?>
+                                 <tr>
+                                    <td class="nfc-mono"><?= esc($k['uid']); ?></td>
+                                    <td><?= esc($tglJam($k['terakhir'])); ?></td>
+                                    <td><?= esc($k['perangkat']); ?></td>
+                                    <td><?= (int) $k['jumlah']; ?>×</td>
+                                    <td class="text-right nfc-aksi">
+                                       <button type="button" class="btn btn-primary pilih-uid" data-uid="<?= esc($k['uid']); ?>">Pilih</button>
+                                       <form action="<?= base_url('admin/reader-nfc/abaikan'); ?>" method="post" class="d-inline">
+                                          <?= csrf_field() ?>
+                                          <input type="hidden" name="uid" value="<?= esc($k['uid']); ?>">
+                                          <button type="submit" class="btn btn-default" title="Hapus dari daftar kartu baru">Abaikan</button>
+                                       </form>
+                                    </td>
+                                 </tr>
+                              <?php endforeach; ?>
+                           </tbody>
+                        </table>
+                     </div>
+                  <?php endif; ?>
                </div>
             </div>
          </div>
 
-         <!-- Status + jadwal -->
-         <div class="col-12 col-xl-5">
+         <!-- ================= Kolom kanan ================= -->
+         <div class="col-12 col-xl-4">
             <div class="card">
                <div class="card-header card-header-primary">
                   <h4 class="card-title"><b>Status reader</b></h4>
                </div>
                <div class="card-body">
-                  <p class="mb-1">API: <?= $apiAktif ? '<span class="text-success"><b>Aktif</b></span>' : '<span class="text-danger"><b>Nonaktif</b></span>'; ?></p>
-                  <p>Alamat API untuk reader: <code><?= esc($apiUrl); ?></code></p>
-                  <table class="table table-sm nfc-table">
-                     <thead><tr><th>Reader</th><th>Terakhir kirim data</th><th>Total tap</th></tr></thead>
-                     <tbody>
-                        <?php if (empty($perangkat)) : ?>
-                           <tr><td colspan="3" class="text-muted">Belum ada reader yang mengirim data.</td></tr>
-                        <?php endif; ?>
-                        <?php foreach ($perangkat as $p) : ?>
-                           <tr><td><?= esc($p['perangkat']); ?></td><td><?= esc($p['terakhir']); ?></td><td><?= (int) $p['jumlah']; ?></td></tr>
-                        <?php endforeach; ?>
-                     </tbody>
-                  </table>
+                  <div class="nfc-stat">
+                     <span class="nfc-titik <?= $apiAktif ? 'siap' : 'error'; ?>"></span>
+                     <span>API <?= $apiAktif ? '<b>aktif</b>' : '<b class="text-danger">nonaktif</b>'; ?></span>
+                  </div>
+                  <span class="nfc-label">Alamat API (isi di web reader)</span>
+                  <div class="nfc-api">
+                     <span class="nfc-mono flex-grow-1" id="apiUrl"><?= esc($apiUrl); ?></span>
+                     <button type="button" class="btn btn-sm btn-default" id="btnSalin" title="Salin alamat"><i class="material-icons" style="font-size:16px">content_copy</i></button>
+                  </div>
+
+                  <span class="nfc-label mt-4">Reader yang mengirim data</span>
+                  <?php if (empty($perangkat)) : ?>
+                     <div class="nfc-kecil">Belum ada reader yang mengirim data.</div>
+                  <?php else : ?>
+                     <table class="nfc-tabel">
+                        <tbody>
+                           <?php foreach ($perangkat as $p) : ?>
+                              <tr>
+                                 <td><b><?= esc($p['perangkat']); ?></b><br><span class="nfc-kecil"><?= (int) $p['jumlah']; ?> tap</span></td>
+                                 <td class="text-right nfc-kecil">terakhir<br><?= esc($tglJam($p['terakhir'])); ?></td>
+                              </tr>
+                           <?php endforeach; ?>
+                        </tbody>
+                     </table>
+                  <?php endif; ?>
                </div>
             </div>
 
             <div class="card">
                <div class="card-header card-header-primary">
-                  <h4 class="card-title"><b>Jadwal absen otomatis</b></h4>
-                  <p class="card-category">Untuk reader dengan mode "Otomatis". Diperiksa berurutan: masuk → dzuhur → ashar → pulang.</p>
+                  <h4 class="card-title"><b>Jadwal mode otomatis</b></h4>
+                  <p class="card-category">Menentukan jenis absen dari jam tap.</p>
                </div>
                <div class="card-body">
                   <form action="<?= base_url('admin/reader-nfc/jadwal'); ?>" method="post">
                      <?= csrf_field() ?>
-                     <div class="row">
-                        <div class="col-12"><div class="form-group"><label>Masuk: sampai jam</label>
-                           <input type="time" name="nfc_akhir_masuk" class="form-control" value="<?= $jam($jadwal['akhir_masuk']); ?>" required></div></div>
-                        <div class="col-6"><div class="form-group"><label>Dzuhur: mulai</label>
-                           <input type="time" name="nfc_mulai_dzuhur" class="form-control" value="<?= $jam($jadwal['mulai_dzuhur']); ?>" required></div></div>
-                        <div class="col-6"><div class="form-group"><label>sampai</label>
-                           <input type="time" name="nfc_akhir_dzuhur" class="form-control" value="<?= $jam($jadwal['akhir_dzuhur']); ?>" required></div></div>
-                        <div class="col-6"><div class="form-group"><label>Ashar: mulai</label>
-                           <input type="time" name="nfc_mulai_ashar" class="form-control" value="<?= $jam($jadwal['mulai_ashar']); ?>" required></div></div>
-                        <div class="col-6"><div class="form-group"><label>sampai</label>
-                           <input type="time" name="nfc_akhir_ashar" class="form-control" value="<?= $jam($jadwal['akhir_ashar']); ?>" required></div></div>
-                        <div class="col-12"><div class="form-group"><label>Pulang: mulai jam</label>
-                           <input type="time" name="nfc_mulai_pulang" class="form-control" value="<?= $jam($jadwal['mulai_pulang']); ?>" required></div></div>
-                     </div>
-                     <small class="text-muted d-block mb-2">Tap di luar semua rentang dicatat di log sebagai "Di luar jadwal" dan tidak mengubah absensi.
-                        Batas terlambat tetap memakai "Batas Waktu Absen Masuk" di menu Pengaturan.</small>
+                     <table class="nfc-jadwal">
+                        <tr>
+                           <td>Masuk</td>
+                           <td class="sd">s/d</td>
+                           <td colspan="3"><input type="time" name="nfc_akhir_masuk" value="<?= $jam($jadwal['akhir_masuk']); ?>" required></td>
+                        </tr>
+                        <tr>
+                           <td>Dzuhur</td>
+                           <td colspan="2"><input type="time" name="nfc_mulai_dzuhur" value="<?= $jam($jadwal['mulai_dzuhur']); ?>" required></td>
+                           <td class="sd">s/d</td>
+                           <td><input type="time" name="nfc_akhir_dzuhur" value="<?= $jam($jadwal['akhir_dzuhur']); ?>" required></td>
+                        </tr>
+                        <tr>
+                           <td>Ashar</td>
+                           <td colspan="2"><input type="time" name="nfc_mulai_ashar" value="<?= $jam($jadwal['mulai_ashar']); ?>" required></td>
+                           <td class="sd">s/d</td>
+                           <td><input type="time" name="nfc_akhir_ashar" value="<?= $jam($jadwal['akhir_ashar']); ?>" required></td>
+                        </tr>
+                        <tr>
+                           <td>Pulang</td>
+                           <td class="sd">mulai</td>
+                           <td colspan="3"><input type="time" name="nfc_mulai_pulang" value="<?= $jam($jadwal['mulai_pulang']); ?>" required></td>
+                        </tr>
+                     </table>
+                     <p class="nfc-kecil mt-3 mb-3">Diperiksa berurutan: masuk → dzuhur → ashar → pulang. Tap di luar semua rentang dicatat
+                        "Di luar jadwal" tanpa mengubah absensi. Batas terlambat tetap mengikuti menu Pengaturan.</p>
                      <button type="submit" class="btn btn-primary btn-block">Simpan jadwal</button>
                   </form>
                </div>
@@ -172,28 +306,32 @@ $jam = fn($t) => substr($t, 0, 5);
       </div>
 
       <div class="row">
-         <!-- Kartu terdaftar -->
+         <!-- ================= Kartu terdaftar ================= -->
          <div class="col-12 col-xl-6">
             <div class="card">
                <div class="card-header card-header-primary">
-                  <h4 class="card-title"><b>Kartu terdaftar (<?= count($siswaBerkartu); ?>)</b></h4>
+                  <h4 class="card-title"><b>Kartu terdaftar</b> <small>(<?= count($siswaBerkartu); ?>)</small></h4>
                </div>
                <div class="card-body">
-                  <input type="text" id="cariBerkartu" class="form-control mb-2" placeholder="Cari nama / kelas / UID...">
-                  <div class="nfc-scroll">
-                     <table class="table table-hover nfc-table" id="tabelBerkartu">
-                        <thead class="text-primary"><tr><th>Nama</th><th>Kelas</th><th>UID</th><th></th></tr></thead>
+                  <input type="text" id="cariBerkartu" class="nfc-filter" placeholder="Cari nama, kelas, atau UID..." autocomplete="off">
+                  <div class="nfc-gulir">
+                     <table class="nfc-tabel" id="tabelBerkartu">
+                        <thead><tr><th>Nama</th><th>Kelas</th><th>UID</th><th></th></tr></thead>
                         <tbody>
+                           <?php if (empty($siswaBerkartu)) : ?>
+                              <tr><td colspan="4" class="nfc-kosong">Belum ada kartu yang terdaftar.</td></tr>
+                           <?php endif; ?>
                            <?php foreach ($siswaBerkartu as $s) : ?>
                               <tr data-cari="<?= esc(strtolower($s['nama_siswa'] . ' ' . $namaKelas($s) . ' ' . $s['uid_kartu'])); ?>">
                                  <td><?= esc($s['nama_siswa']); ?></td>
                                  <td><?= esc($namaKelas($s)); ?></td>
-                                 <td class="nfc-uid"><?= esc($s['uid_kartu']); ?></td>
-                                 <td class="text-right">
-                                    <form action="<?= base_url('admin/reader-nfc/lepas'); ?>" method="post" onsubmit="return confirm(this.dataset.konfirmasi)" data-konfirmasi="<?= esc('Lepas kartu dari ' . $s['nama_siswa'] . '?'); ?>">
+                                 <td class="nfc-mono" style="font-size:13px"><?= esc($s['uid_kartu']); ?></td>
+                                 <td class="text-right nfc-aksi">
+                                    <form action="<?= base_url('admin/reader-nfc/lepas'); ?>" method="post" onsubmit="return confirm(this.dataset.konfirmasi)"
+                                       data-konfirmasi="<?= esc('Lepas kartu dari ' . $s['nama_siswa'] . '? Kartu ini tidak bisa dipakai absen lagi.'); ?>">
                                        <?= csrf_field() ?>
                                        <input type="hidden" name="id_siswa" value="<?= $s['id_siswa']; ?>">
-                                       <button type="submit" class="btn btn-sm btn-secondary">Lepas</button>
+                                       <button type="submit" class="btn btn-default">Lepas</button>
                                     </form>
                                  </td>
                               </tr>
@@ -205,32 +343,36 @@ $jam = fn($t) => substr($t, 0, 5);
             </div>
          </div>
 
-         <!-- Log tap -->
+         <!-- ================= Log tap ================= -->
          <div class="col-12 col-xl-6">
             <div class="card">
                <div class="card-header card-header-primary">
                   <h4 class="card-title"><b>Log tap terbaru</b></h4>
-                  <p class="card-category">100 tap terakhir yang diterima dari reader</p>
+                  <p class="card-category">100 tap terakhir dari reader</p>
                </div>
-               <div class="card-body nfc-scroll">
-                  <table class="table table-sm nfc-table">
-                     <thead class="text-primary"><tr><th>Waktu tap</th><th>Siswa / UID</th><th>Jenis</th><th>Hasil</th><th>Reader</th></tr></thead>
-                     <tbody>
-                        <?php if (empty($log)) : ?>
-                           <tr><td colspan="5" class="text-muted">Belum ada data.</td></tr>
-                        <?php endif; ?>
-                        <?php foreach ($log as $l) : ?>
-                           <?php [$teks, $warna] = $labelHasil[$l['hasil']] ?? [$l['hasil'], 'secondary']; ?>
-                           <tr>
-                              <td><?= esc(substr($l['waktu'], 0, 16)); ?></td>
-                              <td><?= $l['nama_siswa'] ? esc($l['nama_siswa']) : '<span class="nfc-uid">' . esc($l['uid']) . '</span>'; ?></td>
-                              <td><?= esc($labelJenis[$l['jenis']] ?? '-'); ?><?= $l['mode'] !== 'otomatis' ? ' <small class="text-muted">(mode ' . esc($l['mode']) . ')</small>' : ''; ?></td>
-                              <td><span class="badge badge-<?= $warna; ?>"><?= esc($teks); ?></span></td>
-                              <td><?= esc($l['perangkat']); ?></td>
-                           </tr>
-                        <?php endforeach; ?>
-                     </tbody>
-                  </table>
+               <div class="card-body">
+                  <div class="nfc-gulir">
+                     <table class="nfc-tabel">
+                        <thead><tr><th>Waktu</th><th>Siswa / UID</th><th>Jenis</th><th>Hasil</th></tr></thead>
+                        <tbody>
+                           <?php if (empty($log)) : ?>
+                              <tr><td colspan="4" class="nfc-kosong">Belum ada data.</td></tr>
+                           <?php endif; ?>
+                           <?php foreach ($log as $l) : ?>
+                              <?php [$teks, $warna] = $labelHasil[$l['hasil']] ?? [$l['hasil'], 'info']; ?>
+                              <tr>
+                                 <td style="white-space:nowrap"><?= esc($tglJam($l['waktu'])); ?></td>
+                                 <td>
+                                    <?= $l['nama_siswa'] ? esc($l['nama_siswa']) : '<span class="nfc-mono" style="font-size:13px">' . esc($l['uid']) . '</span>'; ?>
+                                    <div class="nfc-kecil"><?= esc($l['perangkat']); ?><?= $l['mode'] !== 'otomatis' ? ' · mode ' . esc($l['mode']) : ''; ?></div>
+                                 </td>
+                                 <td><?= esc($labelJenis[$l['jenis']] ?? '-'); ?></td>
+                                 <td><span class="nfc-badge <?= $warna; ?>"><?= esc($teks); ?></span></td>
+                              </tr>
+                           <?php endforeach; ?>
+                        </tbody>
+                     </table>
+                  </div>
                </div>
             </div>
          </div>
@@ -239,19 +381,76 @@ $jam = fn($t) => substr($t, 0, 5);
 </div>
 
 <script>
-   /*
-    * Daftar kartu lewat reader USB (Web Serial, Chrome/Edge desktop).
-    * Firmware reader V1.4+: perintah "daftar" membuat tap tidak dicatat
-    * sebagai absen dan UID dikirim sebagai baris "UID:DE AD BE EF".
-    * Izin port diingat browser, jadi setelah form dikirim (halaman
-    * dimuat ulang) reader tersambung kembali otomatis.
-    */
    const kartuTerdaftar = <?= json_encode(array_column($siswaBerkartu, 'nama_siswa', 'uid_kartu'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
-   const usb = { port: null, reader: null, writer: null, pipa: null, aktif: false };
    const escHtml = (t) => $('<div>').text(t).html();
+   const POLA_UID = /^[0-9A-F]{2}( [0-9A-F]{2}){3,9}$/;
 
-   function usbStatus(teks, warna) {
-      $('#usbStatus').attr('class', 'ml-2 ' + (warna ? 'text-' + warna : 'text-muted')).text(teks);
+   /* ---------- Form daftar: kartu + siswa ---------- */
+   const pilihan = { uid: '', id: '', nama: '', kelas: '' };
+
+   function normalisasiUid(teks) {
+      const hex = String(teks).toUpperCase().replace(/[^0-9A-F]/g, '');
+      return (hex.match(/.{1,2}/g) || []).join(' ');
+   }
+
+   function setUid(uid) {
+      uid = normalisasiUid(uid);
+      const valid = POLA_UID.test(uid);
+      pilihan.uid = valid ? uid : '';
+      $('#uidDaftar').val(pilihan.uid);
+      const box = $('#uidBox').removeClass('ada dipakai');
+      if (!valid) {
+         $('#uidTampil').text('— — — —');
+         $('#uidKet').removeClass('peringatan').text('Tempelkan kartu ke reader, atau pilih dari "Kartu baru" di bawah.');
+      } else if (kartuTerdaftar[uid]) {
+         box.addClass('dipakai');
+         $('#uidTampil').text(uid);
+         $('#uidKet').addClass('peringatan').html('Sudah terdaftar ke <b>' + escHtml(kartuTerdaftar[uid]) + '</b>. Lepas dulu jika ingin dipindahkan.');
+      } else {
+         box.addClass('ada');
+         $('#uidTampil').text(uid);
+         $('#uidKet').removeClass('peringatan').text('Kartu siap didaftarkan.');
+         if (!pilihan.id) $('#cariSiswa').focus();
+      }
+      perbaruiRingkasan();
+   }
+
+   function pilihSiswa(el) {
+      $('.nfc-siswa').removeClass('dipilih');
+      const $el = $(el).addClass('dipilih');
+      pilihan.id = String($el.data('id'));
+      pilihan.nama = $el.data('nama');
+      pilihan.kelas = $el.data('kelas');
+      $('#idSiswa').val(pilihan.id);
+      perbaruiRingkasan();
+   }
+
+   function perbaruiRingkasan() {
+      const siap = pilihan.uid && pilihan.id && !kartuTerdaftar[pilihan.uid];
+      $('#btnDaftar').prop('disabled', !siap);
+      let teks;
+      if (siap) teks = 'Kartu <b class="nfc-mono">' + pilihan.uid + '</b> → <b>' + escHtml(pilihan.nama) + '</b> (' + escHtml(pilihan.kelas) + ')';
+      else if (!pilihan.uid && !pilihan.id) teks = 'Tap kartu dan pilih siswa untuk mendaftarkan.';
+      else if (!pilihan.uid) teks = 'Siswa: <b>' + escHtml(pilihan.nama) + '</b>. Sekarang tap kartunya.';
+      else if (kartuTerdaftar[pilihan.uid]) teks = 'Kartu ini sudah dipakai siswa lain. Tap kartu lain.';
+      else teks = 'Kartu <b class="nfc-mono">' + pilihan.uid + '</b> terbaca. Sekarang pilih siswanya.';
+      $('#ringkasan').html(teks);
+   }
+
+   /* ---------- Reader USB (Web Serial, firmware V1.4+) ----------
+    * Perintah "daftar" membuat tap tidak dicatat sebagai absen dan UID dikirim
+    * sebagai baris "UID:DE AD BE EF". Izin port diingat browser, jadi setelah
+    * form dikirim (halaman dimuat ulang) reader tersambung kembali otomatis.
+    */
+   const usb = { port: null, reader: null, writer: null, pipa: null, aktif: false, siap: false, terakhir: [] };
+
+   function usbStatus(teks, keadaan) {
+      $('#usbStatus').text(teks);
+      $('#usbTitik').attr('class', 'nfc-titik' + (keadaan ? ' ' + keadaan : ''));
+   }
+
+   function usbCatatan(html, jenis) {
+      $('#usbInfo').html(html ? '<div class="alert alert-' + jenis + ' nfc-catatan mb-0">' + html + '</div>' : '');
    }
 
    async function usbKirim(perintah) {
@@ -265,10 +464,13 @@ $jam = fn($t) => substr($t, 0, 5);
       try { await port.setSignals({ dataTerminalReady: false, requestToSend: false }); } catch (e) {}
       usb.writer = port.writable.getWriter();
       usb.aktif = true;
+      usb.siap = false;
+      usb.terakhir = [];
       sessionStorage.setItem('nfcUsb', '1');
-      $('#btnUsbTeks').text('Putuskan reader USB');
-      usbStatus('Terhubung, menyiapkan mode daftar...', 'info');
+      $('#btnUsbTeks').text('Putuskan');
+      usbStatus('Menyiapkan reader...', 'proses');
       setTimeout(() => usbKirim('daftar'), 1500);
+      setTimeout(usbCekBalasan, 6000);
       usbBaca();
    }
 
@@ -289,33 +491,41 @@ $jam = fn($t) => substr($t, 0, 5);
             }
          }
       } catch (e) {
-         if (usb.aktif) usbStatus('Koneksi USB terputus. Cabut-colok kabel lalu hubungkan lagi.', 'danger');
+         if (usb.aktif) usbStatus('Koneksi terputus, cabut-colok kabel lalu hubungkan lagi', 'error');
       }
+   }
+
+   // Reader tidak membalas "MODE:DAFTAR": tampilkan data terakhir supaya penyebabnya terlihat
+   function usbCekBalasan() {
+      if (!usb.aktif || usb.siap) return;
+      usbKirim('daftar');
+      const diterima = usb.terakhir.length
+         ? '<pre class="mb-1 mt-1" style="white-space:pre-wrap;font-size:11px">' + escHtml(usb.terakhir.join('\n')) + '</pre>'
+         : ' Tidak ada data dari port ini. ';
+      usbCatatan('<b>Reader belum merespons.</b>' + diterima +
+         'Pastikan firmware reader minimal V1.4, port yang dipilih adalah ESP32 (usbserial / CP210x / CH340), dan Serial Monitor Arduino tertutup.', 'warning');
+      usbStatus('Belum ada balasan, mencoba lagi...', 'proses');
+      setTimeout(usbCekBalasan, 6000);
    }
 
    function usbBaris(baris) {
-      if (baris.startsWith('STATUS:SIAP')) {
+      if (baris) {
+         usb.terakhir.push(baris);
+         if (usb.terakhir.length > 8) usb.terakhir.shift();
+      }
+      if (baris.startsWith('STATUS:PN532_ERROR')) {
+         usb.siap = true; // reader menjawab, masalahnya di modul PN532
+         usbCatatan('<b>Modul PN532 tidak terdeteksi.</b> Periksa kabel & saklar DIP PN532, lalu cabut-colok daya. Detail ada di Serial Monitor.', 'danger');
+         usbStatus('PN532 bermasalah', 'error');
+      } else if (baris.startsWith('STATUS:SIAP')) {
+         usbCatatan('');
          usbKirim('daftar'); // reader baru menyala / restart
       } else if (baris.startsWith('MODE:DAFTAR')) {
-         usbStatus('Siap: tempelkan kartu ke reader', 'success');
+         usb.siap = true;
+         usbCatatan('');
+         usbStatus('Siap, tempelkan kartu', 'siap');
       } else if (baris.startsWith('UID:')) {
-         usbUid(baris.slice(4).trim().toUpperCase());
-      }
-   }
-
-   function usbUid(uid) {
-      if (!/^[0-9A-F]{2}( [0-9A-F]{2}){3,9}$/.test(uid)) return;
-      $('#uidDaftar').val(uid).removeClass('nfc-baru');
-      void document.getElementById('uidDaftar').offsetWidth;
-      $('#uidDaftar').addClass('nfc-baru');
-
-      if (kartuTerdaftar[uid]) {
-         $('#usbInfo').html('<div class="alert alert-warning mb-0">Kartu <b class="nfc-uid">' + uid +
-            '</b> sudah terdaftar ke <b>' + escHtml(kartuTerdaftar[uid]) + '</b>. Lepas dulu kartunya jika ingin dipindahkan.</div>');
-      } else {
-         $('#usbInfo').html('<div class="alert alert-success mb-0">Kartu <b class="nfc-uid">' + uid +
-            '</b> terbaca. Cari & pilih siswa, lalu klik <b>Daftarkan kartu</b>.</div>');
-         $('#cariSiswa').focus().select();
+         setUid(baris.slice(4).trim());
       }
    }
 
@@ -329,20 +539,77 @@ $jam = fn($t) => substr($t, 0, 5);
       try { await usb.port.close(); } catch (e) {}
       usb.port = usb.reader = usb.writer = usb.pipa = null;
       $('#btnUsbTeks').text('Hubungkan reader USB');
-      usbStatus('Reader USB diputus. Reader kembali ke mode absen biasa.');
+      usbStatus('Belum terhubung');
+      usbCatatan('');
    }
 
    $(function() {
+      /* pilih siswa */
+      $('#daftarSiswa').on('click', '.nfc-siswa', function() { pilihSiswa(this); });
+
+      $('#cariSiswa').on('input', function() {
+         const q = this.value.toLowerCase().trim();
+         const terlihatPerKelas = {};
+         let ada = 0;
+         $('.nfc-siswa').each(function() {
+            const cocok = q === '' || String($(this).data('cari')).includes(q);
+            this.style.display = cocok ? '' : 'none';
+            if (cocok) {
+               ada++;
+               terlihatPerKelas[$(this).data('kelas')] = true;
+            }
+         });
+         $('.nfc-grup').each(function() {
+            this.style.display = terlihatPerKelas[$(this).data('grup')] ? '' : 'none';
+         });
+         $('#siswaTidakAda').toggle(ada === 0 && $('.nfc-siswa').length > 0);
+      }).on('keydown', function(e) {
+         if (e.key === 'Enter') { // Enter = pilih hasil pertama
+            e.preventDefault();
+            const pertama = $('.nfc-siswa').filter(function() { return this.style.display !== 'none'; }).first();
+            if (pertama.length) pilihSiswa(pertama[0]);
+         }
+      });
+
+      /* kartu dari tabel "Kartu baru" */
+      $('.pilih-uid').on('click', function() {
+         setUid($(this).data('uid'));
+         $('html, body').animate({ scrollTop: $('#formDaftar').offset().top - 140 }, 200);
+      });
+
+      /* UID manual */
+      $('#lnkManual').on('click', function() { $('#boxManual').toggle(); $('#uidManual').focus(); });
+      $('#uidManual').on('input', function() { setUid(this.value); });
+
+      /* salin alamat API */
+      $('#btnSalin').on('click', function() {
+         if (navigator.clipboard) navigator.clipboard.writeText($('#apiUrl').text().trim());
+         const ikon = $(this).find('i').text('check');
+         setTimeout(() => ikon.text('content_copy'), 1500);
+      });
+
+      /* filter kartu terdaftar */
+      $('#cariBerkartu').on('input', function() {
+         const q = this.value.toLowerCase().trim();
+         $('#tabelBerkartu tbody tr[data-cari]').each(function() {
+            this.style.display = q === '' || String($(this).data('cari')).includes(q) ? '' : 'none';
+         });
+      });
+
+      /* reader USB */
       if (!('serial' in navigator)) {
          $('#btnUsb').prop('disabled', true);
-         usbStatus('Browser ini tidak mendukung reader USB. Gunakan Chrome atau Edge di laptop/PC.', 'warning');
+         usbStatus('Reader USB butuh Chrome/Edge di laptop/PC', 'error');
       } else {
          $('#btnUsb').on('click', async function() {
             if (usb.aktif) return usbPutuskan();
             try {
                await usbHubungkan(await navigator.serial.requestPort());
             } catch (e) {
-               if (e.name !== 'NotFoundError') usbStatus('Gagal membuka port: ' + e.message + ' (tutup Serial Monitor Arduino jika sedang terbuka)', 'danger');
+               if (e.name !== 'NotFoundError') {
+                  usbStatus('Gagal membuka port', 'error');
+                  usbCatatan('Gagal membuka port: ' + escHtml(e.message) + '. Tutup Serial Monitor Arduino jika sedang terbuka.', 'danger');
+               }
             }
          });
          // sambung ulang otomatis setelah halaman dimuat ulang (mis. sesudah Daftarkan)
@@ -353,27 +620,7 @@ $jam = fn($t) => substr($t, 0, 5);
          }
       }
 
-      $('.pilih-uid').on('click', function() {
-         $('#uidDaftar').val($(this).data('uid'));
-         $('#cariSiswa').focus();
-         $('html, body').animate({ scrollTop: $('#formDaftar').offset().top - 90 }, 200);
-      });
-
-      $('#cariSiswa').on('input', function() {
-         const q = this.value.toLowerCase().trim();
-         $('#pilihSiswa option').each(function() {
-            this.hidden = q !== '' && !String($(this).data('cari')).includes(q);
-         });
-         const pertama = $('#pilihSiswa option').filter(function() { return !this.hidden; }).first();
-         if (pertama.length) $('#pilihSiswa').val(pertama.val());
-      });
-
-      $('#cariBerkartu').on('input', function() {
-         const q = this.value.toLowerCase().trim();
-         $('#tabelBerkartu tbody tr').each(function() {
-            this.hidden = q !== '' && !String($(this).data('cari')).includes(q);
-         });
-      });
+      perbaruiRingkasan();
    });
 </script>
 <?= $this->endSection() ?>
