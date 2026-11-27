@@ -84,8 +84,16 @@
         <!-- TIMEFRAME: kontrol tanggal/rentang data yang ditampilkan -->
         <div class="row">
             <div class="col-md-12">
-                <div class="card">
+                <div class="card" style="border-left:4px solid #4caf50;">
                     <div class="card-body" style="display:flex !important; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:16px; padding:16px 24px;">
+                        <div style="display:flex !important; align-items:center; gap:10px; flex-shrink:0;">
+                            <i class="material-icons text-success">event</i>
+                            <div>
+                                <div class="small text-muted" style="line-height:1.1;">Menampilkan data untuk</div>
+                                <b><?= esc($labelPeriode); ?></b>
+                            </div>
+                        </div>
+
                         <form id="formTimeframe" method="get" style="display:flex !important; flex-wrap:wrap; align-items:center; gap:10px; margin:0;">
                             <input type="hidden" name="mode" id="inputMode" value="<?= esc($timeframeMode); ?>">
 
@@ -95,13 +103,13 @@
                             </div>
 
                             <div id="blokTanggalTunggal" style="display:<?= $timeframeMode === 'single' ? 'flex' : 'none'; ?> !important; align-items:center; gap:6px;">
-                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="geserTanggal(-1)" title="Hari sebelumnya">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="geserTanggal(-1)" title="Hari sebelumnya" aria-label="Hari sebelumnya">
                                     <i class="material-icons">chevron_left</i>
                                 </button>
                                 <input type="date" class="form-control form-control-sm" name="tanggal" id="inputTanggal"
                                     value="<?= esc($tanggalPilihan); ?>" max="<?= esc($hariIni); ?>"
                                     onchange="document.getElementById('formTimeframe').submit()">
-                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="geserTanggal(1)" title="Hari berikutnya"
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="geserTanggal(1)" title="Hari berikutnya" aria-label="Hari berikutnya"
                                     <?= $tanggalPilihan >= $hariIni ? 'disabled' : ''; ?>>
                                     <i class="material-icons">chevron_right</i>
                                 </button>
@@ -115,10 +123,11 @@
                                 <input type="date" class="form-control form-control-sm" name="mulai" value="<?= esc($mulaiPilihan); ?>" max="<?= esc($hariIni); ?>">
                                 <label class="mb-0 small text-muted">Sampai</label>
                                 <input type="date" class="form-control form-control-sm" name="akhir" value="<?= esc($akhirPilihan); ?>" max="<?= esc($hariIni); ?>">
-                                <button type="submit" class="btn btn-sm btn-success">Terapkan</button>
+                                <button type="submit" class="btn btn-sm btn-success">
+                                    <i class="material-icons" style="font-size:16px; vertical-align:text-bottom;">check</i> Terapkan
+                                </button>
                             </div>
                         </form>
-                        <h5 class="mb-0 text-muted"><b><?= esc($labelPeriode); ?></b></h5>
                     </div>
                 </div>
             </div>
@@ -148,11 +157,13 @@
                                 <h4 class="text-danger"><b>Alfa</b></h4>
                                 <h3><?= $jumlahKehadiranSiswa['alfa']; ?></h3>
                             </div>
-                            <div class="col">
+                            <div class="col" style="border-left:1px dashed #ddd;">
                                 <a href="<?= base_url('admin/absen-siswa/terlambat'); ?>" class="text-decoration-none">
                                     <h4 class="text-danger"><b>Terlambat</b></h4>
                                     <h3><?= $jumlahTerlambatSiswa; ?></h3>
-                                    <small class="text-muted">Lihat detail</small>
+                                    <small class="text-muted" style="display:inline-flex !important; align-items:center; gap:2px;">
+                                        Lihat detail <i class="material-icons" style="font-size:14px;">chevron_right</i>
+                                    </small>
                                 </a>
                             </div>
                         </div>
@@ -193,7 +204,9 @@
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header card-header-success">
-                        <h4 class="card-title"><b>Siswa Datang Tercepat</b></h4>
+                        <h4 class="card-title" style="display:flex !important; align-items:center; gap:8px;">
+                            <i class="material-icons">bolt</i> <b>Siswa Datang Tercepat</b>
+                        </h4>
                         <p class="card-category"><?= esc($labelPeriode); ?></p>
                     </div>
                     <div class="card-body p-0" style="height:360px; overflow-y:auto;">
@@ -226,7 +239,12 @@
                                 <?php endforeach; ?>
                             </ul>
                         <?php else : ?>
-                            <h4 class="text-center text-muted py-5">Belum ada siswa yang absen masuk hari ini</h4>
+                            <div style="display:flex !important; align-items:center; justify-content:center; height:100%; text-align:center; padding:0 24px;">
+                                <div class="text-muted">
+                                    <i class="material-icons" style="font-size:40px; opacity:.5;">schedule</i>
+                                    <p class="mb-0 mt-2">Belum ada siswa yang absen masuk pada periode ini</p>
+                                </div>
+                            </div>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -235,7 +253,9 @@
                 <div class="card">
                     <div class="card-header card-header-danger" style="display:flex !important; align-items:flex-start; justify-content:space-between; gap:12px;">
                         <div>
-                            <h4 class="card-title"><b>Siswa Terlambat</b></h4>
+                            <h4 class="card-title" style="display:flex !important; align-items:center; gap:8px;">
+                                <i class="material-icons">warning</i> <b>Siswa Terlambat</b>
+                            </h4>
                             <p class="card-category"><?= esc($labelPeriode); ?></p>
                         </div>
                         <a href="<?= base_url('admin/absen-siswa/terlambat'); ?>" class="btn btn-danger btn-sm" style="margin-top:2px; white-space:nowrap;">
@@ -275,7 +295,12 @@
                                 <?php endforeach; ?>
                             </ul>
                         <?php else : ?>
-                            <h4 class="text-center text-success py-5">Tidak ada siswa yang terlambat hari ini</h4>
+                            <div style="display:flex !important; align-items:center; justify-content:center; height:100%; text-align:center; padding:0 24px;">
+                                <div class="text-success">
+                                    <i class="material-icons" style="font-size:40px;">check_circle</i>
+                                    <p class="mb-0 mt-2 text-muted">Tidak ada siswa yang terlambat pada periode ini</p>
+                                </div>
+                            </div>
                         <?php endif; ?>
                     </div>
                 </div>
