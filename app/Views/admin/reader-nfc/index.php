@@ -18,6 +18,10 @@ $jam = fn($t) => substr($t, 0, 5);
    .nfc-uid { font-family: monospace; font-size: .95em; }
    .nfc-table td, .nfc-table th { vertical-align: middle; }
    .nfc-scroll { max-height: 460px; overflow-y: auto; }
+   .nfc-usb { border: 1px dashed #c8d3cc; border-radius: 8px; padding: 10px 12px; }
+   .nfc-usb .material-icons { font-size: 18px; vertical-align: middle; }
+   #uidDaftar.nfc-baru { animation: nfcKedip 1s ease-out; }
+   @keyframes nfcKedip { from { background: #fff3c4; } to { background: transparent; } }
 </style>
 <div class="content">
    <div class="container-fluid">
@@ -39,6 +43,14 @@ $jam = fn($t) => substr($t, 0, 5);
                   <p class="card-category">Kartu yang di-tap di reader tapi belum terdaftar ke siswa</p>
                </div>
                <div class="card-body">
+                  <div class="nfc-usb mb-3">
+                     <button type="button" class="btn btn-sm btn-primary" id="btnUsb">
+                        <i class="material-icons">usb</i> <span id="btnUsbTeks">Hubungkan reader USB</span>
+                     </button>
+                     <span id="usbStatus" class="ml-2 text-muted">Daftar kartu langsung: colokkan reader ke laptop ini lewat USB, lalu tap kartu.</span>
+                     <div id="usbInfo" class="mt-2"></div>
+                  </div>
+
                   <form action="<?= base_url('admin/reader-nfc/daftar'); ?>" method="post" id="formDaftar" class="mb-3">
                      <?= csrf_field() ?>
                      <div class="row">
@@ -227,7 +239,120 @@ $jam = fn($t) => substr($t, 0, 5);
 </div>
 
 <script>
+   /*
+    * Daftar kartu lewat reader USB (Web Serial, Chrome/Edge desktop).
+    * Firmware reader V1.4+: perintah "daftar" membuat tap tidak dicatat
+    * sebagai absen dan UID dikirim sebagai baris "UID:DE AD BE EF".
+    * Izin port diingat browser, jadi setelah form dikirim (halaman
+    * dimuat ulang) reader tersambung kembali otomatis.
+    */
+   const kartuTerdaftar = <?= json_encode(array_column($siswaBerkartu, 'nama_siswa', 'uid_kartu'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+   const usb = { port: null, reader: null, writer: null, pipa: null, aktif: false };
+   const escHtml = (t) => $('<div>').text(t).html();
+
+   function usbStatus(teks, warna) {
+      $('#usbStatus').attr('class', 'ml-2 ' + (warna ? 'text-' + warna : 'text-muted')).text(teks);
+   }
+
+   async function usbKirim(perintah) {
+      if (usb.writer) await usb.writer.write(new TextEncoder().encode(perintah + '\n'));
+   }
+
+   async function usbHubungkan(port) {
+      usb.port = port;
+      await port.open({ baudRate: 115200 });
+      // lepas DTR/RTS supaya ESP32 tidak tertahan di mode reset
+      try { await port.setSignals({ dataTerminalReady: false, requestToSend: false }); } catch (e) {}
+      usb.writer = port.writable.getWriter();
+      usb.aktif = true;
+      sessionStorage.setItem('nfcUsb', '1');
+      $('#btnUsbTeks').text('Putuskan reader USB');
+      usbStatus('Terhubung, menyiapkan mode daftar...', 'info');
+      setTimeout(() => usbKirim('daftar'), 1500);
+      usbBaca();
+   }
+
+   async function usbBaca() {
+      const dekoder = new TextDecoderStream();
+      usb.pipa = usb.port.readable.pipeTo(dekoder.writable).catch(() => {});
+      usb.reader = dekoder.readable.getReader();
+      let sisa = '';
+      try {
+         while (usb.aktif) {
+            const { value, done } = await usb.reader.read();
+            if (done) break;
+            sisa += value;
+            let i;
+            while ((i = sisa.indexOf('\n')) >= 0) {
+               usbBaris(sisa.slice(0, i).trim());
+               sisa = sisa.slice(i + 1);
+            }
+         }
+      } catch (e) {
+         if (usb.aktif) usbStatus('Koneksi USB terputus. Cabut-colok kabel lalu hubungkan lagi.', 'danger');
+      }
+   }
+
+   function usbBaris(baris) {
+      if (baris.startsWith('STATUS:SIAP')) {
+         usbKirim('daftar'); // reader baru menyala / restart
+      } else if (baris.startsWith('MODE:DAFTAR')) {
+         usbStatus('Siap: tempelkan kartu ke reader', 'success');
+      } else if (baris.startsWith('UID:')) {
+         usbUid(baris.slice(4).trim().toUpperCase());
+      }
+   }
+
+   function usbUid(uid) {
+      if (!/^[0-9A-F]{2}( [0-9A-F]{2}){3,9}$/.test(uid)) return;
+      $('#uidDaftar').val(uid).removeClass('nfc-baru');
+      void document.getElementById('uidDaftar').offsetWidth;
+      $('#uidDaftar').addClass('nfc-baru');
+
+      if (kartuTerdaftar[uid]) {
+         $('#usbInfo').html('<div class="alert alert-warning mb-0">Kartu <b class="nfc-uid">' + uid +
+            '</b> sudah terdaftar ke <b>' + escHtml(kartuTerdaftar[uid]) + '</b>. Lepas dulu kartunya jika ingin dipindahkan.</div>');
+      } else {
+         $('#usbInfo').html('<div class="alert alert-success mb-0">Kartu <b class="nfc-uid">' + uid +
+            '</b> terbaca. Cari & pilih siswa, lalu klik <b>Daftarkan kartu</b>.</div>');
+         $('#cariSiswa').focus().select();
+      }
+   }
+
+   async function usbPutuskan() {
+      usb.aktif = false;
+      sessionStorage.removeItem('nfcUsb');
+      try { await usbKirim('selesai'); } catch (e) {}
+      try { await usb.reader.cancel(); } catch (e) {}
+      try { await usb.pipa; } catch (e) {}
+      try { usb.writer.releaseLock(); } catch (e) {}
+      try { await usb.port.close(); } catch (e) {}
+      usb.port = usb.reader = usb.writer = usb.pipa = null;
+      $('#btnUsbTeks').text('Hubungkan reader USB');
+      usbStatus('Reader USB diputus. Reader kembali ke mode absen biasa.');
+   }
+
    $(function() {
+      if (!('serial' in navigator)) {
+         $('#btnUsb').prop('disabled', true);
+         usbStatus('Browser ini tidak mendukung reader USB. Gunakan Chrome atau Edge di laptop/PC.', 'warning');
+      } else {
+         $('#btnUsb').on('click', async function() {
+            if (usb.aktif) return usbPutuskan();
+            try {
+               await usbHubungkan(await navigator.serial.requestPort());
+            } catch (e) {
+               if (e.name !== 'NotFoundError') usbStatus('Gagal membuka port: ' + e.message + ' (tutup Serial Monitor Arduino jika sedang terbuka)', 'danger');
+            }
+         });
+         // sambung ulang otomatis setelah halaman dimuat ulang (mis. sesudah Daftarkan)
+         if (sessionStorage.getItem('nfcUsb') === '1') {
+            navigator.serial.getPorts().then((ports) => {
+               if (ports.length) usbHubungkan(ports[0]).catch(() => sessionStorage.removeItem('nfcUsb'));
+            });
+         }
+      }
+
       $('.pilih-uid').on('click', function() {
          $('#uidDaftar').val($(this).data('uid'));
          $('#cariSiswa').focus();
