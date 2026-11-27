@@ -186,9 +186,14 @@
             </div>
             <div class="col-md-6">
                 <div class="card">
-                    <div class="card-header card-header-danger">
-                        <h4 class="card-title"><b>Siswa Terlambat</b></h4>
-                        <p class="card-category"><?= $dateNow; ?></p>
+                    <div class="card-header card-header-danger" style="display:flex !important; align-items:flex-start; justify-content:space-between; gap:12px;">
+                        <div>
+                            <h4 class="card-title"><b>Siswa Terlambat</b></h4>
+                            <p class="card-category"><?= $dateNow; ?></p>
+                        </div>
+                        <a href="<?= base_url('admin/absen-siswa/terlambat'); ?>" class="btn btn-danger btn-sm" style="margin-top:2px; white-space:nowrap;">
+                            Lihat Semua<?= $jumlahTerlambatSiswa > 10 ? " ({$jumlahTerlambatSiswa})" : ''; ?>
+                        </a>
                     </div>
                     <div class="card-body p-0" style="height:360px; overflow-y:auto;">
                         <?php if (!empty($siswaTerlambat)) : ?>
@@ -220,11 +225,6 @@
                         <?php else : ?>
                             <h4 class="text-center text-success py-5">Tidak ada siswa yang terlambat hari ini</h4>
                         <?php endif; ?>
-                    </div>
-                    <div class="card-footer text-center">
-                        <a href="<?= base_url('admin/absen-siswa/terlambat'); ?>" class="btn btn-danger btn-sm">
-                            Lihat Semua<?= $jumlahTerlambatSiswa > 10 ? " ({$jumlahTerlambatSiswa})" : ''; ?>
-                        </a>
                     </div>
                 </div>
             </div>
