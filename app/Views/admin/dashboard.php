@@ -156,25 +156,25 @@
                     </div>
                     <div class="card-body p-0">
                         <?php if (!empty($siswaTercepat)) : ?>
-                            <ul class="list-group list-group-flush">
+                            <ul class="list-group list-group-flush" style="display:block !important;">
                                 <?php foreach ($siswaTercepat as $i => $s) : ?>
-                                    <li class="list-group-item d-flex align-items-center">
-                                        <b class="text-muted mr-3" style="width:20px;flex-shrink:0;"><?= $i + 1; ?></b>
+                                    <li class="list-group-item" style="display:flex !important; align-items:center !important; width:100% !important; gap:14px;">
+                                        <span style="flex:0 0 20px; color:#9a9a9a; font-weight:600; text-align:right;"><?= $i + 1; ?></span>
                                         <?php if (!empty($s['foto'])) : ?>
-                                            <img src="<?= esc($s['foto']); ?>" alt="" class="rounded-circle mr-3" style="width:44px;height:44px;object-fit:cover;flex-shrink:0;">
+                                            <img src="<?= esc($s['foto']); ?>" alt="" style="flex:0 0 44px; width:44px; height:44px; border-radius:50%; object-fit:cover;">
                                         <?php else : ?>
-                                            <span class="rounded-circle bg-light d-flex align-items-center justify-content-center mr-3" style="width:44px;height:44px;flex-shrink:0;">
+                                            <span style="flex:0 0 44px; width:44px; height:44px; border-radius:50%; background:#f1f1f1; display:flex !important; align-items:center; justify-content:center;">
                                                 <i class="material-icons text-muted">person</i>
                                             </span>
                                         <?php endif; ?>
-                                        <div class="flex-grow-1" style="min-width:0;">
-                                            <div class="text-truncate"><b><?= esc($s['nama_siswa']); ?></b></div>
+                                        <div style="flex:1 1 auto; min-width:0;">
+                                            <div style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><b><?= esc($s['nama_siswa']); ?></b></div>
                                             <small class="text-muted"><?= labelKelas($s['kelas'] ?? null, $s['jurusan'] ?? null); ?></small>
                                         </div>
-                                        <span class="text-success d-flex align-items-center ml-2" style="flex-shrink:0;white-space:nowrap;">
-                                            <i class="material-icons mr-1" style="font-size:16px;">schedule</i>
-                                            <b><?= esc($s['jam_masuk']); ?></b>
-                                        </span>
+                                        <div class="text-success" style="flex:0 0 110px; display:flex !important; align-items:center; justify-content:flex-end; gap:4px; white-space:nowrap; font-weight:700;">
+                                            <i class="material-icons" style="font-size:16px;">schedule</i>
+                                            <?= esc($s['jam_masuk']); ?>
+                                        </div>
                                     </li>
                                 <?php endforeach; ?>
                             </ul>
@@ -192,25 +192,25 @@
                     </div>
                     <div class="card-body p-0">
                         <?php if (!empty($siswaTerlambat)) : ?>
-                            <ul class="list-group list-group-flush">
+                            <ul class="list-group list-group-flush" style="display:block !important;">
                                 <?php foreach ($siswaTerlambat as $i => $s) : ?>
-                                    <li class="list-group-item d-flex align-items-center">
-                                        <b class="text-muted mr-3" style="width:20px;flex-shrink:0;"><?= $i + 1; ?></b>
+                                    <li class="list-group-item" style="display:flex !important; align-items:center !important; width:100% !important; gap:14px;">
+                                        <span style="flex:0 0 20px; color:#9a9a9a; font-weight:600; text-align:right;"><?= $i + 1; ?></span>
                                         <?php if (!empty($s['foto'])) : ?>
-                                            <img src="<?= esc($s['foto']); ?>" alt="" class="rounded-circle mr-3" style="width:44px;height:44px;object-fit:cover;flex-shrink:0;">
+                                            <img src="<?= esc($s['foto']); ?>" alt="" style="flex:0 0 44px; width:44px; height:44px; border-radius:50%; object-fit:cover;">
                                         <?php else : ?>
-                                            <span class="rounded-circle bg-light d-flex align-items-center justify-content-center mr-3" style="width:44px;height:44px;flex-shrink:0;">
+                                            <span style="flex:0 0 44px; width:44px; height:44px; border-radius:50%; background:#f1f1f1; display:flex !important; align-items:center; justify-content:center;">
                                                 <i class="material-icons text-muted">person</i>
                                             </span>
                                         <?php endif; ?>
-                                        <div class="flex-grow-1" style="min-width:0;">
-                                            <div class="text-truncate"><b><?= esc($s['nama_siswa']); ?></b></div>
+                                        <div style="flex:1 1 auto; min-width:0;">
+                                            <div style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><b><?= esc($s['nama_siswa']); ?></b></div>
                                             <small class="text-muted"><?= labelKelas($s['kelas'] ?? null, $s['jurusan'] ?? null); ?></small>
                                         </div>
-                                        <span class="text-danger d-flex align-items-center ml-2" style="flex-shrink:0;white-space:nowrap;">
-                                            <i class="material-icons mr-1" style="font-size:16px;">schedule</i>
-                                            <b><?= esc($s['jam_masuk']); ?></b>
-                                        </span>
+                                        <div class="text-danger" style="flex:0 0 110px; display:flex !important; align-items:center; justify-content:flex-end; gap:4px; white-space:nowrap; font-weight:700;">
+                                            <i class="material-icons" style="font-size:16px;">schedule</i>
+                                            <?= esc($s['jam_masuk']); ?>
+                                        </div>
                                     </li>
                                 <?php endforeach; ?>
                             </ul>
