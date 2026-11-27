@@ -1,6 +1,48 @@
 <?= $this->extend('templates/admin_page_layout') ?>
 <?= $this->section('content') ?>
-<div class="content">
+<style>
+    /* Dashboard lebih compact -- tema Material Dashboard default memberi
+       margin-top & margin-bottom 30px ke setiap .card, jadi antar-card
+       bisa berjarak sampai 60px. Dipersempit khusus di halaman ini saja
+       lewat scope #dashboardPage, tema/halaman lain tidak terdampak. */
+    #dashboardPage .row {
+        margin-bottom: 4px;
+    }
+
+    #dashboardPage .card {
+        margin-top: 0;
+        margin-bottom: 16px;
+    }
+
+    #dashboardPage .card-header {
+        padding: 0.6rem 1rem;
+    }
+
+    #dashboardPage .card-body {
+        padding: 1rem;
+    }
+
+    #dashboardPage .card-footer {
+        padding: 0.6rem 1rem;
+    }
+
+    #dashboardPage .card-stats .card-header .card-category {
+        margin-bottom: 0.15rem;
+    }
+
+    #dashboardPage .card-title {
+        margin-bottom: 0.25rem;
+    }
+
+    #dashboardPage .row.text-center h4 {
+        margin-bottom: 0.25rem;
+    }
+
+    #dashboardPage .row.text-center h3 {
+        margin-bottom: 0;
+    }
+</style>
+<div class="content" id="dashboardPage">
     <div class="container-fluid">
         <!-- REKAP JUMLAH DATA -->
         <div class="row">
