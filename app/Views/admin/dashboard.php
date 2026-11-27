@@ -212,7 +212,7 @@
                                                 <i class="material-icons" style="font-size:16px;">schedule</i>
                                                 <?= esc($s['jam_masuk']); ?>
                                             </div>
-                                            <small class="text-muted">terlambat <?= formatDurasiTerlambat($s['jam_masuk'], $batasAbsenMasuk); ?></small>
+                                            <span class="badge badge-danger" style="margin-top:4px;"><?= formatDurasiTerlambat($s['jam_masuk'], $batasAbsenMasuk); ?></span>
                                         </div>
                                     </li>
                                 <?php endforeach; ?>
