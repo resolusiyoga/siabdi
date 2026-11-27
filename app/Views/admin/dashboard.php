@@ -154,7 +154,7 @@
                         <h4 class="card-title"><b>10 Siswa Datang Tercepat</b></h4>
                         <p class="card-category"><?= $dateNow; ?></p>
                     </div>
-                    <div class="card-body p-0">
+                    <div class="card-body p-0" style="height:360px; overflow-y:auto;">
                         <?php if (!empty($siswaTercepat)) : ?>
                             <ul class="list-group list-group-flush" style="display:block !important;">
                                 <?php foreach ($siswaTercepat as $i => $s) : ?>
@@ -190,7 +190,7 @@
                         <h4 class="card-title"><b>Siswa Terlambat</b></h4>
                         <p class="card-category"><?= $dateNow; ?></p>
                     </div>
-                    <div class="card-body p-0">
+                    <div class="card-body p-0" style="height:360px; overflow-y:auto;">
                         <?php if (!empty($siswaTerlambat)) : ?>
                             <ul class="list-group list-group-flush" style="display:block !important;">
                                 <?php foreach ($siswaTerlambat as $i => $s) : ?>
