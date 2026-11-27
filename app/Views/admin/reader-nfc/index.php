@@ -98,6 +98,11 @@ $tglJam = fn($t) => $t ? date('d/m H:i', strtotime($t)) : '-';
    .nfc-jadwal input[type=time] { border: 1px solid var(--garis); border-radius: 6px; padding: 5px 6px; width: 100%; font-size: 14px; outline: none; }
    .nfc-jadwal input[type=time]:focus { border-color: var(--hijau); }
    .nfc-kecil { font-size: 12px; color: var(--abu); line-height: 1.5; }
+   .nfc-reader { border: 1px solid var(--garis); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; }
+   .nfc-reader.offline { background: #fafafa; }
+   .nfc-reader-atas { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
+   .nfc-reader-atas .lalu { margin-left: auto; }
+   .nfc-reader-peringatan { margin-top: 6px; display: flex; gap: 4px; flex-wrap: wrap; }
 </style>
 
 <div class="content nfc">
@@ -246,8 +251,14 @@ $tglJam = fn($t) => $t ? date('d/m H:i', strtotime($t)) : '-';
                      <button type="button" class="btn btn-sm btn-default" id="btnSalin" title="Salin alamat"><i class="material-icons" style="font-size:16px">content_copy</i></button>
                   </div>
 
-                  <span class="nfc-label mt-4">Reader yang mengirim data</span>
-                  <?php if (empty($perangkat)) : ?>
+                  <span class="nfc-label mt-4">Reader <span id="ringkasReader" style="text-transform:none;letter-spacing:0"></span></span>
+                  <?php if ($tabelReaderAda) : ?>
+                     <div id="daftarReader"><div class="nfc-kecil">Memuat...</div></div>
+                  <?php else : ?>
+                     <div class="nfc-kecil mb-2">Status online/offline tampil setelah migrasi <code>CreateNfcReader</code> dijalankan.</div>
+                  <?php endif; ?>
+                  <?php if ($tabelReaderAda) : ?>
+                  <?php elseif (empty($perangkat)) : ?>
                      <div class="nfc-kecil">Belum ada reader yang mengirim data.</div>
                   <?php else : ?>
                      <table class="nfc-tabel">
@@ -621,6 +632,74 @@ $tglJam = fn($t) => $t ? date('d/m H:i', strtotime($t)) : '-';
       }
 
       perbaruiRingkasan();
+
+      /* daftar reader + status online, diperbarui tiap 15 detik */
+      if (document.getElementById('daftarReader')) {
+         tampilkanReader(<?= json_encode($readers, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
+         setInterval(muatReader, 15000);
+         setInterval(() => tampilkanReader(dataReader.list), 5000); // perbarui "x detik lalu"
+      }
    });
+
+   /* ---------- Status reader ---------- */
+   const BATAS_ONLINE = <?= (int) $batasOnline; ?>;
+   const MODE_LABEL = { otomatis: 'Otomatis', masuk: 'Masuk', pulang: 'Pulang', dzuhur: 'Dzuhur', ashar: 'Ashar', daftar: 'Daftar kartu' };
+   const dataReader = { list: [], dimuat: Date.now() };
+
+   function teksLalu(detik) {
+      if (detik < 60) return detik + ' detik lalu';
+      if (detik < 3600) return Math.floor(detik / 60) + ' menit lalu';
+      if (detik < 86400) return Math.floor(detik / 3600) + ' jam lalu';
+      return Math.floor(detik / 86400) + ' hari lalu';
+   }
+
+   function teksSinyal(rssi) {
+      if (rssi === null || rssi === undefined || rssi === '' || +rssi === 0) return '';
+      rssi = +rssi;
+      return 'sinyal ' + (rssi >= -60 ? 'kuat' : rssi >= -72 ? 'sedang' : 'lemah') + ' (' + rssi + ' dBm)';
+   }
+
+   function tampilkanReader(list) {
+      if (list !== dataReader.list) { dataReader.list = list; dataReader.dimuat = Date.now(); }
+      const tambahan = Math.floor((Date.now() - dataReader.dimuat) / 1000);
+      const el = $('#daftarReader');
+      if (!list.length) {
+         el.html('<div class="nfc-kecil">Belum ada reader yang terhubung ke server.</div>');
+         $('#ringkasReader').text('');
+         return;
+      }
+      let online = 0;
+      el.html(list.map((r) => {
+         const lalu = (+r.lalu) + tambahan;
+         const on = lalu <= BATAS_ONLINE;
+         if (on) online++;
+         const baris1 = [r.versi ? 'V' + escHtml(r.versi) : '', r.mode ? 'mode ' + escHtml(MODE_LABEL[r.mode] || r.mode) : '',
+            r.ip ? escHtml(r.ip) : '', teksSinyal(r.rssi)].filter(Boolean).join(' · ');
+         const baris2 = r.laporan
+            ? ['antrian ' + (+r.antrian), 'flash ' + (+r.flash) + '%', (+r.siswa) + ' siswa'].join(' · ')
+            : 'Firmware belum mengirim laporan status (perbarui ke V1.14+)';
+         const catatan = [];
+         if (r.laporan && +r.pn532 === 0) catatan.push('<span class="nfc-badge bad">PN532 tidak terdeteksi</span>');
+         if (r.laporan && +r.jam_valid === 0) catatan.push('<span class="nfc-badge warn">Jam belum diset</span>');
+         if (r.laporan && +r.antrian > 0) catatan.push('<span class="nfc-badge warn">' + (+r.antrian) + ' data belum terkirim</span>');
+         if (r.laporan && +r.flash >= 80) catatan.push('<span class="nfc-badge bad">Flash ' + (+r.flash) + '%</span>');
+         return '<div class="nfc-reader' + (on ? '' : ' offline') + '">' +
+            '<div class="nfc-reader-atas"><span class="nfc-titik ' + (on ? 'siap' : 'error') + '"></span><b>' + escHtml(r.perangkat) + '</b>' +
+            '<span class="nfc-badge ' + (on ? 'ok' : 'bad') + '">' + (on ? 'Online' : 'Offline') + '</span>' +
+            '<span class="nfc-kecil lalu">' + teksLalu(lalu) + '</span></div>' +
+            (baris1 ? '<div class="nfc-kecil">' + baris1 + '</div>' : '') +
+            '<div class="nfc-kecil">' + baris2 + '</div>' +
+            (catatan.length ? '<div class="nfc-reader-peringatan">' + catatan.join('') + '</div>' : '') +
+            '</div>';
+      }).join(''));
+      $('#ringkasReader').text('(' + online + ' dari ' + list.length + ' online)');
+   }
+
+   function muatReader() {
+      fetch('<?= base_url('admin/reader-nfc/status'); ?>', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+         .then((r) => r.ok ? r.json() : Promise.reject())
+         .then((d) => tampilkanReader(d.readers || []))
+         .catch(() => {});
+   }
 </script>
 <?= $this->endSection() ?>

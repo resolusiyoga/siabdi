@@ -31,6 +31,9 @@ class ReaderNfc
         'pulang' => 'Pulang',
     ];
 
+    /** Reader dianggap online jika menghubungi server dalam rentang ini (detik). Heartbeat reader tiap 60 detik. */
+    public const BATAS_ONLINE = 150;
+
     /** Notifikasi WA hanya untuk tap yang belum lama (bukan antrian offline lama) */
     private const BATAS_UMUR_NOTIF = 900;
 
@@ -44,6 +47,54 @@ class ReaderNfc
         $this->presensi = new PresensiSiswaModel();
         $this->settings = $generalSettings
             ?? $this->db->table('general_settings')->where('id', 1)->get()->getRow();
+    }
+
+    /** Tabel tb_nfc_reader ada? (aman dipakai sebelum migrasi CreateNfcReader dijalankan) */
+    public static function adaTabelReader(): bool
+    {
+        static $ada = null;
+        if ($ada === null) {
+            $ada = db_connect()->tableExists('tb_nfc_reader');
+        }
+        return $ada;
+    }
+
+    /**
+     * Catat bahwa reader menghubungi server. $laporan (dari api/reader/status)
+     * berisi versi, mode, ip, rssi, antrian, flash, siswa, pn532, jam_valid, uptime.
+     */
+    public static function catatReader(string $perangkat, array $laporan = []): void
+    {
+        if (!self::adaTabelReader()) return;
+
+        $sekarang = Time::now('Asia/Jakarta')->toDateTimeString();
+        $data = ['perangkat' => $perangkat, 'terakhir' => $sekarang];
+        if (!empty($laporan)) {
+            $data = array_merge($data, $laporan, ['laporan' => $sekarang]);
+        }
+
+        $kolom = array_keys($data);
+        $isian = implode(', ', array_fill(0, count($kolom), '?'));
+        $ubah = implode(', ', array_map(fn($k) => "$k = VALUES($k)", array_diff($kolom, ['perangkat'])));
+        db_connect()->query(
+            'INSERT INTO tb_nfc_reader (' . implode(', ', $kolom) . ") VALUES ($isian) ON DUPLICATE KEY UPDATE $ubah",
+            array_values($data)
+        );
+    }
+
+    /** Daftar reader + status online/offline, untuk halaman admin */
+    public static function daftarReader(): array
+    {
+        if (!self::adaTabelReader()) return [];
+
+        $rows = db_connect()->table('tb_nfc_reader')->orderBy('perangkat')->get()->getResultArray();
+        $sekarang = time();
+        foreach ($rows as &$r) {
+            $lalu = max(0, $sekarang - strtotime($r['terakhir']));
+            $r['lalu'] = $lalu;
+            $r['online'] = $lalu <= self::BATAS_ONLINE;
+        }
+        return $rows;
     }
 
     public static function uidValid(string $uid): bool

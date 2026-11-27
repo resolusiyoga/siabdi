@@ -59,9 +59,21 @@ class ReaderNfc extends BaseController
                 ->select('perangkat, MAX(diterima) AS terakhir, COUNT(*) AS jumlah')
                 ->groupBy('perangkat')->orderBy('terakhir', 'DESC')
                 ->get()->getResultArray(),
+            'tabelReaderAda' => ReaderNfcLib::adaTabelReader(),
+            'readers'        => ReaderNfcLib::daftarReader(),
+            'batasOnline'    => ReaderNfcLib::BATAS_ONLINE,
         ];
 
         return view('admin/reader-nfc/index', $data);
+    }
+
+    /** Status reader (JSON) untuk penyegaran berkala di halaman */
+    public function statusReader()
+    {
+        if (!isSuperadmin()) {
+            return $this->response->setStatusCode(403)->setJSON(['error' => 'khusus superadmin']);
+        }
+        return $this->response->setJSON(['readers' => ReaderNfcLib::daftarReader()]);
     }
 
     public function daftar()

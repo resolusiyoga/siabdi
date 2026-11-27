@@ -18,6 +18,7 @@ use CodeIgniter\HTTP\ResponseInterface;
  *   GET  api/reader/siswa  -> "#SISWA <n>\n" lalu "UID|Nama\n" per siswa
  *   POST api/reader/absen  -> body "UID,epoch_utc[,mode]\n" per tap,
  *                             balasan "OK <jumlah_baris_diproses>"
+ *   POST api/reader/status -> body "kunci=nilai\n" (heartbeat), balasan "OK"
  * Header X-DEVICE berisi nama reader (mis. READER-01).
  */
 class Reader extends BaseController
@@ -56,6 +57,7 @@ class Reader extends BaseController
     public function siswa()
     {
         if ($tolak = $this->cekKunci()) return $tolak;
+        ReaderNfc::catatReader($this->perangkat());
 
         $rows = db_connect()->table('tb_siswa')
             ->select('uid_kartu, nama_siswa')
@@ -83,6 +85,7 @@ class Reader extends BaseController
 
         $reader = new ReaderNfc($this->generalSettings);
         $perangkat = $this->perangkat();
+        ReaderNfc::catatReader($perangkat);
         $diproses = 0;
 
         try {
@@ -106,5 +109,34 @@ class Reader extends BaseController
         }
 
         return $this->teks("OK $diproses");
+    }
+
+    /**
+     * Laporan kondisi reader (heartbeat tiap ±60 detik).
+     * Body teks "kunci=nilai" per baris: versi, mode, ip, rssi, antrian,
+     * flash, siswa, pn532, jam_valid, uptime. Kunci lain diabaikan.
+     */
+    public function status()
+    {
+        if ($tolak = $this->cekKunci()) return $tolak;
+
+        $angka = ['rssi', 'antrian', 'flash', 'siswa', 'pn532', 'jam_valid', 'uptime'];
+        $teks  = ['versi' => 10, 'mode' => 10, 'ip' => 45];
+        $laporan = [];
+
+        foreach (preg_split('/\r?\n/', trim((string) $this->request->getBody())) as $baris) {
+            [$k, $v] = array_pad(explode('=', $baris, 2), 2, '');
+            $k = strtolower(trim($k));
+            $v = trim($v);
+            if (in_array($k, $angka, true)) {
+                $laporan[$k] = (int) $v;
+            } elseif (isset($teks[$k])) {
+                $laporan[$k] = substr(preg_replace('/[^A-Za-z0-9.:_\-]/', '', $v), 0, $teks[$k]);
+            }
+        }
+        if (isset($laporan['flash'])) $laporan['flash'] = max(0, min(100, $laporan['flash']));
+
+        ReaderNfc::catatReader($this->perangkat(), $laporan);
+        return $this->teks('OK');
     }
 }

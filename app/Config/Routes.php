@@ -50,6 +50,7 @@ $routes->group('scan', function (RouteCollection $routes) {
 $routes->group('api/reader', ['namespace' => 'App\Controllers\Api'], function (RouteCollection $routes) {
    $routes->get('siswa', 'Reader::siswa');
    $routes->post('absen', 'Reader::absen');
+   $routes->post('status', 'Reader::status');
 });
 
 
@@ -174,6 +175,7 @@ $routes->group('admin', function (RouteCollection $routes) {
       $routes->post('lepas', 'ReaderNfc::lepas');
       $routes->post('abaikan', 'ReaderNfc::abaikan');
       $routes->post('jadwal', 'ReaderNfc::jadwal');
+      $routes->get('status', 'ReaderNfc::statusReader'); // JSON, dipanggil berkala
    });
 
    // admin buat laporan
