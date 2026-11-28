@@ -10,6 +10,7 @@ use App\Libraries\ReaderNfc as ReaderNfcLib;
  * - mendaftarkan kartu yang muncul di "Kartu baru" ke siswa
  * - melepas kartu dari siswa (kartu hilang / ganti)
  * - jadwal penentuan jenis absen untuk reader mode "otomatis"
+ * - metode & interval laporan status reader (kecepatan deteksi offline)
  * - log tap terbaru & status reader
  */
 class ReaderNfc extends BaseController
@@ -61,7 +62,13 @@ class ReaderNfc extends BaseController
                 ->get()->getResultArray(),
             'tabelReaderAda' => ReaderNfcLib::adaTabelReader(),
             'readers'        => ReaderNfcLib::daftarReader(),
-            'batasOnline'    => ReaderNfcLib::BATAS_ONLINE,
+            'adaPengaturanStatus' => $db->fieldExists('nfc_metode_status', 'general_settings'),
+            'intervalStatus' => ReaderNfcLib::intervalStatus($this->generalSettings),
+            'metodeStatus'   => ReaderNfcLib::metodeStatus($this->generalSettings),
+            'keepalive'      => ReaderNfcLib::keepaliveMqtt($this->generalSettings),
+            'mqttSiap'       => ReaderNfcLib::mqttWeb() !== null,
+            // kredensial broker hanya dikirim ke halaman bila mode MQTT dipakai
+            'mqttWeb'        => ReaderNfcLib::metodeStatus($this->generalSettings) === 'mqtt' ? ReaderNfcLib::mqttWeb() : null,
         ];
 
         return view('admin/reader-nfc/index', $data);
@@ -74,6 +81,41 @@ class ReaderNfc extends BaseController
             return $this->response->setStatusCode(403)->setJSON(['error' => 'khusus superadmin']);
         }
         return $this->response->setJSON(['readers' => ReaderNfcLib::daftarReader()]);
+    }
+
+    /** Metode & interval laporan status; reader mengambilnya dari balasan heartbeat */
+    public function pengaturanStatus()
+    {
+        if (!isSuperadmin()) return $this->tolakNonSuperadmin();
+
+        $metode = (string) $this->request->getPost('metode');
+        $interval = (int) $this->request->getPost('interval');
+        $keepalive = (int) $this->request->getPost('keepalive');
+        $db = db_connect();
+
+        if (!in_array($metode, ReaderNfcLib::METODE_STATUS, true)
+            || !in_array($interval, ReaderNfcLib::PILIHAN_INTERVAL, true)
+            || !in_array($keepalive, ReaderNfcLib::PILIHAN_KEEPALIVE, true)
+            || !$db->fieldExists('nfc_metode_status', 'general_settings')) {
+            $this->session->setFlashdata('error', 'Pengaturan status reader tidak bisa disimpan');
+            return redirect()->to(self::KE_HALAMAN);
+        }
+        if ($metode === 'mqtt' && ReaderNfcLib::mqttWeb() === null) {
+            $this->session->setFlashdata('error', 'Isi MQTT_HOST, MQTT_WEB_USER, dan MQTT_WEB_PASS di file .env server terlebih dahulu');
+            return redirect()->to(self::KE_HALAMAN);
+        }
+
+        $db->table('general_settings')->where('id', 1)->update([
+            'nfc_metode_status'   => $metode,
+            'nfc_interval_status' => $interval,
+            'nfc_mqtt_keepalive'  => $keepalive,
+        ]);
+
+        $this->session->setFlashdata('success', $metode === 'mqtt'
+            ? "Metode MQTT dipakai (keep-alive $keepalive detik). Reader beralih pada laporan berikutnya."
+            : "Metode HTTP dipakai: reader lapor tiap $interval detik, offline setelah "
+                . ReaderNfcLib::batasOnline($interval) . ' detik tanpa kabar.');
+        return redirect()->to(self::KE_HALAMAN);
     }
 
     public function daftar()

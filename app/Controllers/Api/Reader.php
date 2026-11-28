@@ -2,9 +2,12 @@
 
 namespace App\Controllers\Api;
 
-use App\Controllers\BaseController;
 use App\Libraries\ReaderNfc;
+use CodeIgniter\Controller;
+use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
+use Config\School;
+use Psr\Log\LoggerInterface;
 
 /**
  * API untuk reader kartu NFC Si-ABDI (ESP32).
@@ -18,11 +21,26 @@ use CodeIgniter\HTTP\ResponseInterface;
  *   GET  api/reader/siswa  -> "#SISWA <n>\n" lalu "UID|Nama\n" per siswa
  *   POST api/reader/absen  -> body "UID,epoch_utc[,mode]\n" per tap,
  *                             balasan "OK <jumlah_baris_diproses>"
- *   POST api/reader/status -> body "kunci=nilai\n" (heartbeat), balasan "OK"
+ *   POST api/reader/status -> body "kunci=nilai\n" (heartbeat), balasan
+ *                             "OK\ninterval=<detik>\nmetode=<http|mqtt>\nkeepalive=<detik>\n"
+ *                             (pengaturan reader dari menu Reader NFC)
  * Header X-DEVICE berisi nama reader (mis. READER-01).
  */
-class Reader extends BaseController
+class Reader extends Controller
 {
+    private ?object $generalSettings = null;
+
+    /**
+     * Sengaja tidak mewarisi BaseController: BaseController membuka sesi,
+     * sehingga tiap panggilan reader (tiap beberapa detik) membuat satu berkas
+     * sesi baru di server.
+     */
+    public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
+    {
+        parent::initController($request, $response, $logger);
+        $this->generalSettings = (new School())::$generalSettings;
+    }
+
     /** Batas baris per permintaan (firmware mengirim 200 per batch) */
     private const MAKS_BARIS = 500;
 
@@ -112,17 +130,17 @@ class Reader extends BaseController
     }
 
     /**
-     * Laporan kondisi reader (heartbeat tiap ±60 detik).
+     * Laporan kondisi reader (heartbeat tiap beberapa detik).
      * Body teks "kunci=nilai" per baris: versi, mode, ip, rssi, antrian,
      * flash, siswa, pn532, jam_valid, uptime, rtc, sumber_jam, rtc_epoch
-     * (jam RTC, epoch UTC). Kunci lain diabaikan.
+     * (jam RTC, epoch UTC), interval, metode, mqtt. Kunci lain diabaikan.
      */
     public function status()
     {
         if ($tolak = $this->cekKunci()) return $tolak;
 
         $angka = ['rssi', 'antrian', 'flash', 'siswa', 'pn532', 'jam_valid', 'uptime'];
-        $teks  = ['versi' => 10, 'mode' => 10, 'ip' => 45, 'rtc' => 10, 'sumber_jam' => 6];
+        $teks  = ['versi' => 10, 'mode' => 10, 'ip' => 45, 'rtc' => 10, 'sumber_jam' => 6, 'metode' => 4];
         $laporan = [];
         $rtcEpoch = 0;
 
@@ -132,6 +150,10 @@ class Reader extends BaseController
             $v = trim($v);
             if ($k === 'rtc_epoch') {
                 $rtcEpoch = (int) $v;
+            } elseif ($k === 'interval') {
+                $laporan['interval_status'] = max(0, min(300, (int) $v));
+            } elseif ($k === 'mqtt') {
+                $laporan['mqtt_ok'] = (int) $v === 1 ? 1 : 0;
             } elseif (in_array($k, $angka, true)) {
                 $laporan[$k] = (int) $v;
             } elseif (isset($teks[$k])) {
@@ -141,14 +163,17 @@ class Reader extends BaseController
         if (isset($laporan['flash'])) $laporan['flash'] = max(0, min(100, $laporan['flash']));
 
         if (!empty($laporan)) {
-            // selalu ditulis, agar info RTC lama tidak tertinggal bila reader tidak mengirimnya
-            $laporan += ['rtc' => '', 'sumber_jam' => ''];
+            // selalu ditulis, agar info lama tidak tertinggal bila firmware tidak mengirimnya
+            $laporan += ['rtc' => '', 'sumber_jam' => '', 'interval_status' => 0, 'metode' => '', 'mqtt_ok' => 0];
             $rtcSah = $rtcEpoch > 0 && $rtcEpoch < 4102444800; // sebelum tahun 2100
             $laporan['rtc_waktu'] = $rtcSah ? date('Y-m-d H:i:s', $rtcEpoch) : null;
             $laporan['rtc_selisih'] = $rtcSah ? max(-2147483647, min(2147483647, $rtcEpoch - time())) : null;
         }
 
         ReaderNfc::catatReader($this->perangkat(), $laporan);
-        return $this->teks('OK');
+        return $this->teks("OK\n"
+            . 'interval=' . ReaderNfc::intervalStatus($this->generalSettings) . "\n"
+            . 'metode=' . ReaderNfc::metodeStatus($this->generalSettings) . "\n"
+            . 'keepalive=' . ReaderNfc::keepaliveMqtt($this->generalSettings) . "\n");
     }
 }

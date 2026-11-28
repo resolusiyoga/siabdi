@@ -103,6 +103,9 @@ $tglJam = fn($t) => $t ? date('d/m H:i', strtotime($t)) : '-';
    .nfc-reader-atas { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
    .nfc-reader-atas .lalu { margin-left: auto; }
    .nfc-reader-peringatan { margin-top: 6px; display: flex; gap: 4px; flex-wrap: wrap; }
+   .nfc-atur label { display: block; font-size: 13px; color: var(--abu); margin: 0 0 4px; }
+   .nfc-broker { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; }
+   .nfc-broker .nfc-titik { margin-top: 4px; }
 </style>
 
 <div class="content nfc">
@@ -252,6 +255,9 @@ $tglJam = fn($t) => $t ? date('d/m H:i', strtotime($t)) : '-';
                   </div>
 
                   <span class="nfc-label mt-4">Reader <span id="ringkasReader" style="text-transform:none;letter-spacing:0"></span></span>
+                  <?php if ($mqttWeb) : ?>
+                     <div class="nfc-broker nfc-kecil"><span class="nfc-titik proses" id="brokerTitik"></span><span id="brokerStatus">Menghubungi broker MQTT...</span></div>
+                  <?php endif; ?>
                   <?php if ($tabelReaderAda) : ?>
                      <div id="daftarReader"><div class="nfc-kecil">Memuat...</div></div>
                   <?php else : ?>
@@ -271,6 +277,42 @@ $tglJam = fn($t) => $t ? date('d/m H:i', strtotime($t)) : '-';
                            <?php endforeach; ?>
                         </tbody>
                      </table>
+                  <?php endif; ?>
+
+                  <span class="nfc-label mt-4">Kecepatan deteksi offline</span>
+                  <?php if ($adaPengaturanStatus) : ?>
+                     <?php $lib = \App\Libraries\ReaderNfc::class; ?>
+                     <form action="<?= base_url('admin/reader-nfc/pengaturan-status'); ?>" method="post" class="nfc-atur">
+                        <?= csrf_field() ?>
+                        <label for="aturMetode">Metode status reader</label>
+                        <select name="metode" id="aturMetode" class="nfc-filter">
+                           <option value="http" <?= $metodeStatus === 'http' ? 'selected' : ''; ?>>HTTP (langsung ke server MAD1NAH)</option>
+                           <option value="mqtt" <?= $metodeStatus === 'mqtt' ? 'selected' : ''; ?> <?= $mqttSiap ? '' : 'disabled'; ?>>
+                              MQTT (lewat broker, lebih cepat)<?= $mqttSiap ? '' : ' - isi MQTT_* di .env'; ?></option>
+                        </select>
+                        <label for="aturInterval" id="labelInterval">Interval HTTP</label>
+                        <select name="interval" id="aturInterval" class="nfc-filter">
+                           <?php foreach ($lib::PILIHAN_INTERVAL as $i) : ?>
+                              <option value="<?= $i; ?>" <?= $i === $intervalStatus ? 'selected' : ''; ?>>
+                                 Lapor tiap <?= $i; ?> dtk, offline setelah <?= $lib::batasOnline($i); ?> dtk</option>
+                           <?php endforeach; ?>
+                        </select>
+                        <div id="barisKeepalive">
+                           <label for="aturKeepalive">Keep-alive MQTT</label>
+                           <select name="keepalive" id="aturKeepalive" class="nfc-filter">
+                              <?php foreach ($lib::PILIHAN_KEEPALIVE as $k) : ?>
+                                 <option value="<?= $k; ?>" <?= $k === $keepalive ? 'selected' : ''; ?>>
+                                    <?= $k; ?> dtk, offline diketahui sekitar <?= (int) ceil($k * 1.5); ?> dtk</option>
+                              <?php endforeach; ?>
+                           </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block btn-sm">Simpan</button>
+                     </form>
+                     <div class="nfc-kecil mt-2">Diterapkan reader pada laporan berikutnya, tanpa menyentuh perangkat.
+                        HTTP butuh firmware V1.16+, MQTT butuh V1.17+ dengan data broker terisi di web reader.
+                        Firmware lama tetap lapor tiap 60 detik. Data absensi selalu dikirim lewat HTTPS.</div>
+                  <?php else : ?>
+                     <div class="nfc-kecil">Pengaturan tampil setelah migrasi <code>AddMqttStatusReader</code> dijalankan.</div>
                   <?php endif; ?>
                </div>
             </div>
@@ -633,16 +675,31 @@ $tglJam = fn($t) => $t ? date('d/m H:i', strtotime($t)) : '-';
 
       perbaruiRingkasan();
 
-      /* daftar reader + status online, diperbarui tiap 15 detik */
+      /* pilihan keep-alive hanya relevan untuk MQTT */
+      $('#aturMetode').on('change', function() {
+         const mqttDipilih = this.value === 'mqtt';
+         $('#barisKeepalive').toggle(mqttDipilih);
+         $('#labelInterval').text(mqttDipilih ? 'Interval HTTP cadangan (bila broker putus)' : 'Interval HTTP');
+      }).trigger('change');
+
+      /* pustaka MQTT hanya dimuat bila mode MQTT dipakai */
+      if (MQTT_CFG) {
+         const skrip = document.createElement('script');
+         skrip.src = '<?= base_url('assets/js/plugins/mqtt/mqtt.min.js'); ?>';
+         skrip.onload = sambungBroker;
+         skrip.onerror = () => statusBroker('Pustaka MQTT gagal dimuat, status memakai server', 'error');
+         document.body.appendChild(skrip);
+      }
+
+      /* daftar reader + status online, diperbarui tiap 5 detik */
       if (document.getElementById('daftarReader')) {
          tampilkanReader(<?= json_encode($readers, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
-         setInterval(muatReader, 15000);
-         setInterval(() => tampilkanReader(dataReader.list), 5000); // perbarui "x detik lalu"
+         setInterval(muatReader, 5000);
+         setInterval(() => tampilkanReader(dataReader.list), 1000); // perbarui "x detik lalu"
       }
    });
 
    /* ---------- Status reader ---------- */
-   const BATAS_ONLINE = <?= (int) $batasOnline; ?>;
    const MODE_LABEL = { otomatis: 'Otomatis', masuk: 'Masuk', pulang: 'Pulang', dzuhur: 'Dzuhur', ashar: 'Ashar', daftar: 'Daftar kartu' };
    const dataReader = { list: [], dimuat: Date.now() };
 
@@ -690,6 +747,79 @@ $tglJam = fn($t) => $t ? date('d/m H:i', strtotime($t)) : '-';
       return bagian.join(' · ') + (r.sumber_jam ? '<br>Sumber jam: ' + escHtml(SUMBER_JAM[r.sumber_jam] || r.sumber_jam) : '');
    }
 
+   /* ---------- MQTT: status dari broker, server tetap jadi cadangan ---------- */
+   const MQTT_CFG = <?= json_encode($mqttWeb, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+   const MQTT_SEGAR = 90; // detik; reader mempublikasikan status tiap 30 detik
+   const KUNCI_MQTT = ['versi', 'mode', 'ip', 'rssi', 'antrian', 'flash', 'siswa', 'pn532', 'jam_valid', 'rtc'];
+   const mqttData = {}; // nama reader -> { online, isi, waktu }
+   let mqttTersambung = false;
+
+   // "kunci=nilai" per baris -> objek
+   function uraiPesan(teks) {
+      const isi = {};
+      String(teks).split('\n').forEach((baris) => {
+         const i = baris.indexOf('=');
+         if (i > 0) isi[baris.slice(0, i)] = baris.slice(i + 1).trim();
+      });
+      return isi;
+   }
+
+   function terimaPesan(topik, teks, waktu) {
+      const nama = String(topik).split('/').slice(-2)[0];
+      if (!teks) delete mqttData[nama]; // dikosongkan reader saat beralih ke HTTP
+      else {
+         const isi = uraiPesan(teks);
+         mqttData[nama] = { online: isi.online === '1', isi: isi, waktu: waktu };
+      }
+   }
+
+   // Gabungkan data server (r) dengan pesan broker untuk reader tersebut
+   function statusGabungan(r, lalu) {
+      const server = { r: r, lalu: lalu, online: lalu <= (+r.batas), sumber: 'server' }; // batas mengikuti interval reader
+      const m = mqttTersambung ? mqttData[r.perangkat] : null;
+      if (!m || r.metode !== 'mqtt') return server;
+      // reader sendiri melapor putus dari broker tetapi HTTP-nya jalan
+      if (+r.mqtt_ok === 0 && server.online) return server;
+      if (!m.online) return { r: r, lalu: lalu, online: false, sumber: 'broker' };
+      const umur = Math.max(0, Math.floor((Date.now() - m.waktu) / 1000));
+      if (umur > MQTT_SEGAR) return server;
+      const gabung = Object.assign({}, r);
+      KUNCI_MQTT.forEach((k) => { if (m.isi[k] !== undefined) gabung[k] = m.isi[k]; });
+      return { r: gabung, lalu: umur, online: true, sumber: 'mqtt' };
+   }
+
+   function statusBroker(teks, keadaan) {
+      $('#brokerStatus').text(teks);
+      $('#brokerTitik').attr('class', 'nfc-titik ' + keadaan);
+   }
+
+   function sambungBroker() {
+      const klien = mqtt.connect(MQTT_CFG.url, {
+         username: MQTT_CFG.username, password: MQTT_CFG.password,
+         clientId: 'madinah-web-' + Math.random().toString(16).slice(2, 10),
+         keepalive: 30, reconnectPeriod: 5000, clean: true,
+      });
+      klien.on('connect', () => {
+         klien.subscribe(MQTT_CFG.topik, { qos: 1 }, (err, hasil) => {
+            if (err || (hasil && hasil.some((h) => h.qos === 128))) {
+               statusBroker('Broker menolak subscribe, periksa hak akses user web. Status memakai server.', 'error');
+               return;
+            }
+            mqttTersambung = true;
+            statusBroker('Broker MQTT tersambung', 'siap');
+         });
+      });
+      klien.on('close', () => {
+         mqttTersambung = false;
+         statusBroker('Broker MQTT terputus, status memakai server. Mencoba lagi...', 'error');
+      });
+      klien.on('error', (e) => statusBroker('Broker MQTT: ' + e.message, 'error'));
+      klien.on('message', (topik, isi) => {
+         terimaPesan(topik, isi.toString(), Date.now());
+         tampilkanReader(dataReader.list);
+      });
+   }
+
    function tampilkanReader(list) {
       if (list !== dataReader.list) { dataReader.list = list; dataReader.dimuat = Date.now(); }
       const tambahan = Math.floor((Date.now() - dataReader.dimuat) / 1000);
@@ -700,16 +830,17 @@ $tglJam = fn($t) => $t ? date('d/m H:i', strtotime($t)) : '-';
          return;
       }
       let online = 0;
-      el.html(list.map((r) => {
-         const lalu = (+r.lalu) + tambahan;
-         const on = lalu <= BATAS_ONLINE;
+      el.html(list.map((baris) => {
+         const s = statusGabungan(baris, (+baris.lalu) + tambahan);
+         const r = s.r, on = s.online;
          if (on) online++;
          const baris1 = [r.versi ? 'V' + escHtml(r.versi) : '', r.mode ? 'mode ' + escHtml(MODE_LABEL[r.mode] || r.mode) : '',
-            r.ip ? escHtml(r.ip) : '', teksSinyal(r.rssi)].filter(Boolean).join(' · ');
+            r.ip ? escHtml(r.ip) : '', teksSinyal(r.rssi), +r.interval_status > 0 ? 'lapor ' + (+r.interval_status) + ' dtk' : ''].filter(Boolean).join(' · ');
          const baris2 = r.laporan
             ? ['antrian ' + (+r.antrian), 'flash ' + (+r.flash) + '%', (+r.siswa) + ' siswa'].join(' · ')
             : 'Firmware belum mengirim laporan status (perbarui ke V1.14+)';
          const catatan = [];
+         if (r.laporan && r.metode === 'mqtt' && +r.mqtt_ok === 0 && s.sumber === 'server') catatan.push('<span class="nfc-badge warn">MQTT belum tersambung, memakai HTTP</span>');
          if (r.laporan && +r.pn532 === 0) catatan.push('<span class="nfc-badge bad">PN532 tidak terdeteksi</span>');
          if (r.laporan && +r.jam_valid === 0) catatan.push('<span class="nfc-badge warn">Jam belum diset</span>');
          if (r.laporan && r.rtc === 'tidak_ada') catatan.push('<span class="nfc-badge bad">RTC tidak terdeteksi</span>');
@@ -720,7 +851,7 @@ $tglJam = fn($t) => $t ? date('d/m H:i', strtotime($t)) : '-';
          return '<div class="nfc-reader' + (on ? '' : ' offline') + '">' +
             '<div class="nfc-reader-atas"><span class="nfc-titik ' + (on ? 'siap' : 'error') + '"></span><b>' + escHtml(r.perangkat) + '</b>' +
             '<span class="nfc-badge ' + (on ? 'ok' : 'bad') + '">' + (on ? 'Online' : 'Offline') + '</span>' +
-            '<span class="nfc-kecil lalu">' + teksLalu(lalu) + '</span></div>' +
+            '<span class="nfc-kecil lalu">' + (s.sumber === 'broker' ? 'terputus dari broker' : (s.sumber === 'mqtt' ? 'MQTT · ' : '') + teksLalu(s.lalu)) + '</span></div>' +
             (baris1 ? '<div class="nfc-kecil">' + baris1 + '</div>' : '') +
             '<div class="nfc-kecil">' + baris2 + '</div>' +
             (r.laporan ? '<div class="nfc-kecil">' + barisRtc(r) + '</div>' : '') +

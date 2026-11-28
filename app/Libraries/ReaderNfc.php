@@ -31,8 +31,26 @@ class ReaderNfc
         'pulang' => 'Pulang',
     ];
 
-    /** Reader dianggap online jika menghubungi server dalam rentang ini (detik). Heartbeat reader tiap 60 detik. */
-    public const BATAS_ONLINE = 150;
+    /** Pilihan interval laporan status reader (detik), diatur dari menu Reader NFC */
+    public const PILIHAN_INTERVAL = [5, 10, 15, 30, 60];
+
+    public const INTERVAL_BAWAAN = 10;
+
+    /** Batas online reader lama (< V1.16) yang lapor tiap 60 detik tanpa menyebut intervalnya */
+    public const BATAS_ONLINE_LAMA = 150;
+
+    /** Batas online terpendek, agar jeda sesaat (WiFi, unduh data) tidak dianggap offline */
+    public const BATAS_ONLINE_MIN = 20;
+
+    /** Cara reader melaporkan status: HTTP ke server, atau MQTT lewat broker */
+    public const METODE_STATUS = ['http', 'mqtt'];
+
+    public const PILIHAN_KEEPALIVE = [5, 10, 15, 30];
+
+    public const KEEPALIVE_BAWAAN = 5;
+
+    /** Harus sama dengan MQTT_TOPIK_AWAL di firmware: <awal>/<nama reader>/status */
+    public const TOPIK_AWAL = 'madinah/reader';
 
     /** Notifikasi WA hanya untuk tap yang belum lama (bukan antrian offline lama) */
     private const BATAS_UMUR_NOTIF = 900;
@@ -49,6 +67,46 @@ class ReaderNfc
             ?? $this->db->table('general_settings')->where('id', 1)->get()->getRow();
     }
 
+    /** Interval laporan status yang diminta admin */
+    public static function intervalStatus(?object $generalSettings): int
+    {
+        $nilai = (int) ($generalSettings->nfc_interval_status ?? self::INTERVAL_BAWAAN);
+        return in_array($nilai, self::PILIHAN_INTERVAL, true) ? $nilai : self::INTERVAL_BAWAAN;
+    }
+
+    public static function metodeStatus(?object $generalSettings): string
+    {
+        return ($generalSettings->nfc_metode_status ?? 'http') === 'mqtt' ? 'mqtt' : 'http';
+    }
+
+    public static function keepaliveMqtt(?object $generalSettings): int
+    {
+        $nilai = (int) ($generalSettings->nfc_mqtt_keepalive ?? self::KEEPALIVE_BAWAAN);
+        return in_array($nilai, self::PILIHAN_KEEPALIVE, true) ? $nilai : self::KEEPALIVE_BAWAAN;
+    }
+
+    /** Sambungan broker untuk halaman admin (hanya subscribe), null bila .env belum diisi */
+    public static function mqttWeb(): ?array
+    {
+        $host = trim((string) env('MQTT_HOST', ''));
+        $user = (string) env('MQTT_WEB_USER', '');
+        $pass = (string) env('MQTT_WEB_PASS', '');
+        if ($host === '' || $user === '' || $pass === '') return null;
+
+        return [
+            'url'      => trim((string) env('MQTT_WS_URL', '')) ?: "wss://$host:8084/mqtt",
+            'username' => $user,
+            'password' => $pass,
+            'topik'    => self::TOPIK_AWAL . '/+/status',
+        ];
+    }
+
+    /** Lama tanpa kabar (detik) sebelum reader dianggap offline: 3x interval yang dipakainya */
+    public static function batasOnline(int $interval): int
+    {
+        return $interval > 0 ? max(self::BATAS_ONLINE_MIN, $interval * 3) : self::BATAS_ONLINE_LAMA;
+    }
+
     /** Tabel tb_nfc_reader ada? (aman dipakai sebelum migrasi CreateNfcReader dijalankan) */
     public static function adaTabelReader(): bool
     {
@@ -62,7 +120,7 @@ class ReaderNfc
     /**
      * Catat bahwa reader menghubungi server. $laporan (dari api/reader/status)
      * berisi versi, mode, ip, rssi, antrian, flash, siswa, pn532, jam_valid, uptime,
-     * rtc, sumber_jam, rtc_waktu, rtc_selisih.
+     * rtc, sumber_jam, rtc_waktu, rtc_selisih, interval_status, metode, mqtt_ok.
      */
     public static function catatReader(string $perangkat, array $laporan = []): void
     {
@@ -95,7 +153,8 @@ class ReaderNfc
         foreach ($rows as &$r) {
             $lalu = max(0, $sekarang - strtotime($r['terakhir']));
             $r['lalu'] = $lalu;
-            $r['online'] = $lalu <= self::BATAS_ONLINE;
+            $r['batas'] = self::batasOnline((int) ($r['interval_status'] ?? 0));
+            $r['online'] = $lalu <= $r['batas'];
         }
         return $rows;
     }

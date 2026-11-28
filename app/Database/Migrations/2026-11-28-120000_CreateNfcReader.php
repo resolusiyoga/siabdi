@@ -8,7 +8,7 @@ use CodeIgniter\Database\Migration;
  * Status tiap reader NFC Si-ABDI. Reader mengirim laporan (heartbeat) ke
  * api/reader/status tiap ±60 detik; kolom "terakhir" juga diperbarui setiap
  * reader memanggil API lain. Reader dianggap online bila "terakhir" masih
- * baru (lihat ReaderNfc::BATAS_ONLINE).
+ * baru (lihat ReaderNfc::batasOnline()).
  */
 class CreateNfcReader extends Migration
 {
