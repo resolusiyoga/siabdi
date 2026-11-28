@@ -98,6 +98,9 @@ $tglJam = fn($t) => $t ? date('d/m H:i', strtotime($t)) : '-';
    .nfc-jadwal input[type=time] { border: 1px solid var(--garis); border-radius: 6px; padding: 5px 6px; width: 100%; font-size: 14px; outline: none; }
    .nfc-jadwal input[type=time]:focus { border-color: var(--hijau); }
    .nfc-kecil { font-size: 12px; color: var(--abu); line-height: 1.5; }
+   .nfc-hapus { border: 0; background: transparent; color: #a3aba0; padding: 2px; border-radius: 6px; cursor: pointer; line-height: 0; }
+   .nfc-hapus .material-icons { font-size: 18px; }
+   .nfc-hapus:hover { background: #fde4e4; color: #b91c1c; }
    .nfc-reader { border: 1px solid var(--garis); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; }
    .nfc-reader.offline { background: #fafafa; }
    .nfc-reader-atas { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
@@ -400,16 +403,30 @@ $tglJam = fn($t) => $t ? date('d/m H:i', strtotime($t)) : '-';
          <div class="col-12 col-xl-6">
             <div class="card">
                <div class="card-header card-header-primary">
-                  <h4 class="card-title"><b>Log tap terbaru</b></h4>
-                  <p class="card-category">100 tap terakhir dari reader</p>
+                  <div class="d-flex align-items-start justify-content-between flex-wrap" style="gap:8px">
+                     <div>
+                        <h4 class="card-title"><b>Log tap terbaru</b> <small>(<?= (int) $jumlahLog; ?>)</small></h4>
+                        <p class="card-category">100 tap terakhir dari reader</p>
+                     </div>
+                     <?php if (!empty($log)) : ?>
+                        <form action="<?= base_url('admin/reader-nfc/hapus-log-semua'); ?>" method="post"
+                           onsubmit="return confirm(this.dataset.konfirmasi)"
+                           data-konfirmasi="<?= esc('Hapus semua ' . (int) $jumlahLog . ' log tap? Data presensi siswa TIDAK ikut terhapus.'); ?>">
+                           <?= csrf_field() ?>
+                           <button type="submit" class="btn btn-sm btn-white" style="margin:0">
+                              <i class="material-icons" style="font-size:16px;vertical-align:middle">delete_sweep</i> Hapus semua
+                           </button>
+                        </form>
+                     <?php endif; ?>
+                  </div>
                </div>
                <div class="card-body">
                   <div class="nfc-gulir">
                      <table class="nfc-tabel">
-                        <thead><tr><th>Waktu</th><th>Siswa / UID</th><th>Jenis</th><th>Hasil</th></tr></thead>
+                        <thead><tr><th>Waktu</th><th>Siswa / UID</th><th>Jenis</th><th>Hasil</th><th></th></tr></thead>
                         <tbody>
                            <?php if (empty($log)) : ?>
-                              <tr><td colspan="4" class="nfc-kosong">Belum ada data.</td></tr>
+                              <tr><td colspan="5" class="nfc-kosong">Belum ada data.</td></tr>
                            <?php endif; ?>
                            <?php foreach ($log as $l) : ?>
                               <?php [$teks, $warna] = $labelHasil[$l['hasil']] ?? [$l['hasil'], 'info']; ?>
@@ -421,6 +438,14 @@ $tglJam = fn($t) => $t ? date('d/m H:i', strtotime($t)) : '-';
                                  </td>
                                  <td><?= esc($labelJenis[$l['jenis']] ?? '-'); ?></td>
                                  <td><span class="nfc-badge <?= $warna; ?>"><?= esc($teks); ?></span></td>
+                                 <td class="text-right">
+                                    <form action="<?= base_url('admin/reader-nfc/hapus-log'); ?>" method="post" class="d-inline"
+                                       onsubmit="return confirm('Hapus log tap ini? Data presensi tidak berubah.')">
+                                       <?= csrf_field() ?>
+                                       <input type="hidden" name="id" value="<?= (int) $l['id']; ?>">
+                                       <button type="submit" class="nfc-hapus" title="Hapus log ini"><i class="material-icons">close</i></button>
+                                    </form>
+                                 </td>
                               </tr>
                            <?php endforeach; ?>
                         </tbody>

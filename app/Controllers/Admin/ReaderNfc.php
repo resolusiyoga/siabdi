@@ -56,6 +56,7 @@ class ReaderNfc extends BaseController
                 ->join('tb_siswa', 'tb_siswa.id_siswa = tb_nfc_log.id_siswa', 'left')
                 ->orderBy('tb_nfc_log.id', 'DESC')->limit(100)
                 ->get()->getResultArray(),
+            'jumlahLog' => $db->table('tb_nfc_log')->countAllResults(),
             'perangkat' => $db->table('tb_nfc_log')
                 ->select('perangkat, MAX(diterima) AS terakhir, COUNT(*) AS jumlah')
                 ->groupBy('perangkat')->orderBy('terakhir', 'DESC')
@@ -170,6 +171,34 @@ class ReaderNfc extends BaseController
         db_connect()->table('tb_siswa')->where('id_siswa', $idSiswa)->update(['uid_kartu' => null]);
 
         $this->session->setFlashdata('success', 'Kartu dilepas dari siswa. Kartu tersebut tidak bisa dipakai absen lagi.');
+        return redirect()->to(self::KE_HALAMAN);
+    }
+
+    /**
+     * Hapus satu baris log tap. Hanya log yang dihapus: data presensi yang
+     * sudah tercatat dari tap tersebut tidak ikut berubah.
+     */
+    public function hapusLog()
+    {
+        if (!isSuperadmin()) return $this->tolakNonSuperadmin();
+
+        $id = (int) $this->request->getPost('id');
+        db_connect()->table('tb_nfc_log')->where('id', $id)->delete();
+
+        $this->session->setFlashdata('success', 'Log tap dihapus. Data presensi tidak berubah.');
+        return redirect()->to(self::KE_HALAMAN);
+    }
+
+    /** Hapus seluruh log tap (data presensi tidak berubah) */
+    public function hapusLogSemua()
+    {
+        if (!isSuperadmin()) return $this->tolakNonSuperadmin();
+
+        $db = db_connect();
+        $jumlah = $db->table('tb_nfc_log')->countAllResults();
+        $db->table('tb_nfc_log')->emptyTable();
+
+        $this->session->setFlashdata('success', "$jumlah log tap dihapus. Data presensi tidak berubah.");
         return redirect()->to(self::KE_HALAMAN);
     }
 

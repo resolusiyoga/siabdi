@@ -174,6 +174,8 @@ $routes->group('admin', function (RouteCollection $routes) {
       $routes->post('daftar', 'ReaderNfc::daftar');
       $routes->post('lepas', 'ReaderNfc::lepas');
       $routes->post('abaikan', 'ReaderNfc::abaikan');
+      $routes->post('hapus-log', 'ReaderNfc::hapusLog');
+      $routes->post('hapus-log-semua', 'ReaderNfc::hapusLogSemua');
       $routes->post('jadwal', 'ReaderNfc::jadwal');
       $routes->post('pengaturan-status', 'ReaderNfc::pengaturanStatus');
       $routes->get('status', 'ReaderNfc::statusReader'); // JSON, dipanggil berkala
